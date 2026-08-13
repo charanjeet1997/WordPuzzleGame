@@ -156,6 +156,8 @@ namespace WordPuzzle.Editor
             audioManager.clipButtonClick = AssetDatabase.LoadAssetAtPath<AudioClip>($"{soundPath}/button_click.wav");
             EditorUtility.SetDirty(audioManager);
 
+            SetupMusicPlayer(audioObj);
+
             // Child 3: Factory GameObject -> factory manager singletons + the registration controller.
             // The managers are framework singletons; without them in the scene RegisterFactoryByType
             // hits its "FactoryManager instance not found" guard and every factory silently fails.
@@ -480,6 +482,42 @@ namespace WordPuzzle.Editor
             return panelSettings;
         }
 
+        /// <summary>
+        /// Adds the playlist alongside AudioManager - it plays through the existing
+        /// AudioSource_Background channel, so there is no second source and no second mixer
+        /// routing to keep in sync. Every clip in Assets/WordPuzzle/Audio/Music is picked up,
+        /// so dropping a new loop into that folder and re-running setup adds it to the rotation.
+        /// </summary>
+        private static void SetupMusicPlayer(GameObject audioObj)
+        {
+            const string musicFolder = "Assets/WordPuzzle/Audio/Music";
+
+            // A leftover child from the earlier separate-source layout would keep a stale
+            // MusicPlayer in the scene, and two playlists would fight over one channel.
+            Transform legacyChild = audioObj.transform.Find("MusicPlayer");
+            if (legacyChild != null) Undo.DestroyObjectImmediate(legacyChild.gameObject);
+
+            MusicPlayer player = GetOrAddComponent<MusicPlayer>(audioObj);
+
+            var tracks = new List<AudioClip>();
+            if (AssetDatabase.IsValidFolder(musicFolder))
+            {
+                foreach (string guid in AssetDatabase.FindAssets("t:AudioClip", new[] { musicFolder }))
+                {
+                    AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(AssetDatabase.GUIDToAssetPath(guid));
+                    if (clip != null) tracks.Add(clip);
+                }
+            }
+
+            player.EditorSetTracks(tracks);
+            EditorUtility.SetDirty(player);
+
+            if (tracks.Count == 0)
+            {
+                Debug.LogWarning($"[Wonders of Word Setup] No music clips found in {musicFolder} - the playlist will be silent.");
+            }
+        }
+
         private static void SetupAudioManager(AudioManager audioManager)
         {
             if (audioManager == null) return;
@@ -614,47 +652,39 @@ namespace WordPuzzle.Editor
 
         private static List<LevelData> CreateSampleLevelAssets()
         {
-            string levelPath = "Assets/WordPuzzle/Data/SO";
             List<LevelData> result = new List<LevelData>();
 
             // Crossword rule: a word must either share its intersecting cell with a crossing word
             // or be separated by a blank. A word starting directly under an existing letter merges
             // with it into one run - e.g. CAT at (1,0) beneath CATS' C read as "CCAT".
-            result.Add(CreateLevelAsset($"{levelPath}/LevelData_01.asset", 1, "Chapter 1 - Green Meadow", "CATS", new[]
+            result.Add(CreateLevel("Level_0001", 1, "Chapter 1 - Green Meadow", "CATS", new[]
             {
                 ("CATS", 0, 0, WordOrientation.Horizontal),
                 ("CAT", 0, 0, WordOrientation.Vertical),
                 ("SAT", 0, 3, WordOrientation.Vertical)
             }));
 
-            result.Add(CreateLevelAsset($"{levelPath}/LevelData_02.asset", 2, "Chapter 1 - Starlight Peak", "STAR", new[]
+            result.Add(CreateLevel("Level_0002", 2, "Chapter 1 - Starlight Peak", "STAR", new[]
             {
                 ("STAR", 0, 0, WordOrientation.Horizontal),
                 ("SAT", 0, 0, WordOrientation.Vertical),
                 ("ART", 0, 2, WordOrientation.Vertical)
             }));
 
-            result.Add(CreateLevelAsset($"{levelPath}/LevelData_03.asset", 3, "Chapter 1 - Whispering Woods", "BIRD", new[]
+            result.Add(CreateLevel("Level_0003", 3, "Chapter 1 - Whispering Woods", "BIRD", new[]
             {
                 ("BIRD", 0, 0, WordOrientation.Horizontal),
                 ("RIB", 0, 2, WordOrientation.Vertical),
                 ("BID", 0, 0, WordOrientation.Vertical)
             }));
 
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
             return result;
         }
 
-        private static LevelData CreateLevelAsset(string path, int levelNum, string chapter, string letters, (string word, int r, int c, WordOrientation ori)[] targets)
+        private static LevelData CreateLevel(string levelName, int levelNum, string chapter, string letters, (string word, int r, int c, WordOrientation ori)[] targets)
         {
-            LevelData data = AssetDatabase.LoadAssetAtPath<LevelData>(path);
-            if (data == null)
-            {
-                data = ScriptableObject.CreateInstance<LevelData>();
-                AssetDatabase.CreateAsset(data, path);
-            }
-
+            LevelData data = new LevelData();
+            data.levelName = levelName;
             data.levelNumber = levelNum;
             data.chapterTitle = chapter;
             data.wheelLetters = letters;
@@ -670,7 +700,6 @@ namespace WordPuzzle.Editor
                     orientation = t.ori
                 });
             }
-            EditorUtility.SetDirty(data);
             return data;
         }
 

@@ -13,9 +13,15 @@ namespace WordPuzzle.Data
         public WordOrientation orientation;
     }
 
-    [CreateAssetMenu(fileName = "LevelData_01", menuName = "WordPuzzle/Level Data")]
-    public class LevelData : ScriptableObject
+    /// <summary>
+    /// A single authored level. Plain serializable data, not a ScriptableObject: levels are
+    /// stored inline in the <see cref="LevelDatabase"/> list, so a 1000-level campaign is one
+    /// asset instead of 1000 files to create, track and load.
+    /// </summary>
+    [Serializable]
+    public class LevelData
     {
+        public string levelName = "Level_0001";
         public int levelNumber = 1;
         public string chapterTitle = "Chapter 1 - Green Valley";
         public string wheelLetters = "CATS";

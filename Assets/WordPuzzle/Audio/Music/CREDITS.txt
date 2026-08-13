@@ -1,0 +1,23 @@
+Background music
+================
+
+Source : "Royalty free game music loops" by Pudgyplatypus
+URL    : https://opengameart.org/content/royalty-free-game-music-loops
+Licence: CC0 1.0 Universal (Public Domain Dedication)
+         https://creativecommons.org/publicdomain/zero/1.0/
+
+CC0 means no attribution is required and the tracks may be used in a commercial
+game. This file is kept as a record of provenance, not as a licence obligation.
+
+Tracks used (renamed from the original pack):
+
+  BGM_Chillstep_1.wav  <- Chillstep_1.wav
+  BGM_Chillstep_2.wav  <- Chillstep_2.wav
+  BGM_Ambient_1.wav    <- FutureAmbient_1.wav
+  BGM_Ambient_2.wav    <- FutureAmbient_4.wav
+  BGM_Melodic_1.wav    <- MelodicHouse_1.wav
+  BGM_Melodic_2.wav    <- MelodicHouse_3.wav
+
+Adding a track: drop any AudioClip into this folder and re-run
+WordPuzzle > Setup (WordPuzzleSceneSetup) - MusicPlayer's playlist is rebuilt from
+every clip in this folder.

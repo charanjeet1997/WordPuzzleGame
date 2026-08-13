@@ -5,6 +5,7 @@ using WordPuzzle.Models;
 using WordPuzzle.Managers;
 using WordPuzzle.Gameplay;
 using WordPuzzle.Audio;
+using WordPuzzle.Feedback;
 
 namespace WordPuzzle.UI
 {
@@ -79,9 +80,15 @@ namespace WordPuzzle.UI
             {
                 if (_coinsLabel != null)
                 {
-                    _gameModel.Coins.Bind(_bindingOwner, (coins) => _coinsLabel.text = coins.ToString());
+                    _gameModel.Coins.Bind(_bindingOwner, (coins) =>
+                    {
+                        _coinsLabel.text = coins.ToString();
+                        RefreshHintAffordability(coins);
+                    });
                     _coinsLabel.text = _gameModel.Coins.Value.ToString();
                 }
+
+                RefreshHintAffordability(_gameModel.Coins.Value);
 
                 if (_levelLabel != null)
                 {
@@ -196,11 +203,31 @@ namespace WordPuzzle.UI
             }).StartingIn(ErrorFlashMs);
         }
 
+        /// <summary>
+        /// Dims the hint button once the player cannot pay for it, and shows how many hints
+        /// the current purse buys. The old caption was the price (a fixed "20"), which read as
+        /// a counter that never moved - spending coins now visibly costs you something.
+        /// </summary>
+        private void RefreshHintAffordability(int coins)
+        {
+            int remaining = coins / GameplayHandler.SingleTileHintCost;
+
+            Label costLabel = rootElement?.Q<Label>("lbl-hint-cost");
+            if (costLabel != null)
+            {
+                costLabel.text = remaining > 0 ? $"HINT · {remaining} LEFT" : "HINT · 0 LEFT";
+            }
+
+            if (_hintButton == null) return;
+            _hintButton.EnableInClassList("action-btn--unaffordable", remaining <= 0);
+        }
+
         private void OnHintClicked()
         {
             if (_audioManager == null && ServiceLocator.Current.Has<AudioManager>())
                 _audioManager = ServiceLocator.Current.Get<AudioManager>();
             if (_audioManager != null) _audioManager.PlayButtonClickSound();
+            HapticManager.Play(HapticType.Light);
 
             if (_gameplayHandler == null && ServiceLocator.Current.Has<GameplayHandler>())
             {
@@ -218,6 +245,7 @@ namespace WordPuzzle.UI
             if (_audioManager == null && ServiceLocator.Current.Has<AudioManager>())
                 _audioManager = ServiceLocator.Current.Get<AudioManager>();
             if (_audioManager != null) _audioManager.PlayButtonClickSound();
+            HapticManager.Play(HapticType.Light);
 
             if (_gameplayHandler == null && ServiceLocator.Current.Has<GameplayHandler>())
             {
@@ -234,6 +262,7 @@ namespace WordPuzzle.UI
             if (_audioManager == null && ServiceLocator.Current.Has<AudioManager>())
                 _audioManager = ServiceLocator.Current.Get<AudioManager>();
             if (_audioManager != null) _audioManager.PlayButtonClickSound();
+            HapticManager.Play(HapticType.Light);
 
             if (_gameManager == null && ServiceLocator.Current.Has<GameManager>())
             {

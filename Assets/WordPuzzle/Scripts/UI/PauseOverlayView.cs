@@ -2,6 +2,7 @@ using UnityEngine.UIElements;
 using ServiceLocatorFramework;
 using WordPuzzle.Managers;
 using WordPuzzle.Audio;
+using WordPuzzle.Feedback;
 
 namespace WordPuzzle.UI
 {
@@ -65,6 +66,7 @@ namespace WordPuzzle.UI
                 _gameManager = ServiceLocator.Current.Get<GameManager>();
 
             if (_audioManager != null) _audioManager.PlayButtonClickSound();
+            HapticManager.Play(HapticType.Light);
             if (_gameManager != null) _gameManager.ResumeGame();
         }
 
@@ -78,6 +80,7 @@ namespace WordPuzzle.UI
             // Click first, then toggle: turning sound off would otherwise silence its own
             // confirmation and the tap would feel unresponsive.
             _audioManager.PlayButtonClickSound();
+            HapticManager.Play(HapticType.Light);
             _audioManager.ToggleSound();
             RefreshSoundLabel();
         }
@@ -90,6 +93,7 @@ namespace WordPuzzle.UI
                 _gameManager = ServiceLocator.Current.Get<GameManager>();
 
             if (_audioManager != null) _audioManager.PlayButtonClickSound();
+            HapticManager.Play(HapticType.Light);
             if (_gameManager != null) _gameManager.QuitToMainMenu();
         }
     }

@@ -4,9 +4,9 @@ using UnityEngine;
 namespace WordPuzzle.Data
 {
     /// <summary>
-    /// Holds every authored level. Levels live as sub-assets of this asset, so a large
-    /// campaign is one file on disk and one reference in the scene rather than N assets
-    /// serialized into a scene-side list.
+    /// Holds every authored level. Levels are plain serializable data stored inline, so a
+    /// large campaign is one file on disk and one reference in the scene rather than N
+    /// ScriptableObject assets.
     /// </summary>
     [CreateAssetMenu(fileName = "LevelDatabase", menuName = "WordPuzzle/Level Database")]
     public class LevelDatabase : ScriptableObject

@@ -10,6 +10,18 @@
                 <ui:Button name="btn-sound-toggle" text="ON" class="settings-toggle" />
             </ui:VisualElement>
 
+            <ui:VisualElement name="row-music" class="settings-row">
+                <ui:VisualElement name="icon-music" class="settings-icon icon-music-on" picking-mode="Ignore" />
+                <ui:Label name="lbl-music-state" text="MUSIC: ON" class="settings-row-label" />
+                <ui:Button name="btn-music-toggle" text="ON" class="settings-toggle" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="row-vibration" class="settings-row">
+                <ui:VisualElement name="icon-vibration" class="settings-icon icon-vibration-on" picking-mode="Ignore" />
+                <ui:Label name="lbl-vibration-state" text="VIBRATION: ON" class="settings-row-label" />
+                <ui:Button name="btn-vibration-toggle" text="ON" class="settings-toggle" />
+            </ui:VisualElement>
+
             <ui:Button name="btn-reset" text="RESET PROGRESS" class="settings-button settings-quiet" />
             <ui:Button name="btn-close" text="CLOSE" class="settings-button" />
         </ui:VisualElement>

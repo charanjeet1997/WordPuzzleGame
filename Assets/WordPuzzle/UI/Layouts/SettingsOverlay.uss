@@ -65,6 +65,50 @@
     background-image: url("../../Sprites/slices/icon_sound_off.png");
 }
 
+/* No music sprite in the atlas either - a note-ish stack of two bars reads well enough
+   at 66px and keeps the row rhythm identical to the sound row. */
+.icon-music-on,
+.icon-music-off {
+    width: 54px;
+    height: 60px;
+    margin-left: 6px;
+    margin-right: 33px;
+    border-radius: 6px;
+    border-width: 0;
+    border-left-width: 9px;
+    border-bottom-width: 9px;
+}
+
+.icon-music-on {
+    border-color: #f6dd9a;
+}
+
+.icon-music-off {
+    border-color: rgba(207, 224, 240, 0.35);
+}
+
+/* No vibration sprite ships with the atlas, so the icon is drawn as a phone-shaped
+   outline in USS. On/off reads from colour rather than a swapped image. */
+.icon-vibration-on,
+.icon-vibration-off {
+    width: 42px;
+    height: 66px;
+    margin-left: 12px;
+    margin-right: 39px;
+    border-radius: 12px;
+    border-width: 5px;
+}
+
+.icon-vibration-on {
+    border-color: #f6dd9a;
+    background-color: rgba(246, 221, 154, 0.18);
+}
+
+.icon-vibration-off {
+    border-color: rgba(207, 224, 240, 0.35);
+    background-color: rgba(0, 0, 0, 0);
+}
+
 .settings-row-label {
     flex-grow: 1;
     font-size: 36px;

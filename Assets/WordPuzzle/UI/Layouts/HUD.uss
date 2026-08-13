@@ -227,6 +227,12 @@
     color: #4a2c05;
 }
 
+/* Kept clickable on purpose - tapping it plays the rejection cue, which tells the player
+   why nothing happened. A hard-disabled button would swallow the tap silently. */
+.action-btn--unaffordable {
+    opacity: 0.45;
+}
+
 .action-label {
     font-size: 30px;
     -unity-font-style: bold;

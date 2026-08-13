@@ -162,6 +162,14 @@ namespace WordPuzzle.Audio
             Play(data);
         }
 
+        /// <summary>The configured source for a channel, so MusicPlayer can drive Background
+        /// directly instead of standing up a second source for the same job.</summary>
+        public AudioSource GetSource(AudioType type)
+        {
+            AudioSourceData data = GetAudioSourceData(type);
+            return data != null ? data.source : null;
+        }
+
         private AudioSourceData GetAudioSourceData(AudioType type)
         {
             if (audioSourceList == null) return null;

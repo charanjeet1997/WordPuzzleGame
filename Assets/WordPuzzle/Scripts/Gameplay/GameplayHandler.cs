@@ -6,6 +6,7 @@ using WordPuzzle.Data;
 using WordPuzzle.Models;
 using WordPuzzle.Services;
 using WordPuzzle.Audio;
+using WordPuzzle.Feedback;
 
 namespace WordPuzzle.Gameplay
 {
@@ -184,49 +185,62 @@ namespace WordPuzzle.Gameplay
                 gridController.TryRevealWord(upperWord);
                 if (_audioManager != null) _audioManager.PlayWordMatchedSound();
                 if (_particleService != null) _particleService.PlayWordMatchBurst(transform.position);
+                HapticManager.Play(HapticType.Medium);
             }
             else if (eventData.IsBonusWord)
             {
                 if (_audioManager != null) _audioManager.PlayBonusWordSound();
                 if (_particleService != null) _particleService.PlayBonusWordSparkle(transform.position);
+                HapticManager.Play(HapticType.Medium);
             }
             else if (eventData.IsAlreadySolved)
             {
                 // Already credited - acknowledge it without the failure buzz.
                 if (_audioManager != null) _audioManager.PlayButtonClickSound();
+                HapticManager.Play(HapticType.Light);
             }
             else
             {
                 if (_audioManager != null) _audioManager.PlayWrongWordSound();
+                HapticManager.Play(HapticType.Failure);
             }
 
             _gameModel.NotifyWordSubmitted(eventData);
         }
 
+        /// <summary>Coin price of one revealed tile. The HUD label reads from here too.</summary>
+        public const int SingleTileHintCost = 20;
+
         public bool UseSingleTileHint()
         {
             EnsureServices();
 
-            if (_gameModel == null)
+            if (_gameModel == null) return false;
+
+            // Nothing left to reveal - checked before spending, otherwise the player is
+            // charged 20 coins for a hint that does nothing.
+            if (gridController == null || !gridController.HasHiddenTiles())
             {
+                if (_audioManager != null) _audioManager.PlayWrongWordSound();
                 return false;
             }
 
-            if (!_gameModel.SpendCoins(20))
+            if (!_gameModel.SpendCoins(SingleTileHintCost))
             {
+                // Too few coins. Silence here reads as a broken button, so the refusal
+                // gets the same rejection cue as an invalid word.
+                if (_audioManager != null) _audioManager.PlayWrongWordSound();
+                HapticManager.Play(HapticType.Failure);
                 return false;
             }
 
-            bool revealed = gridController != null && gridController.RevealRandomHiddenTile();
+            if (!gridController.RevealRandomHiddenTile()) return false;
 
-            if (revealed)
-            {
-                if (_audioManager != null) _audioManager.PlayHintSound();
-                if (_particleService != null) _particleService.PlayTileRevealSparkle(transform.position);
-                _gameModel.NotifyHintUsed(HintType.SingleTile);
-                return true;
-            }
-            return false;
+            if (_audioManager != null) _audioManager.PlayHintSound();
+            if (_particleService != null) _particleService.PlayTileRevealSparkle(transform.position);
+            HapticManager.Play(HapticType.Light);
+            _gameModel.NotifyHintUsed(HintType.SingleTile);
+            return true;
         }
 
         public void ShuffleWheel()

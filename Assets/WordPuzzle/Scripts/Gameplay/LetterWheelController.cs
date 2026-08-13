@@ -9,6 +9,7 @@ using WordPuzzle.Factory;
 using WordPuzzle.Models;
 using WordPuzzle.Services;
 using WordPuzzle.Audio;
+using WordPuzzle.Feedback;
 
 namespace WordPuzzle.Gameplay
 {
@@ -160,6 +161,7 @@ namespace WordPuzzle.Gameplay
 
             SetupWheel(new string(chars));
             if (_audioManager != null) _audioManager.PlayShuffleSound();
+            HapticManager.Play(HapticType.Light);
         }
 
         private void Update()
@@ -231,6 +233,7 @@ namespace WordPuzzle.Gameplay
                         node.SetSelected(true);
 
                         if (_audioManager != null) _audioManager.PlaySwipeCharSound();
+                        HapticManager.Play(HapticType.Selection);
                         if (_gameModel != null)
                         {
                             _gameModel.CurrentWordPreview.Value = GetSelectedWordString();

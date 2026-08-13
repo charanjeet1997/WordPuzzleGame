@@ -85,6 +85,16 @@ namespace WordPuzzle.Gameplay
             return wordMatched;
         }
 
+        /// <summary>Whether a hint has anything left to reveal - checked before charging for one.</summary>
+        public bool HasHiddenTiles()
+        {
+            foreach (var tile in _gridTiles.Values)
+            {
+                if (!tile.IsRevealed) return true;
+            }
+            return false;
+        }
+
         public bool RevealRandomHiddenTile()
         {
             List<GridTile> unrevealedTiles = new List<GridTile>();

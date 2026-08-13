@@ -9,13 +9,11 @@ namespace WordPuzzle.Editor
 {
     /// <summary>
     /// Authoring tool for the level campaign. Generates validated crossword levels from a
-    /// word list, writes them as individual assets into Data/SO/Levels, and registers
-    /// them in the LevelDatabase.
+    /// word list and stores them inline in the LevelDatabase asset.
     /// </summary>
     public class LevelGeneratorWindow : EditorWindow
     {
         private const string DatabasePath = "Assets/WordPuzzle/Data/SO/LevelDatabase.asset";
-        private const string LevelsFolder = "Assets/WordPuzzle/Data/SO/Levels";
 
         private TextAsset _wordListAsset;
         private LevelDatabase _database;
@@ -78,7 +76,7 @@ namespace WordPuzzle.Editor
 
             using (new EditorGUI.DisabledScope(_wordListAsset == null))
             {
-                if (GUILayout.Button($"Generate {_levelCount} Levels Into Data/SO/Levels", GUILayout.Height(32f))) Generate();
+                if (GUILayout.Button($"Generate {_levelCount} Levels Into The Level Database", GUILayout.Height(32f))) Generate();
             }
 
             EditorGUILayout.Space();
@@ -130,10 +128,8 @@ namespace WordPuzzle.Editor
             }
 
             LevelDatabase db = GetOrCreateDatabase();
-            EnsureLevelsFolder();
 
             List<LevelData> levels = _appendInsteadOfReplace ? new List<LevelData>(db.Levels) : new List<LevelData>();
-            if (!_appendInsteadOfReplace) DeleteExistingLevelAssets();
 
             var wheelPool = words
                 .Where(w => w.Length >= _minWheelLetters && w.Length <= _maxWheelLetters)
@@ -143,8 +139,6 @@ namespace WordPuzzle.Editor
             var used = new HashSet<string>(levels.Where(l => l != null).Select(l => l.wheelLetters));
             int made = 0;
 
-            // Batching the writes keeps a 1000-asset run from re-importing after every file.
-            AssetDatabase.StartAssetEditing();
             try
             {
                 foreach (string wheel in wheelPool)
@@ -155,7 +149,6 @@ namespace WordPuzzle.Editor
                     LevelData level = BuildLevel(wheel, words, levels.Count + 1);
                     if (level == null) continue;
 
-                    AssetDatabase.CreateAsset(level, $"{LevelsFolder}/{level.name}.asset");
                     levels.Add(level);
                     used.Add(wheel);
                     made++;
@@ -169,25 +162,22 @@ namespace WordPuzzle.Editor
             }
             finally
             {
-                AssetDatabase.StopAssetEditing();
                 EditorUtility.ClearProgressBar();
             }
 
             db.EditorSetLevels(levels);
             EditorUtility.SetDirty(db);
             AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
 
             _status = made < _levelCount
                 ? $"Generated {made} levels from {wheelPool.Count} candidate wheels - the word list is too small for {_levelCount}. " +
                   "A denser list of common words yields far more sub-words per wheel."
-                : $"Generated {made} levels into {LevelsFolder} and registered them in the LevelDatabase.";
+                : $"Generated {made} levels into the LevelDatabase asset.";
         }
 
         private void AddSingle(string wheel)
         {
             LevelDatabase db = GetOrCreateDatabase();
-            EnsureLevelsFolder();
 
             List<string> words = LoadWords();
             var levels = new List<LevelData>(db.Levels);
@@ -199,7 +189,6 @@ namespace WordPuzzle.Editor
                 return;
             }
 
-            AssetDatabase.CreateAsset(level, $"{LevelsFolder}/{level.name}.asset");
             levels.Add(level);
             db.EditorSetLevels(levels);
 
@@ -222,8 +211,8 @@ namespace WordPuzzle.Editor
             List<PlacedWord> placed = LevelLayoutBuilder.Build(wheel, candidates, _maxWordsPerLevel);
             if (placed == null || placed.Count < _minWordsPerLevel) return null;
 
-            var level = CreateInstance<LevelData>();
-            level.name = $"Level_{levelNumber:D4}";
+            var level = new LevelData();
+            level.levelName = $"Level_{levelNumber:D4}";
             level.levelNumber = levelNumber;
             level.chapterTitle = $"Chapter {((levelNumber - 1) / 20) + 1}";
             level.wheelLetters = wheel;
@@ -249,23 +238,6 @@ namespace WordPuzzle.Editor
             AssetDatabase.CreateAsset(_database, DatabasePath);
             AssetDatabase.SaveAssets();
             return _database;
-        }
-
-        private static void EnsureLevelsFolder()
-        {
-            if (AssetDatabase.IsValidFolder(LevelsFolder)) return;
-            AssetDatabase.CreateFolder("Assets/WordPuzzle/Data/SO", "Levels");
-        }
-
-        private static void DeleteExistingLevelAssets()
-        {
-            if (!AssetDatabase.IsValidFolder(LevelsFolder)) return;
-
-            string[] guids = AssetDatabase.FindAssets("t:LevelData", new[] { LevelsFolder });
-            foreach (string guid in guids)
-            {
-                AssetDatabase.DeleteAsset(AssetDatabase.GUIDToAssetPath(guid));
-            }
         }
 
         private void ValidateDatabase()

@@ -39,7 +39,7 @@
                     <ui:Button name="btn-hint" text="" class="action-btn hint-color">
                         <ui:VisualElement class="action-icon icon-hint" picking-mode="Ignore" />
                     </ui:Button>
-                    <ui:Label name="lbl-hint-cost" text="HINT · 20" class="action-label" />
+                    <ui:Label name="lbl-hint-cost" text="HINT · 5 LEFT" class="action-label" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

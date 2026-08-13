@@ -9,6 +9,7 @@ using WordPuzzle.Models;
 using WordPuzzle.UI;
 using WordPuzzle.Gameplay;
 using WordPuzzle.Audio;
+using WordPuzzle.Feedback;
 
 namespace WordPuzzle.Managers
 {
@@ -247,6 +248,8 @@ namespace WordPuzzle.Managers
                 ServiceLocator.Current.Get<AudioManager>().PlayFanfareSound();
             }
 
+            HapticManager.Play(HapticType.Heavy);
+
             if (_uiManager != null && configLevelComplete != null)
             {
                 _uiManager.ShowOverlay(configLevelComplete);
@@ -273,7 +276,8 @@ namespace WordPuzzle.Managers
 
         private LevelData CreateFallbackLevel(int levelNumber)
         {
-            LevelData fallback = ScriptableObject.CreateInstance<LevelData>();
+            LevelData fallback = new LevelData();
+            fallback.levelName = $"Level_{levelNumber:D4}";
             fallback.levelNumber = levelNumber;
             fallback.chapterTitle = $"Chapter {((levelNumber - 1) / 5) + 1} - Sunrise Trail";
             fallback.wheelLetters = "CATS";

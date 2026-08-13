@@ -3,6 +3,7 @@ using ServiceLocatorFramework;
 using WordPuzzle.Models;
 using WordPuzzle.Managers;
 using WordPuzzle.Audio;
+using WordPuzzle.Feedback;
 
 namespace WordPuzzle.UI
 {
@@ -117,6 +118,7 @@ namespace WordPuzzle.UI
                 _gameManager = ServiceLocator.Current.Get<GameManager>();
 
             if (_audioManager != null) _audioManager.PlayButtonClickSound();
+            HapticManager.Play(HapticType.Light);
             if (_gameManager != null)
             {
                 _gameManager.LoadNextLevel();
