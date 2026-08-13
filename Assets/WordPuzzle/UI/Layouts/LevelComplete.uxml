@@ -1,0 +1,24 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" path="Assets/WordPuzzle/UI/Layouts/LevelComplete.uxml">
+    <ui:Style src="LevelComplete.uss" />
+    <ui:VisualElement name="level-complete-root" class="victory-backdrop">
+        <ui:VisualElement class="victory-card">
+            <ui:Label text="LEVEL CLEAR!" class="victory-title" />
+
+            <ui:VisualElement name="stars-row" class="stars-row">
+                <ui:VisualElement name="star-0" class="star star--empty" />
+                <ui:VisualElement name="star-1" class="star star--empty" />
+                <ui:VisualElement name="star-2" class="star star--empty" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="reward-box">
+                <ui:VisualElement class="reward-coin" />
+                <ui:Label name="lbl-reward" text="+50" class="reward-text" />
+            </ui:VisualElement>
+
+            <ui:Label name="lbl-score" text="" class="reward-subtext" />
+
+            <ui:Button name="btn-next-level" text="NEXT LEVEL" class="btn-victory-primary" />
+            <ui:Label name="lbl-subtitle" text="Main Menu" class="victory-subtitle" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" path="Assets/WordPuzzle/UI/Layouts/PauseOverlay.uxml">
+    <ui:Style src="PauseOverlay.uss" />
+    <ui:VisualElement name="pause-root" class="pause-backdrop">
+        <ui:VisualElement class="pause-modal-card">
+            <ui:Label text="GAME PAUSED" class="pause-title" />
+            <ui:VisualElement class="button-stack">
+                <ui:Button name="btn-resume" text="RESUME" class="btn-modal-primary" />
+                <ui:Button name="btn-sound-toggle" text="🔊 SOUND: ON" class="btn-modal-secondary" />
+                <ui:Button name="btn-quit" text="MAIN MENU" class="btn-modal-secondary btn-quiet" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

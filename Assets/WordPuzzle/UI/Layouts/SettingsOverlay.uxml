@@ -1,0 +1,17 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" path="Assets/WordPuzzle/UI/Layouts/SettingsOverlay.uxml">
+    <ui:Style src="SettingsOverlay.uss" />
+    <ui:VisualElement name="settings-root" class="settings-backdrop">
+        <ui:VisualElement class="settings-card">
+            <ui:Label text="SETTINGS" class="settings-title" />
+
+            <ui:VisualElement class="settings-row">
+                <ui:VisualElement name="icon-sound" class="settings-icon icon-sound-on" picking-mode="Ignore" />
+                <ui:Label name="lbl-sound-state" text="SOUND: ON" class="settings-row-label" />
+                <ui:Button name="btn-sound-toggle" text="ON" class="settings-toggle" />
+            </ui:VisualElement>
+
+            <ui:Button name="btn-reset" text="RESET PROGRESS" class="settings-button settings-quiet" />
+            <ui:Button name="btn-close" text="CLOSE" class="settings-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

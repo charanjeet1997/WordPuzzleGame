@@ -1,0 +1,44 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" path="Assets/WordPuzzle/UI/Layouts/MainMenu.uxml">
+    <ui:Style src="MainMenu.uss" />
+    <ui:VisualElement name="main-menu-root" class="menu-container">
+
+        <ui:VisualElement class="menu-top-bar">
+            <ui:Button name="btn-sound" text="" class="icon-btn-round">
+                <ui:VisualElement name="icon-sound" class="btn-icon icon-sound-on" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="btn-settings" text="" class="icon-btn-round">
+                <ui:VisualElement class="btn-icon icon-settings" picking-mode="Ignore" />
+            </ui:Button>
+        </ui:VisualElement>
+
+        <ui:VisualElement class="center-content">
+            <ui:VisualElement class="title-lockup">
+                <ui:Label text="AURORA" class="game-title" />
+                <ui:Label text="W O R D S" class="game-subtitle" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="chapter-card">
+                <ui:VisualElement class="chapter-card-row">
+                    <ui:Label name="lbl-chapter-info" text="CHAPTER 1" class="chapter-title" />
+                    <ui:Label name="lbl-word-count" text="3 WORDS" class="chapter-meta" />
+                </ui:VisualElement>
+                <ui:Label name="lbl-chapter-name" text="First Light" class="chapter-name" />
+                <ui:VisualElement class="chapter-card-row">
+                    <ui:Label name="lbl-level-number" text="LEVEL 1" class="level-subtitle" />
+                    <ui:VisualElement name="progress-dots" class="progress-dots">
+                        <ui:VisualElement class="dot dot--on" />
+                        <ui:VisualElement class="dot dot--on" />
+                        <ui:VisualElement class="dot dot--on" />
+                        <ui:VisualElement class="dot" />
+                        <ui:VisualElement class="dot" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:Button name="btn-play" text="PLAY" class="btn-primary" />
+        </ui:VisualElement>
+
+        <ui:VisualElement class="menu-footer" />
+
+    </ui:VisualElement>
+</ui:UXML>

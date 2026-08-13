@@ -1,0 +1,178 @@
+/* Ported from "Word Wonders Screens" S01 (Main Menu). Design px x3. */
+
+.menu-container {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.menu-top-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    padding: 60px 54px 0 54px;
+}
+
+/* Larger than the design's 40px (=120px) circles - they read too small on device. */
+.icon-btn-round {
+    background-image: url("../../Sprites/slices/btn_icon_round.png");
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    width: 168px;
+    height: 168px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition-property: scale, opacity;
+    transition-duration: 0.12s, 0.12s;
+}
+
+/* Icons are sprites, not font glyphs: a glyph only renders if the active font happens
+   to include it, which is not guaranteed once the font is swapped. */
+.btn-icon {
+    width: 78px;
+    height: 78px;
+}
+
+.icon-sound-on {
+    background-image: url("../../Sprites/slices/icon_sound_on.png");
+}
+
+.icon-sound-off {
+    background-image: url("../../Sprites/slices/icon_sound_off.png");
+}
+
+.icon-settings {
+    background-image: url("../../Sprites/slices/icon_settings_gear.png");
+}
+
+.icon-btn-round:hover { scale: 1.05 1.05; }
+.icon-btn-round:active { scale: 0.93 0.93; opacity: 0.85; }
+
+.center-content {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0 66px;
+}
+
+/* ------------------------------------------------------------------ title */
+.title-lockup {
+    align-items: center;
+    margin-bottom: 102px;
+}
+
+.game-title {
+    font-size: 126px;
+    -unity-font-style: bold;
+    color: #f6dd9a;
+    letter-spacing: 3px;
+    text-shadow: 0 9px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* Negative top margin pulls the wordmark up under the title, as in the design. */
+.game-subtitle {
+    font-size: 72px;
+    -unity-font-style: bold;
+    color: #cfe8ea;
+    letter-spacing: 18px;
+    margin-top: -18px;
+}
+
+/* ------------------------------------------------------------------ chapter card */
+.chapter-card {
+    background-image: url("../../Sprites/slices/panel_card.png");
+    -unity-slice-left: 42;
+    -unity-slice-right: 42;
+    -unity-slice-top: 42;
+    -unity-slice-bottom: 42;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    width: 100%;
+    max-width: 810px;
+    padding: 48px 54px;
+    margin-bottom: 102px;
+}
+
+.chapter-card-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.chapter-title {
+    font-size: 33px;
+    -unity-font-style: bold;
+    color: rgba(255, 255, 255, 0.55);
+    letter-spacing: 4.5px;
+}
+
+.chapter-meta {
+    font-size: 30px;
+    -unity-font-style: bold;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.chapter-name {
+    font-size: 57px;
+    -unity-font-style: bold;
+    color: #ffffff;
+    margin-top: 27px;
+    margin-bottom: 27px;
+}
+
+.level-subtitle {
+    font-size: 36px;
+    -unity-font-style: bold;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.progress-dots {
+    flex-direction: row;
+    align-items: center;
+}
+
+.dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    margin-left: 12px;
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+.dot--on {
+    background-color: #e6b25a;
+}
+
+/* ------------------------------------------------------------------ play button */
+.btn-primary {
+    width: 650px;
+    height: 160px;
+    background-image: url("../../Sprites/slices/btn_primary.png");
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-width: 0;
+    color: #4a2c05;
+    font-size: 63px;
+    -unity-font-style: bold;
+    letter-spacing: 6px;
+    transition-property: scale, opacity;
+    transition-duration: 0.13s, 0.13s;
+}
+
+.btn-primary:hover { scale: 1.05 1.05; }
+.btn-primary:active { scale: 0.95 0.95; opacity: 0.9; }
+
+.menu-footer {
+    height: 72px;
+}
+
+/* Sound off: dim the speaker so the state is visible on an icon-only button. */
+.icon-btn--muted {
+    opacity: 0.45;
+}

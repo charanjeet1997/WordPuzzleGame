@@ -1,0 +1,142 @@
+/* Ported from "Word Wonders Screens" S04 (Level Complete). Design px x3.
+   Absolute inset rather than width/height 100%: the overlay is parented into a panel whose
+   root does not stretch, so percentage sizing collapses and the scrim never covers the screen. */
+
+.victory-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(4, 10, 16, 0.72);
+    align-items: center;
+    justify-content: center;
+}
+
+.victory-card {
+    background-image: url("../../Sprites/slices/panel_modal.png");
+    -unity-slice-left: 57;
+    -unity-slice-right: 57;
+    -unity-slice-top: 57;
+    -unity-slice-bottom: 57;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    width: 858px;
+    border-width: 0;
+    padding: 84px 72px;
+    align-items: center;
+
+    /* Entrance state; the shown class is added a frame later from code. */
+    scale: 0.88 0.88;
+    opacity: 0;
+    transition-property: scale, opacity;
+    transition-duration: 0.22s, 0.22s;
+}
+
+.victory-card--shown {
+    scale: 1 1;
+    opacity: 1;
+}
+
+.victory-title {
+    font-size: 84px;
+    -unity-font-style: bold;
+    color: #f6dd9a;
+    letter-spacing: 3px;
+    margin-bottom: 45px;
+}
+
+/* ------------------------------------------------------------------ stars
+   Sprites, not emoji: the font has no colour-emoji glyphs, so a star character
+   falls back to a flat monochrome outline. */
+.stars-row {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 45px;
+}
+
+.star {
+    width: 108px;
+    height: 108px;
+    margin: 0 15px;
+    background-image: url("../../Sprites/slices/icon_star_off.png");
+    scale: 0.6 0.6;
+    opacity: 0;
+    transition-property: scale, opacity;
+    transition-duration: 0.28s, 0.28s;
+}
+
+.star--earned {
+    background-image: url("../../Sprites/slices/icon_star_on.png");
+}
+
+.star--shown {
+    scale: 1 1;
+    opacity: 1;
+}
+
+/* ------------------------------------------------------------------ reward */
+.reward-box {
+    min-height: 96px;
+    background-image: url("../../Sprites/slices/pill_hud.png");
+    -unity-slice-left: 42;
+    -unity-slice-right: 42;
+    -unity-slice-top: 42;
+    -unity-slice-bottom: 42;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border-width: 0;
+    padding: 27px 54px;
+    margin-bottom: 18px;
+}
+
+.reward-coin {
+    width: 57px;
+    height: 57px;
+    margin-right: 24px;
+    background-image: url("../../Sprites/slices/icon_coin.png");
+}
+
+.reward-text {
+    font-size: 51px;
+    -unity-font-style: bold;
+    color: #f6dd9a;
+}
+
+.reward-subtext {
+    font-size: 30px;
+    -unity-font-style: bold;
+    color: rgba(255, 255, 255, 0.55);
+    margin-bottom: 27px;
+}
+
+/* ------------------------------------------------------------------ actions */
+.btn-victory-primary {
+    width: 714px;
+    height: 176px;
+    background-image: url("../../Sprites/slices/btn_primary.png");
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-width: 0;
+    color: #4a2c05;
+    font-size: 48px;
+    -unity-font-style: bold;
+    letter-spacing: 4.5px;
+    margin-bottom: 36px;
+    transition-property: scale, opacity;
+    transition-duration: 0.13s, 0.13s;
+}
+
+.btn-victory-primary:hover { scale: 1.04 1.04; }
+.btn-victory-primary:active { scale: 0.95 0.95; opacity: 0.88; }
+
+.victory-subtitle {
+    font-size: 36px;
+    -unity-font-style: bold;
+    color: rgba(255, 255, 255, 0.55);
+    letter-spacing: 1.5px;
+}

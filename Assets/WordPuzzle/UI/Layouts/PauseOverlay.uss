@@ -1,0 +1,99 @@
+/* Ported from "Word Wonders Screens" S03 (Pause Overlay). Design px x3.
+   Absolute inset rather than width/height 100%: the overlay is parented into a panel whose
+   root does not stretch, so percentage sizing collapses and the scrim never covers the screen. */
+
+.pause-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(4, 10, 16, 0.68);
+    align-items: center;
+    justify-content: center;
+}
+
+.pause-modal-card {
+    background-image: url("../../Sprites/slices/panel_modal.png");
+    -unity-slice-left: 57;
+    -unity-slice-right: 57;
+    -unity-slice-top: 57;
+    -unity-slice-bottom: 57;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    width: 798px;
+    border-width: 0;
+    padding: 78px 72px;
+    align-items: center;
+}
+
+.pause-title {
+    font-size: 69px;
+    -unity-font-style: bold;
+    color: #f6dd9a;
+    letter-spacing: 3px;
+    margin-bottom: 39px;
+}
+
+.button-stack {
+    width: 100%;
+    align-items: center;
+}
+
+.btn-modal-primary {
+    width: 654px;
+    height: 161px;
+    background-image: url("../../Sprites/slices/btn_primary.png");
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-width: 0;
+    color: #4a2c05;
+    font-size: 42px;
+    -unity-font-style: bold;
+    letter-spacing: 3px;
+    margin-bottom: 39px;
+    transition-property: scale, opacity;
+    transition-duration: 0.13s, 0.13s;
+}
+
+.btn-modal-secondary {
+    background-image: url("../../Sprites/slices/btn_secondary.png");
+    -unity-slice-left: 38;
+    -unity-slice-right: 38;
+    -unity-slice-top: 38;
+    -unity-slice-bottom: 38;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    width: 100%;
+    padding: 39px;
+    color: #ffffff;
+    font-size: 42px;
+    -unity-font-style: bold;
+    letter-spacing: 3px;
+    margin-bottom: 39px;
+    transition-property: scale, opacity;
+    transition-duration: 0.13s, 0.13s;
+}
+
+/* The design fades the last row back so it reads as the least likely choice. */
+.btn-modal-secondary.btn-quiet {
+    background-image: url("../../Sprites/slices/btn_ghost.png");
+    -unity-slice-left: 40;
+    -unity-slice-right: 40;
+    -unity-slice-top: 40;
+    -unity-slice-bottom: 40;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.btn-modal-primary:hover,
+.btn-modal-secondary:hover {
+    scale: 1.04 1.04;
+}
+
+.btn-modal-primary:active,
+.btn-modal-secondary:active {
+    scale: 0.95 0.95;
+    opacity: 0.86;
+}

@@ -1,0 +1,123 @@
+/* Settings screen. Design px x3, matching the Pause overlay's material and rhythm.
+   Absolute inset rather than width/height 100%: overlays are parented into a panel whose
+   root does not stretch, so percentage sizing collapses and the scrim never covers. */
+
+.settings-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(4, 10, 16, 0.72);
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-card {
+    width: 798px;
+    background-image: url("../../Sprites/slices/panel_modal.png");
+    -unity-slice-left: 57;
+    -unity-slice-right: 57;
+    -unity-slice-top: 57;
+    -unity-slice-bottom: 57;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    padding: 78px 66px;
+    align-items: center;
+}
+
+.settings-title {
+    font-size: 69px;
+    -unity-font-style: bold;
+    color: #f6dd9a;
+    letter-spacing: 3px;
+    margin-bottom: 48px;
+}
+
+/* ------------------------------------------------------------------ sound row */
+.settings-row {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    min-height: 132px;
+    padding: 0 36px;
+    margin-bottom: 30px;
+    background-image: url("../../Sprites/slices/pill_hud.png");
+    -unity-slice-left: 42;
+    -unity-slice-right: 42;
+    -unity-slice-top: 42;
+    -unity-slice-bottom: 42;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+
+.settings-icon {
+    width: 66px;
+    height: 66px;
+    margin-right: 27px;
+}
+
+.icon-sound-on {
+    background-image: url("../../Sprites/slices/icon_sound_on.png");
+}
+
+.icon-sound-off {
+    background-image: url("../../Sprites/slices/icon_sound_off.png");
+}
+
+.settings-row-label {
+    flex-grow: 1;
+    font-size: 36px;
+    -unity-font-style: bold;
+    color: #e8f0f0;
+    letter-spacing: 1.5px;
+}
+
+.settings-toggle {
+    width: 150px;
+    height: 78px;
+    border-radius: 39px;
+    background-color: rgba(90, 200, 140, 0.85);
+    border-width: 0;
+    color: #0d1b2e;
+    font-size: 30px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    transition-property: background-color, scale;
+    transition-duration: 0.14s, 0.12s;
+}
+
+.settings-toggle--off {
+    background-color: rgba(120, 140, 170, 0.55);
+    color: #cfe0f0;
+}
+
+.settings-toggle:active {
+    scale: 0.94 0.94;
+}
+
+/* ------------------------------------------------------------------ buttons */
+.settings-button {
+    width: 100%;
+    padding: 33px;
+    border-radius: 42px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-width: 3px;
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    font-size: 38px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    margin-top: 18px;
+    transition-property: scale, opacity;
+    transition-duration: 0.13s, 0.13s;
+}
+
+.settings-quiet {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.settings-button:hover { scale: 1.03 1.03; }
+.settings-button:active { scale: 0.96 0.96; opacity: 0.85; }
