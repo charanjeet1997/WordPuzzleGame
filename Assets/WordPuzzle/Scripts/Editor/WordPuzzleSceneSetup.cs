@@ -28,6 +28,14 @@ namespace WordPuzzle.Editor
         // Breathing room between the outermost letter node and the wheel backdrop edge, in world units.
         private const float BackdropPadding = 0.1f;
 
+        [MenuItem("WordPuzzle/Reset All Saved Progress (PlayerPrefs)")]
+        public static void ResetAllSavedProgress()
+        {
+            PlayerPrefs.DeleteAll();
+            PlayerPrefs.Save();
+            Debug.Log("<color=green>[WordPuzzle]</color> All saved level states, coins, and progress have been completely reset!");
+        }
+
         [MenuItem("WordPuzzle/Setup Wonders of Word Scene")]
         public static void BuildSceneSetup()
         {

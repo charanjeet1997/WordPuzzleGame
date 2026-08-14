@@ -190,16 +190,30 @@ namespace WordPuzzle.UI
             {
                 ServiceLocator.Current.Get<WordPuzzle.Services.IProgressionService>().ResetAllProgress();
             }
-
-            PlayerPrefs.DeleteKey(WondersOfWordGameModel.KEY_CURRENT_LEVEL_INDEX);
-            PlayerPrefs.SetInt(WondersOfWordGameModel.KEY_COINS, StartingCoins);
-            PlayerPrefs.Save();
+            else
+            {
+                PlayerPrefs.DeleteAll();
+                PlayerPrefs.Save();
+            }
 
             if (ServiceLocator.Current.Has<WondersOfWordGameModel>())
             {
                 var model = ServiceLocator.Current.Get<WondersOfWordGameModel>();
                 model.CurrentLevelIndex.Value = 1;
                 model.Coins.Value = StartingCoins;
+                model.SolvedTargetWords.Clear();
+                model.FoundBonusWords.Clear();
+                model.SolvedWordsCount.Value = 0;
+                model.BonusWordsCount.Value = 0;
+                model.Score.Value = 0;
+                model.HintsUsed.Value = 0;
+            }
+
+            // If game manager is present, reload Level 1 fresh
+            if (ServiceLocator.Current.Has<GameManager>())
+            {
+                var gm = ServiceLocator.Current.Get<GameManager>();
+                gm.StartCurrentLevel();
             }
         }
 

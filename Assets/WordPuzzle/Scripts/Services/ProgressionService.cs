@@ -257,21 +257,11 @@ namespace WordPuzzle.Services
             _totalWordsFound = 0;
             _totalBonusWordsFound = 0;
 
-            // Clear stored keys
-            PlayerPrefs.DeleteKey(PrefKeyCurrentLevel);
-            PlayerPrefs.DeleteKey(PrefKeyHighestLevel);
-            PlayerPrefs.DeleteKey(PrefKeyCoins);
-            PlayerPrefs.DeleteKey(PrefKeyTotalScore);
-            PlayerPrefs.DeleteKey(PrefKeyTotalWords);
-            PlayerPrefs.DeleteKey(PrefKeyTotalBonusWords);
+            // Clear all stored keys and level states completely
+            PlayerPrefs.DeleteAll();
+            PlayerPrefs.Save();
 
-            // Clear any level state keys
-            for (int i = 1; i <= 200; i++)
-            {
-                if (PlayerPrefs.HasKey(PrefKeyStarsPrefix + i)) PlayerPrefs.DeleteKey(PrefKeyStarsPrefix + i);
-                if (PlayerPrefs.HasKey(PrefKeyLevelStatePrefix + i)) PlayerPrefs.DeleteKey(PrefKeyLevelStatePrefix + i);
-            }
-
+            // Re-save fresh clean defaults
             SaveAll();
         }
     }
