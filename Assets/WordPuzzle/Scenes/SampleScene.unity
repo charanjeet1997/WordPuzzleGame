@@ -195,63 +195,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1963892652}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &467751038
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 6426734481610605477, guid: d3198c12d07a68f44aece1626c6037c0, type: 3}
-      propertyPath: m_Name
-      value: WordPuzzleWorld
-      objectReference: {fileID: 0}
-    - target: {fileID: 9034817508223592249, guid: d3198c12d07a68f44aece1626c6037c0, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9034817508223592249, guid: d3198c12d07a68f44aece1626c6037c0, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9034817508223592249, guid: d3198c12d07a68f44aece1626c6037c0, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9034817508223592249, guid: d3198c12d07a68f44aece1626c6037c0, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9034817508223592249, guid: d3198c12d07a68f44aece1626c6037c0, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9034817508223592249, guid: d3198c12d07a68f44aece1626c6037c0, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9034817508223592249, guid: d3198c12d07a68f44aece1626c6037c0, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9034817508223592249, guid: d3198c12d07a68f44aece1626c6037c0, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9034817508223592249, guid: d3198c12d07a68f44aece1626c6037c0, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9034817508223592249, guid: d3198c12d07a68f44aece1626c6037c0, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: d3198c12d07a68f44aece1626c6037c0, type: 3}
 --- !u!1 &485885289
 GameObject:
   m_ObjectHideFlags: 0
@@ -663,7 +606,11 @@ MonoBehaviour:
     delayBetweenInstances: 0
   particleFXConfig:
     prefab:
-    - {fileID: 4569402911229307197, guid: ec2a041df117887498b594e8ee90b277, type: 3}
+    - {fileID: 231006006502465012, guid: 8aa862bb0d2280f40aeb467aefc88c6e, type: 3}
+    - {fileID: 3257094683418246176, guid: d3cf5de4a4410c94e986635f2839a265, type: 3}
+    - {fileID: 6892492440228586404, guid: eec13f6d84fcb244ebc114d19c54bff3, type: 3}
+    - {fileID: 2450713832491063958, guid: 56a1f741f8e54e6499f480fd2857a2af, type: 3}
+    - {fileID: 2450713832491063958, guid: 6a87b3c2e1f94a5089cd123456789abc, type: 3}
     name: ParticleFX
     startImmediately: 0
     numberOfObjectsToCreate: 0
@@ -1123,6 +1070,7 @@ GameObject:
   - component: {fileID: 1963892651}
   - component: {fileID: 1963892650}
   - component: {fileID: 1963892649}
+  - component: {fileID: 1963892653}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -1142,6 +1090,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e352e95e471b94b4382d342f97b64be1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WordPuzzle.Managers.WordPuzzleInitializer
+  configSplashScreen: {fileID: 11400000, guid: c3d4e5f60718293a4b5c6d7e8f90a1b2, type: 2}
   configMainMenu: {fileID: 11400000, guid: 1b74983e7038fdb49b633b3a427df59b, type: 2}
 --- !u!114 &1963892650
 MonoBehaviour:
@@ -1248,6 +1197,18 @@ Transform:
   - {fileID: 1211316536}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1963892653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1963892648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d91fa3911f0cd248b81d33aac0662ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordPuzzle.Services.ProgressionService
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1257,4 +1218,3 @@ SceneRoots:
   - {fileID: 505922784}
   - {fileID: 202868092}
   - {fileID: 1963892652}
-  - {fileID: 467751038}

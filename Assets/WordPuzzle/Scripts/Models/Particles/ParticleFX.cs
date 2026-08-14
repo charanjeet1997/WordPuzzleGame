@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using WordPuzzle.Factory;
 using WordPuzzle.Services;
@@ -13,7 +12,12 @@ namespace WordPuzzle.Particles
     {
         private ParticleSystem[] _systems;
         private int _factoryIndex;
-        private Coroutine _recycleRoutine;
+
+        // An unscaled-time deadline rather than a WaitForSeconds coroutine: this is the hot
+        // path (one spawn per revealed tile), so it must not allocate, and effects that play
+        // over a paused level-complete overlay would otherwise never be returned to the pool.
+        private bool _active;
+        private float _recycleAt;
 
         private void Awake()
         {
@@ -41,6 +45,9 @@ namespace WordPuzzle.Particles
                 main.loop = false;
                 // Must not be Destroy: these instances are pooled and returned to the factory.
                 main.stopAction = ParticleSystemStopAction.None;
+                // Matched to the unscaled recycle deadline below - on scaled time a paused
+                // overlay would freeze the visuals while the pool reclaimed them anyway.
+                main.useUnscaledTime = true;
 
                 longestLife = Mathf.Max(longestLife, main.duration + main.startLifetime.constantMax);
 
@@ -48,29 +55,21 @@ namespace WordPuzzle.Particles
                 ps.Play(true);
             }
 
-            if (_recycleRoutine != null) StopCoroutine(_recycleRoutine);
-            _recycleRoutine = StartCoroutine(RecycleAfter(longestLife));
+            _recycleAt = Time.unscaledTime + longestLife;
+            _active = true;
         }
 
-        private IEnumerator RecycleAfter(float seconds)
+        private void Update()
         {
-            yield return new WaitForSeconds(seconds);
-            _recycleRoutine = null;
-            RecycleSelf();
-        }
+            if (!_active || Time.unscaledTime < _recycleAt) return;
 
-        private void RecycleSelf()
-        {
+            _active = false;
             FactoryFuncMapping.RecycleParticleFX(this, _factoryIndex);
         }
 
         private void OnDisable()
         {
-            if (_recycleRoutine != null)
-            {
-                StopCoroutine(_recycleRoutine);
-                _recycleRoutine = null;
-            }
+            _active = false;
         }
     }
 }

@@ -1,0 +1,29 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" path="Assets/WordPuzzle/UI/Layouts/SplashScreen.uxml">
+    <ui:Style src="SplashScreen.uss" />
+    <ui:VisualElement name="splash-root" class="splash-container">
+
+        <ui:VisualElement class="splash-center-content">
+            <ui:VisualElement name="splash-logo-card" class="splash-logo-card">
+                <ui:VisualElement class="splash-app-icon" picking-mode="Ignore" />
+                <ui:VisualElement class="splash-title-lockup">
+                    <ui:Label text="AURORA" class="splash-title-main" />
+                    <ui:Label text="W O R D S" class="splash-title-sub" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement class="splash-bottom-section">
+            <ui:VisualElement class="loading-info-row">
+                <ui:Label name="lbl-status" text="PREPARING PUZZLES..." class="lbl-loading-status" />
+                <ui:Label name="lbl-percent" text="0%" class="lbl-loading-percent" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="loading-track">
+                <ui:VisualElement name="loading-bar-fill" class="loading-fill" />
+            </ui:VisualElement>
+
+            <ui:Label text="VER 1.0.0" class="splash-version" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

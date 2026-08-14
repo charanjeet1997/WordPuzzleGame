@@ -40,7 +40,8 @@ namespace WordPuzzle.Editor
             // 3. Build & Save Factory Prefabs in Assets/WordPuzzle/Prefabs
             GameObject gridTilePrefab = CreateOrUpdateGridTilePrefab();
             GameObject letterNodePrefab = CreateOrUpdateLetterNodePrefab();
-            GameObject particleFXPrefab = CreateOrUpdateParticleFXPrefab();
+            // One prefab per FXType, in enum order - the factory is indexed by that enum.
+            ParticleFX[] particleFXPrefabs = CreateOrUpdateParticleFXPrefabs();
 
             // 4. Build & Save World Prefab (WordPuzzleWorld.prefab)
             GameObject worldPrefab = CreateOrUpdateWorldPrefab(gridTilePrefab, letterNodePrefab);
@@ -54,6 +55,7 @@ namespace WordPuzzle.Editor
             // 7. Create Level Data Assets & UI Toolkit View Config Assets in Data/SO
             List<LevelData> levelAssets = CreateSampleLevelAssets();
             LevelDatabase levelDatabase = GetOrCreateLevelDatabase(levelAssets);
+            ViewConfig configSplashScreen = CreateOrGetViewConfig("ViewConfig_SplashScreen", "SplashScreen", "WordPuzzle.UI.SplashScreenView", panelSettings, true, "Assets/WordPuzzle/UI/Layouts/SplashScreen.uxml");
             ViewConfig configMainMenu = CreateOrGetViewConfig("ViewConfig_MainMenu", "MainMenu", "WordPuzzle.UI.MainMenuView", panelSettings, true, "Assets/WordPuzzle/UI/Layouts/MainMenu.uxml");
             ViewConfig configHUD = CreateOrGetViewConfig("ViewConfig_HUD", "HUD", "WordPuzzle.UI.HUDView", panelSettings, true, "Assets/WordPuzzle/UI/Layouts/HUD.uxml");
             ViewConfig configPause = CreateOrGetViewConfig("ViewConfig_PauseOverlay", "PauseOverlay", "WordPuzzle.UI.PauseOverlayView", panelSettings, false, "Assets/WordPuzzle/UI/Layouts/PauseOverlay.uxml");
@@ -127,6 +129,7 @@ namespace WordPuzzle.Editor
                 managersObj = new GameObject("Managers");
             }
 
+            ProgressionService progressionService = GetOrAddComponent<ProgressionService>(managersObj);
             ParticleService particleService = GetOrAddComponent<ParticleService>(managersObj);
             GameManager gameManager = GetOrAddComponent<GameManager>(managersObj);
             WordPuzzleInitializer initializer = GetOrAddComponent<WordPuzzleInitializer>(managersObj);
@@ -170,9 +173,9 @@ namespace WordPuzzle.Editor
 
             WordPuzzleFactoryController factoryController = GetOrAddComponent<WordPuzzleFactoryController>(factoryObj);
             SerializedObject factorySO = new SerializedObject(factoryController);
-            ConfigureFactory(factorySO, "gridTileConfig", gridTilePrefab.GetComponent<GridTile>(), "GridTile");
-            ConfigureFactory(factorySO, "letterNodeConfig", letterNodePrefab.GetComponent<LetterNode>(), "LetterNode");
-            ConfigureFactory(factorySO, "particleFXConfig", particleFXPrefab.GetComponent<ParticleFX>(), "ParticleFX");
+            ConfigureFactory(factorySO, "gridTileConfig", "GridTile", gridTilePrefab.GetComponent<GridTile>());
+            ConfigureFactory(factorySO, "letterNodeConfig", "LetterNode", letterNodePrefab.GetComponent<LetterNode>());
+            ConfigureFactory(factorySO, "particleFXConfig", "ParticleFX", particleFXPrefabs);
             factorySO.ApplyModifiedProperties();
             EditorUtility.SetDirty(factoryController);
 
@@ -225,8 +228,16 @@ namespace WordPuzzle.Editor
             gameManager.configSettings = configSettings;
             EditorUtility.SetDirty(gameManager);
 
+            initializer.configSplashScreen = configSplashScreen;
             initializer.configMainMenu = configMainMenu;
             EditorUtility.SetDirty(initializer);
+
+            // Configure App Icon in Unity PlayerSettings if asset is present
+            Texture2D appIconTex = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/WordPuzzle/Sprites/AppIcon.png");
+            if (appIconTex != null)
+            {
+                PlayerSettings.SetIconsForTargetGroup(BuildTargetGroup.Unknown, new Texture2D[] { appIconTex });
+            }
 
             Undo.RegisterCreatedObjectUndo(managersObj, "Setup Wonders of Word Scene");
             AssetDatabase.SaveAssets();
@@ -330,29 +341,227 @@ namespace WordPuzzle.Editor
             return prefab;
         }
 
-        private static GameObject CreateOrUpdateParticleFXPrefab()
+        /// <summary>
+        /// One prefab per <see cref="FXType"/>, returned in enum order because the factory is
+        /// indexed by that enum. Only a single shared prefab existed before, so three of the
+        /// four effects could never be created.
+        /// </summary>
+        private static ParticleFX[] CreateOrUpdateParticleFXPrefabs()
         {
-            string path = "Assets/WordPuzzle/Prefabs/ParticleFXPrefab.prefab";
-            GameObject temp = new GameObject("ParticleFXPrefab");
+            return new[]
+            {
+                // TileReveal - cheapest emitter in the game: it fires once per revealed tile.
+                BuildParticleFXPrefab("FX_TileReveal", new Color(1f, 1f, 1f, 1f),
+                    burst: 8, lifetime: 0.35f, speed: 1.2f, size: 0.12f, radius: 0.1f, gravity: -0.2f),
 
+                // WordMatchBurst - the main reward pop, at the centre of the matched word.
+                BuildParticleFXPrefab("FX_WordMatchBurst", new Color(0.45f, 0.9f, 1f, 1f),
+                    burst: 24, lifetime: 0.5f, speed: 2.6f, size: 0.18f, radius: 0.15f, gravity: 0.15f),
+
+                // BonusWordSparkle - gold, deliberately a different colour language to targets.
+                BuildParticleFXPrefab("FX_BonusWordSparkle", new Color(1f, 0.82f, 0.25f, 1f),
+                    burst: 16, lifetime: 0.7f, speed: 1.8f, size: 0.15f, radius: 0.25f, gravity: -0.1f),
+
+                // LevelCompleteFireworks - celebratory radial fireworks.
+                BuildParticleFXPrefab("FX_LevelCompleteFireworks", new Color(1f, 0.6f, 0.85f, 1f),
+                    burst: 40, lifetime: 1.4f, speed: 4.5f, size: 0.2f, radius: 0.1f, gravity: 0.5f),
+
+                // Confetti - colorful cascading celebration confetti with 3D tumbling paper pieces.
+                BuildConfettiParticleFXPrefab("FX_Confetti")
+            };
+        }
+
+        private static ParticleFX BuildConfettiParticleFXPrefab(string name)
+        {
+            string path = $"Assets/WordPuzzle/Prefabs/{name}.prefab";
+            GameObject temp = new GameObject(name);
+
+            // 1. Primary Confetti Emitter (Ribbon & Paper pieces)
             ParticleSystem ps = temp.AddComponent<ParticleSystem>();
             var main = ps.main;
-            main.duration = 0.6f;
-            main.startLifetime = 0.5f;
-            main.startSpeed = 3f;
-            main.startSize = 0.25f;
-            main.startColor = new Color(1f, 0.85f, 0.2f, 1f);
-            // Must be non-looping: stopAction never fires on a system that never stops.
+            main.duration = 2.4f;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(1.8f, 2.5f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(4.5f, 8.5f);
+            main.startSize = new ParticleSystem.MinMaxCurve(0.14f, 0.28f);
+            main.gravityModifier = 0.42f;
+            main.maxParticles = 80;
             main.loop = false;
-            main.stopAction = ParticleSystemStopAction.Destroy;
+            main.stopAction = ParticleSystemStopAction.None;
+            main.playOnAwake = false;
+
+            // Enable 3D tumbling rotation on all axes
+            main.startRotation3D = true;
+            main.startRotationX = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2);
+            main.startRotationY = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2);
+            main.startRotationZ = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2);
+
+            // Rich 8-Color Festive Celebration Palette (Bright saturated colors)
+            var gradient = new Gradient();
+            gradient.mode = GradientMode.Fixed; // Pure discrete confetti colors for each paper flake
+            gradient.SetKeys(
+                new GradientColorKey[]
+                {
+                    new GradientColorKey(new Color(1f, 0.88f, 0.05f), 0.0f),    // Sunshine Gold
+                    new GradientColorKey(new Color(1f, 0.15f, 0.25f), 0.14f),   // Vivid Ruby Red
+                    new GradientColorKey(new Color(1f, 0.08f, 0.65f), 0.28f),   // Neon Magenta
+                    new GradientColorKey(new Color(0f, 0.92f, 1f), 0.42f),      // Electric Sky Cyan
+                    new GradientColorKey(new Color(0.05f, 1f, 0.45f), 0.57f),   // Neon Emerald
+                    new GradientColorKey(new Color(1f, 0.52f, 0.05f), 0.71f),   // Sunset Tangerine
+                    new GradientColorKey(new Color(0.65f, 0.2f, 1f), 0.85f),    // Royal Violet
+                    new GradientColorKey(new Color(1f, 0.98f, 0.7f), 1.0f)      // Shimmer Gold
+                },
+                new GradientAlphaKey[]
+                {
+                    new GradientAlphaKey(1f, 0f),
+                    new GradientAlphaKey(1f, 0.85f),
+                    new GradientAlphaKey(0f, 1f)
+                }
+            );
+            main.startColor = new ParticleSystem.MinMaxGradient(gradient) { mode = ParticleSystemGradientMode.RandomColor };
 
             var emission = ps.emission;
             emission.rateOverTime = 0;
-            emission.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0f, 25) });
+            emission.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0f, 65) });
+
+            var shape = ps.shape;
+            shape.shapeType = ParticleSystemShapeType.Cone;
+            shape.angle = 45f;
+            shape.radius = 0.35f;
+            temp.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
+
+            // Fast continuous 3D tumbling rotation
+            var rotOverLifetime = ps.rotationOverLifetime;
+            rotOverLifetime.enabled = true;
+            rotOverLifetime.separateAxes = true;
+            rotOverLifetime.x = new ParticleSystem.MinMaxCurve(-9f, 9f);
+            rotOverLifetime.y = new ParticleSystem.MinMaxCurve(-10f, 10f);
+            rotOverLifetime.z = new ParticleSystem.MinMaxCurve(-8f, 8f);
+
+            // Air drag / velocity damping: explosive blast that softly floats
+            var limitVel = ps.limitVelocityOverLifetime;
+            limitVel.enabled = true;
+            limitVel.dampen = 0.3f;
+            limitVel.limit = new ParticleSystem.MinMaxCurve(2.0f);
+
+            // Organic flutter turbulence (simulates realistic fluttering paper on air)
+            var noise = ps.noise;
+            noise.enabled = true;
+            noise.strength = 0.65f;
+            noise.frequency = 0.45f;
+            noise.scrollSpeed = 0.7f;
+            noise.damping = true;
+
+            // Size curve: quick pop in, subtle pulse, smooth fade
+            var sizeOverLifetime = ps.sizeOverLifetime;
+            sizeOverLifetime.enabled = true;
+            AnimationCurve sizeCurve = new AnimationCurve();
+            sizeCurve.AddKey(0f, 0.4f);
+            sizeCurve.AddKey(0.1f, 1.1f);
+            sizeCurve.AddKey(0.25f, 1.0f);
+            sizeCurve.AddKey(0.85f, 0.95f);
+            sizeCurve.AddKey(1f, 0.05f);
+            sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1f, sizeCurve);
+
+            ParticleSystemRenderer psRenderer = temp.GetComponent<ParticleSystemRenderer>();
+            Material confettiMat = ParticleMaterialUtility.GetConfettiMaterial();
+            if (confettiMat != null)
+            {
+                psRenderer.sharedMaterial = confettiMat;
+            }
+            else
+            {
+                ParticleMaterialUtility.EnsureValidMaterial(temp);
+            }
+            psRenderer.sortingOrder = 20;
+
+            // 2. Secondary Magical Sparkle Child Emitter
+            GameObject sparklesObj = new GameObject("ConfettiSparkles");
+            sparklesObj.transform.SetParent(temp.transform, false);
+            ParticleSystem sparklePS = sparklesObj.AddComponent<ParticleSystem>();
+            var sMain = sparklePS.main;
+            sMain.duration = 1.6f;
+            sMain.startLifetime = new ParticleSystem.MinMaxCurve(0.8f, 1.4f);
+            sMain.startSpeed = new ParticleSystem.MinMaxCurve(2.0f, 6.0f);
+            sMain.startSize = new ParticleSystem.MinMaxCurve(0.06f, 0.12f);
+            sMain.gravityModifier = 0.15f;
+            sMain.maxParticles = 30;
+            sMain.loop = false;
+            sMain.stopAction = ParticleSystemStopAction.None;
+            sMain.playOnAwake = false;
+
+            var sGradient = new Gradient();
+            sGradient.SetKeys(
+                new GradientColorKey[]
+                {
+                    new GradientColorKey(new Color(1f, 0.95f, 0.4f), 0.0f),  // Bright Gold Sparkle
+                    new GradientColorKey(new Color(0.4f, 0.95f, 1f), 0.5f),  // Cyan Sparkle
+                    new GradientColorKey(new Color(1f, 0.6f, 0.9f), 1.0f)   // Pink Sparkle
+                },
+                new GradientAlphaKey[]
+                {
+                    new GradientAlphaKey(1f, 0f),
+                    new GradientAlphaKey(1f, 0.6f),
+                    new GradientAlphaKey(0f, 1f)
+                }
+            );
+            sMain.startColor = new ParticleSystem.MinMaxGradient(sGradient) { mode = ParticleSystemGradientMode.RandomColor };
+
+            var sEmission = sparklePS.emission;
+            sEmission.rateOverTime = 0;
+            sEmission.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0f, 25) });
+
+            var sShape = sparklePS.shape;
+            sShape.shapeType = ParticleSystemShapeType.Sphere;
+            sShape.radius = 0.25f;
+
+            ParticleSystemRenderer sRenderer = sparklesObj.GetComponent<ParticleSystemRenderer>();
+            Material defaultMat = ParticleMaterialUtility.GetMaterial();
+            if (defaultMat != null) sRenderer.sharedMaterial = defaultMat;
+            sRenderer.sortingOrder = 21;
+
+            temp.AddComponent<ParticleFX>();
+
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(temp, path);
+            Object.DestroyImmediate(temp);
+            return prefab.GetComponent<ParticleFX>();
+        }
+
+        private static ParticleFX BuildParticleFXPrefab(string name, Color color, int burst,
+            float lifetime, float speed, float size, float radius, float gravity)
+        {
+            string path = $"Assets/WordPuzzle/Prefabs/{name}.prefab";
+            GameObject temp = new GameObject(name);
+
+            ParticleSystem ps = temp.AddComponent<ParticleSystem>();
+            var main = ps.main;
+            main.duration = lifetime;
+            main.startLifetime = lifetime;
+            main.startSpeed = speed;
+            main.startSize = size;
+            main.startColor = color;
+            main.gravityModifier = gravity;
+            // Hard ceiling per prefab so no effect can blow the mobile particle budget.
+            main.maxParticles = burst;
+            // Must be non-looping: stopAction never fires on a system that never stops.
+            main.loop = false;
+            // Not Destroy: these instances are pooled and handed back to the factory. The old
+            // prefab set Destroy, which only survived because ParticleFX.Init overrode it.
+            main.stopAction = ParticleSystemStopAction.None;
+            main.playOnAwake = false;
+
+            var emission = ps.emission;
+            emission.rateOverTime = 0;
+            emission.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0f, (short)burst) });
 
             var shape = ps.shape;
             shape.shapeType = ParticleSystemShapeType.Sphere;
-            shape.radius = 0.2f;
+            shape.radius = radius;
+
+            // Off by default - each of these costs a separate pass on mobile.
+            var collision = ps.collision; collision.enabled = false;
+            var trails = ps.trails; trails.enabled = false;
+            var lights = ps.lights; lights.enabled = false;
+            var noise = ps.noise; noise.enabled = false;
 
             // AddComponent leaves the built-in Default-ParticleSystem material, whose shader
             // does not exist under URP and renders magenta.
@@ -364,7 +573,7 @@ namespace WordPuzzle.Editor
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(temp, path);
             Object.DestroyImmediate(temp);
-            return prefab;
+            return prefab.GetComponent<ParticleFX>();
         }
 
         private static GameObject CreateOrUpdateWorldPrefab(GameObject gridTilePrefab, GameObject letterNodePrefab)
@@ -710,18 +919,28 @@ namespace WordPuzzle.Editor
         /// availableObjectsDictionary - so prewarmed instances would never be handed out.
         /// The pool grows on demand instead.
         /// </summary>
-        private static void ConfigureFactory(SerializedObject controllerSO, string fieldName, Component prefab, string factoryName)
+        private static void ConfigureFactory(SerializedObject controllerSO, string fieldName, string factoryName, params Component[] prefabs)
         {
             SerializedProperty config = controllerSO.FindProperty(fieldName);
-            if (config == null || prefab == null)
+            if (config == null || prefabs == null || prefabs.Length == 0)
             {
                 Debug.LogWarning($"[WordPuzzleSetup] Could not configure factory '{fieldName}' (prefab missing or field renamed).");
                 return;
             }
 
+            // The list must hold every index the game asks for. It was hardcoded to 1, so any
+            // FXType above 0 fell into the out-of-bounds path in FactoryFuncMapping and
+            // silently played nothing.
             SerializedProperty prefabList = config.FindPropertyRelative("prefab");
-            prefabList.arraySize = 1;
-            prefabList.GetArrayElementAtIndex(0).objectReferenceValue = prefab;
+            prefabList.arraySize = prefabs.Length;
+            for (int i = 0; i < prefabs.Length; i++)
+            {
+                if (prefabs[i] == null)
+                {
+                    Debug.LogWarning($"[WordPuzzleSetup] Factory '{fieldName}' has no prefab for index {i}.");
+                }
+                prefabList.GetArrayElementAtIndex(i).objectReferenceValue = prefabs[i];
+            }
 
             config.FindPropertyRelative("name").stringValue = factoryName;
             config.FindPropertyRelative("startImmediately").boolValue = false;

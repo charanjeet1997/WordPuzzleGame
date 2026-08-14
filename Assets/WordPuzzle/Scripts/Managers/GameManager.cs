@@ -256,6 +256,16 @@ namespace WordPuzzle.Managers
             }
         }
 
+        /// <summary>
+        /// The level the player would start next. Exposed so the menu card can describe it
+        /// instead of showing hardcoded placeholder text.
+        /// </summary>
+        public LevelData GetCurrentLevelData()
+        {
+            int index = _model != null ? _model.CurrentLevelIndex.Value : 1;
+            return GetLevelData(index);
+        }
+
         private LevelData GetLevelData(int levelNumber)
         {
             // Database first: it holds the authored campaign. The inline list stays as a

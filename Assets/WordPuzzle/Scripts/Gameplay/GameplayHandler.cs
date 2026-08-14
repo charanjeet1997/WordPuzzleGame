@@ -141,6 +141,43 @@ namespace WordPuzzle.Gameplay
                 gridController.BuildGrid(levelData);
             }
 
+            // Restore any in-progress mid-level words if saved
+            if (_gameModel != null && ServiceLocator.Current.Has<IProgressionService>())
+            {
+                var prog = ServiceLocator.Current.Get<IProgressionService>();
+                if (prog.TryGetSavedLevelState(_gameModel.CurrentLevelIndex.Value, out var savedSolved, out var savedBonus, out var savedHints))
+                {
+                    if (savedSolved != null && savedSolved.Count > 0 && levelData.targetWords != null)
+                    {
+                        var validTargets = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
+                        foreach (var entry in levelData.targetWords)
+                        {
+                            if (!string.IsNullOrEmpty(entry.word)) validTargets.Add(entry.word.ToUpperInvariant());
+                        }
+
+                        foreach (string w in savedSolved)
+                        {
+                            string upper = w.Trim().ToUpperInvariant();
+                            if (validTargets.Contains(upper))
+                            {
+                                if (gridController != null) gridController.TryRevealWord(upper, out _);
+                                if (!_gameModel.SolvedTargetWords.Contains(upper))
+                                {
+                                    _gameModel.SolvedTargetWords.Add(upper);
+                                }
+                            }
+                        }
+                        _gameModel.SolvedWordsCount.Value = _gameModel.SolvedTargetWords.Count;
+                    }
+                    if (savedBonus != null && savedBonus.Count > 0)
+                    {
+                        foreach (string b in savedBonus) _gameModel.FoundBonusWords.Add(b);
+                        _gameModel.BonusWordsCount.Value = _gameModel.FoundBonusWords.Count;
+                    }
+                    _gameModel.HintsUsed.Value = savedHints;
+                }
+            }
+
             if (wheelController != null)
             {
                 wheelController.SetupWheel(levelData.wheelLetters);
@@ -182,15 +219,21 @@ namespace WordPuzzle.Gameplay
 
             if (eventData.IsTargetMatch && gridController != null)
             {
-                gridController.TryRevealWord(upperWord);
+                gridController.TryRevealWord(upperWord, out Vector3 wordCenter);
                 if (_audioManager != null) _audioManager.PlayWordMatchedSound();
-                if (_particleService != null) _particleService.PlayWordMatchBurst(transform.position);
+                if (_particleService != null) _particleService.PlayWordMatchBurst(wordCenter);
                 HapticManager.Play(HapticType.Medium);
             }
             else if (eventData.IsBonusWord)
             {
                 if (_audioManager != null) _audioManager.PlayBonusWordSound();
-                if (_particleService != null) _particleService.PlayBonusWordSparkle(transform.position);
+                // A bonus word is never on the grid, so the wheel it was swiped on is the only
+                // position it actually belongs to.
+                if (_particleService != null)
+                {
+                    _particleService.PlayBonusWordSparkle(
+                        wheelController != null ? wheelController.transform.position : transform.position);
+                }
                 HapticManager.Play(HapticType.Medium);
             }
             else if (eventData.IsAlreadySolved)
@@ -234,10 +277,10 @@ namespace WordPuzzle.Gameplay
                 return false;
             }
 
-            if (!gridController.RevealRandomHiddenTile()) return false;
+            if (!gridController.RevealRandomHiddenTile(out Vector3 revealedTilePos)) return false;
 
             if (_audioManager != null) _audioManager.PlayHintSound();
-            if (_particleService != null) _particleService.PlayTileRevealSparkle(transform.position);
+            if (_particleService != null) _particleService.PlayTileRevealSparkle(revealedTilePos);
             HapticManager.Play(HapticType.Light);
             _gameModel.NotifyHintUsed(HintType.SingleTile);
             return true;

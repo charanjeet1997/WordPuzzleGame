@@ -3,6 +3,7 @@ using UnityEngine;
 using ServiceLocatorFramework;
 using DataBindingFramework;
 using WordPuzzle.Data;
+using WordPuzzle.Services;
 
 namespace WordPuzzle.Models
 {
@@ -54,6 +55,17 @@ namespace WordPuzzle.Models
         public HashSet<string> SolvedTargetWords { get; private set; } = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
         public HashSet<string> FoundBonusWords { get; private set; } = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
 
+        private IProgressionService _progressionService;
+
+        private IProgressionService GetProgressionService()
+        {
+            if (_progressionService == null && ServiceLocator.Current != null && ServiceLocator.Current.Has<IProgressionService>())
+            {
+                _progressionService = ServiceLocator.Current.Get<IProgressionService>();
+            }
+            return _progressionService;
+        }
+
         public WondersOfWordGameModel()
         {
             _propertyManager = ServiceLocator.Current.Get<IPropertyManager>();
@@ -75,10 +87,12 @@ namespace WordPuzzle.Models
             BonusWordsCount = _propertyManager.GetOrCreateProperty<int>(KEY_BONUS_WORDS_COUNT);
             HintsUsed = _propertyManager.GetOrCreateProperty<int>(KEY_HINTS_USED);
 
-            // Restored values. The level index was previously written to PlayerPrefs but never
-            // read back, so every launch restarted at level 1 regardless of progress.
-            CurrentLevelIndex.Value = Mathf.Max(1, PlayerPrefs.GetInt(KEY_CURRENT_LEVEL_INDEX, 1));
-            Coins.Value = PlayerPrefs.GetInt(KEY_COINS, 100);
+            var prog = GetProgressionService();
+            int initLevel = prog != null ? prog.CurrentLevelIndex : Mathf.Max(1, PlayerPrefs.GetInt(KEY_CURRENT_LEVEL_INDEX, 1));
+            int initCoins = prog != null ? prog.Coins : PlayerPrefs.GetInt(KEY_COINS, 100);
+
+            CurrentLevelIndex.Value = initLevel;
+            Coins.Value = initCoins;
             Score.Value = 0;
             State.Value = GameState.MainMenu;
             CurrentWordPreview.Value = "";
@@ -100,22 +114,37 @@ namespace WordPuzzle.Models
             _observerManager.GetOrCreateObserver<char>(OBS_SWIPE_CHAR_ADDED);
         }
 
-        /// <summary>
-        /// Persists the resume point and wallet. CurrentLevelIndex is the level the player
-        /// should land on next launch.
-        /// </summary>
         public void SaveProgress()
         {
-            PlayerPrefs.SetInt(KEY_CURRENT_LEVEL_INDEX, CurrentLevelIndex.Value);
-            PlayerPrefs.SetInt(KEY_COINS, Coins.Value);
-            PlayerPrefs.Save();
+            var prog = GetProgressionService();
+            if (prog != null)
+            {
+                prog.CurrentLevelIndex = CurrentLevelIndex.Value;
+                prog.Coins = Coins.Value;
+                prog.SaveAll();
+            }
+            else
+            {
+                PlayerPrefs.SetInt(KEY_CURRENT_LEVEL_INDEX, CurrentLevelIndex.Value);
+                PlayerPrefs.SetInt(KEY_COINS, Coins.Value);
+                PlayerPrefs.Save();
+            }
         }
 
         public void AddCoins(int amount)
         {
             Coins.Value += amount;
-            PlayerPrefs.SetInt(KEY_COINS, Coins.Value);
-            PlayerPrefs.Save();
+            var prog = GetProgressionService();
+            if (prog != null)
+            {
+                prog.Coins = Coins.Value;
+                prog.SaveAll();
+            }
+            else
+            {
+                PlayerPrefs.SetInt(KEY_COINS, Coins.Value);
+                PlayerPrefs.Save();
+            }
         }
 
         public bool SpendCoins(int amount)
@@ -123,8 +152,17 @@ namespace WordPuzzle.Models
             if (Coins.Value >= amount)
             {
                 Coins.Value -= amount;
-                PlayerPrefs.SetInt(KEY_COINS, Coins.Value);
-                PlayerPrefs.Save();
+                var prog = GetProgressionService();
+                if (prog != null)
+                {
+                    prog.Coins = Coins.Value;
+                    prog.SaveAll();
+                }
+                else
+                {
+                    PlayerPrefs.SetInt(KEY_COINS, Coins.Value);
+                    PlayerPrefs.Save();
+                }
                 return true;
             }
             return false;
@@ -139,6 +177,15 @@ namespace WordPuzzle.Models
             BonusWordsCount.Value = 0;
             HintsUsed.Value = 0;
             CurrentWordPreview.Value = "";
+        }
+
+        public void SaveMidLevelState()
+        {
+            var prog = GetProgressionService();
+            if (prog != null)
+            {
+                prog.SaveLevelState(CurrentLevelIndex.Value, SolvedTargetWords, FoundBonusWords, HintsUsed.Value);
+            }
         }
 
         public void NotifySwipeCharAdded(char c)
@@ -159,6 +206,15 @@ namespace WordPuzzle.Models
                 Score.Value += eventData.MatchScore;
                 AddCoins(COINS_TARGET_WORD);
 
+                var prog = GetProgressionService();
+                if (prog != null)
+                {
+                    prog.TotalWordsFound += 1;
+                    prog.TotalScore += eventData.MatchScore;
+                }
+
+                SaveMidLevelState();
+
                 var matchObs = _observerManager.GetOrCreateObserver<string>(OBS_WORD_MATCHED);
                 matchObs.Notify(eventData.SubmittedWord);
 
@@ -172,6 +228,14 @@ namespace WordPuzzle.Models
                 FoundBonusWords.Add(eventData.SubmittedWord);
                 BonusWordsCount.Value = FoundBonusWords.Count;
                 AddCoins(COINS_BONUS_WORD);
+
+                var prog = GetProgressionService();
+                if (prog != null)
+                {
+                    prog.TotalBonusWordsFound += 1;
+                }
+
+                SaveMidLevelState();
 
                 var bonusObs = _observerManager.GetOrCreateObserver<string>(OBS_BONUS_WORD_FOUND);
                 bonusObs.Notify(eventData.SubmittedWord);
@@ -188,28 +252,20 @@ namespace WordPuzzle.Models
             }
         }
 
-        /// <summary>Score removed for each tile hint taken.</summary>
         public const int HINT_SCORE_PENALTY = 25;
-
-        /// <summary>Coin rewards. Named so the UI can show the same numbers it pays out.</summary>
         public const int COINS_TARGET_WORD = 10;
         public const int COINS_BONUS_WORD = 5;
         public const int COINS_LEVEL_COMPLETE = 50;
 
-        /// <summary>Full marks, minus one star per tile hint used, never below one.</summary>
-        public int StarsEarned
-        {
-            get { return UnityEngine.Mathf.Clamp(3 - HintsUsed.Value, 1, 3); }
-        }
+        public int StarsEarned => Mathf.Clamp(3 - HintsUsed.Value, 1, 3);
 
         public void NotifyHintUsed(HintType type)
         {
-            // Shuffle also routes through here but only rearranges letters - it reveals
-            // nothing, so it must not cost a star or any score.
             if (type != HintType.ShuffleWheel)
             {
                 HintsUsed.Value += 1;
-                Score.Value = UnityEngine.Mathf.Max(0, Score.Value - HINT_SCORE_PENALTY);
+                Score.Value = Mathf.Max(0, Score.Value - HINT_SCORE_PENALTY);
+                SaveMidLevelState();
             }
 
             var observer = _observerManager.GetOrCreateObserver<HintType>(OBS_HINT_USED);
@@ -221,13 +277,25 @@ namespace WordPuzzle.Models
             State.Value = GameState.LevelComplete;
             AddCoins(COINS_LEVEL_COMPLETE);
 
-            // Bank the next level immediately. Waiting for the Next button would lose the
-            // clear if the player quits from the victory screen.
-            PlayerPrefs.SetInt(KEY_CURRENT_LEVEL_INDEX, CurrentLevelIndex.Value + 1);
-            PlayerPrefs.Save();
+            int completedLevel = CurrentLevelIndex.Value;
+            int stars = StarsEarned;
+
+            var prog = GetProgressionService();
+            if (prog != null)
+            {
+                prog.SetStarsForLevel(completedLevel, stars);
+                prog.ClearLevelState(completedLevel);
+                prog.CurrentLevelIndex = completedLevel + 1;
+                prog.SaveAll();
+            }
+            else
+            {
+                PlayerPrefs.SetInt(KEY_CURRENT_LEVEL_INDEX, completedLevel + 1);
+                PlayerPrefs.Save();
+            }
 
             var observer = _observerManager.GetOrCreateObserver<int>(OBS_LEVEL_COMPLETED);
-            observer.Notify(CurrentLevelIndex.Value);
+            observer.Notify(completedLevel);
         }
     }
 }

@@ -61,6 +61,15 @@ namespace WordPuzzle.UI
             if (_resetButton != null) _resetButton.clicked += OnResetClicked;
             if (_closeButton != null) _closeButton.clicked += OnCloseClicked;
 
+            // Desktop and the Editor have no motor, so the row would offer a switch that
+            // changes nothing observable. HapticManager.IsSupported exists for exactly this.
+            VisualElement vibrationRow = rootElement.Q<VisualElement>("row-vibration");
+            if (vibrationRow != null)
+            {
+                vibrationRow.style.display =
+                    HapticManager.IsSupported ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+
             RefreshSoundRow();
             RefreshMusicRow();
             RefreshVibrationRow();
@@ -177,8 +186,11 @@ namespace WordPuzzle.UI
             if (_audioManager != null) _audioManager.PlayButtonClickSound();
             HapticManager.Play(HapticType.Light);
 
-            // Coins go back to the starting purse too: resetting to level 1 while leaving the
-            // player broke means the hint button stays dead on a fresh run.
+            if (ServiceLocator.Current.Has<WordPuzzle.Services.IProgressionService>())
+            {
+                ServiceLocator.Current.Get<WordPuzzle.Services.IProgressionService>().ResetAllProgress();
+            }
+
             PlayerPrefs.DeleteKey(WondersOfWordGameModel.KEY_CURRENT_LEVEL_INDEX);
             PlayerPrefs.SetInt(WondersOfWordGameModel.KEY_COINS, StartingCoins);
             PlayerPrefs.Save();

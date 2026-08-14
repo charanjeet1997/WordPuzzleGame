@@ -23,6 +23,7 @@ namespace WordPuzzle.Services
         };
 
         private static Material _cachedMaterial;
+        private static Material _cachedConfettiMaterial;
 
         /// <summary>
         /// Repairs the material on <paramref name="target"/> and any nested particle systems.
@@ -32,24 +33,54 @@ namespace WordPuzzle.Services
         {
             if (target == null) return;
 
+            bool isConfetti = target.name.IndexOf("confetti", System.StringComparison.OrdinalIgnoreCase) >= 0;
+
             foreach (ParticleSystemRenderer renderer in target.GetComponentsInChildren<ParticleSystemRenderer>(true))
             {
                 if (IsUsable(renderer.sharedMaterial)) continue;
 
-                Material material = GetMaterial();
+                Material material = isConfetti ? GetConfettiMaterial() : GetMaterial();
                 if (material != null) renderer.sharedMaterial = material;
             }
         }
 
-        private static bool IsUsable(Material material)
+        public static bool IsUsable(Material material)
         {
             return material != null
                    && material.shader != null
                    && material.shader.name != ErrorShaderName;
         }
 
-        private static Material GetMaterial()
+        public static Material GetConfettiMaterial()
         {
+            if (_cachedConfettiMaterial != null) return _cachedConfettiMaterial;
+
+#if UNITY_EDITOR
+            _cachedConfettiMaterial = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>("Assets/WordPuzzle/Materials/Confetti_Particle.mat");
+            if (_cachedConfettiMaterial != null) return _cachedConfettiMaterial;
+#endif
+            _cachedConfettiMaterial = Resources.Load<Material>("Materials/Confetti_Particle");
+            if (_cachedConfettiMaterial != null) return _cachedConfettiMaterial;
+
+            Material baseMat = GetMaterial();
+            if (baseMat != null)
+            {
+                _cachedConfettiMaterial = new Material(baseMat) { name = "WordPuzzle_ConfettiParticleRuntime" };
+                return _cachedConfettiMaterial;
+            }
+
+            return null;
+        }
+
+        public static Material GetMaterial()
+        {
+            if (_cachedMaterial != null) return _cachedMaterial;
+
+#if UNITY_EDITOR
+            _cachedMaterial = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>("Assets/WordPuzzle/Materials/Particle.mat");
+            if (_cachedMaterial != null) return _cachedMaterial;
+#endif
+            _cachedMaterial = Resources.Load<Material>("Materials/Particle");
             if (_cachedMaterial != null) return _cachedMaterial;
 
             foreach (string shaderName in ShaderCandidates)

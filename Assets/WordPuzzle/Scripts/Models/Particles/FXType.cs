@@ -9,6 +9,7 @@ namespace WordPuzzle.Particles
         TileReveal = 0,
         WordMatchBurst = 1,
         BonusWordSparkle = 2,
-        LevelCompleteFireworks = 3
+        LevelCompleteFireworks = 3,
+        Confetti = 4
     }
 }

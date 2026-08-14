@@ -111,7 +111,8 @@ namespace WordPuzzle.UI
             }
             else
             {
-                if (config.viewId == "MainMenu") viewScript = viewObj.AddComponent<MainMenuView>();
+                if (config.viewId == "SplashScreen" || config.viewId == "Splash") viewScript = viewObj.AddComponent<SplashScreenView>();
+                else if (config.viewId == "MainMenu") viewScript = viewObj.AddComponent<MainMenuView>();
                 else if (config.viewId == "HUD") viewScript = viewObj.AddComponent<HUDView>();
                 else if (config.viewId == "PauseOverlay") viewScript = viewObj.AddComponent<PauseOverlayView>();
                 else if (config.viewId == "LevelComplete") viewScript = viewObj.AddComponent<LevelCompleteView>();

@@ -1,0 +1,123 @@
+/* Splash Screen UI Styles for Words of Wonders / Aurora Words */
+
+.splash-container {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: space-between;
+    background-image: url("../../Sprites/game_background.png");
+    -unity-background-scale-mode: scale-and-crop;
+    background-color: rgba(0, 0, 0, 0);
+    opacity: 1;
+    transition-property: opacity;
+    transition-duration: 0.4s;
+}
+
+.splash-container--hidden {
+    opacity: 0;
+}
+
+.splash-center-content {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0 54px;
+}
+
+.splash-logo-card {
+    align-items: center;
+    justify-content: center;
+}
+
+.splash-app-icon {
+    width: 220px;
+    height: 220px;
+    border-radius: 44px;
+    background-image: url("../../Sprites/AppIcon.png");
+    margin-bottom: 42px;
+    border-width: 3px;
+    border-color: rgba(255, 226, 160, 0.5);
+}
+
+.splash-title-lockup {
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.splash-title-main {
+    font-size: 126px;
+    -unity-font-style: bold;
+    color: #f6dd9a;
+    letter-spacing: 3px;
+    text-shadow: 0 9px 0 rgba(0, 0, 0, 0.35);
+    margin: 0;
+    padding: 0;
+}
+
+.splash-title-sub {
+    font-size: 72px;
+    -unity-font-style: bold;
+    color: #cfe8ea;
+    letter-spacing: 18px;
+    margin-top: -18px;
+    text-shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
+    margin-bottom: 0;
+    padding: 0;
+}
+
+/* ------------------------------------------------------------------ Loading Section */
+.splash-bottom-section {
+    width: 100%;
+    max-width: 820px;
+    padding: 0 64px 84px 64px;
+    align-items: center;
+}
+
+.loading-info-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 18px;
+}
+
+.lbl-loading-status {
+    font-size: 32px;
+    -unity-font-style: bold;
+    color: #cfe8ea;
+    letter-spacing: 3px;
+}
+
+.lbl-loading-percent {
+    font-size: 34px;
+    -unity-font-style: bold;
+    color: #f6dd9a;
+}
+
+.loading-track {
+    width: 100%;
+    height: 26px;
+    background-color: rgba(10, 25, 38, 0.85);
+    border-radius: 13px;
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.15);
+    overflow: hidden;
+    margin-bottom: 32px;
+}
+
+.loading-fill {
+    height: 100%;
+    width: 0%;
+    background-color: #e6b25a;
+    border-radius: 11px;
+    transition-property: width;
+    transition-duration: 0.1s;
+}
+
+.splash-version {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.35);
+    letter-spacing: 2px;
+}

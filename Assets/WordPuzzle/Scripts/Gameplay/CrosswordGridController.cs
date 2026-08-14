@@ -21,6 +21,7 @@ namespace WordPuzzle.Gameplay
 
         private readonly Dictionary<Vector2Int, GridTile> _gridTiles = new Dictionary<Vector2Int, GridTile>();
         private readonly List<TargetWordEntry> _targetWords = new List<TargetWordEntry>();
+        private readonly List<GridTile> _scratchTiles = new List<GridTile>();
 
         public void BuildGrid(LevelData levelData)
         {
@@ -70,18 +71,33 @@ namespace WordPuzzle.Gameplay
 
         public bool TryRevealWord(string submittedWord)
         {
+            return TryRevealWord(submittedWord, out _);
+        }
+
+        /// <summary>
+        /// Reveals the word and reports the world-space center of the tiles it occupies, so
+        /// feedback (particles, shake) can play on the word instead of at the manager's origin.
+        /// </summary>
+        public bool TryRevealWord(string submittedWord, out Vector3 wordCenter)
+        {
+            wordCenter = transform.position;
             if (string.IsNullOrEmpty(submittedWord)) return false;
             string word = submittedWord.ToUpperInvariant();
 
             bool wordMatched = false;
+            Vector3 sum = Vector3.zero;
+            int counted = 0;
+
             foreach (var entry in _targetWords)
             {
                 if (string.Equals(entry.word, word, System.StringComparison.OrdinalIgnoreCase))
                 {
-                    RevealWordEntry(entry);
+                    RevealWordEntry(entry, ref sum, ref counted);
                     wordMatched = true;
                 }
             }
+
+            if (counted > 0) wordCenter = sum / counted;
             return wordMatched;
         }
 
@@ -97,22 +113,34 @@ namespace WordPuzzle.Gameplay
 
         public bool RevealRandomHiddenTile()
         {
-            List<GridTile> unrevealedTiles = new List<GridTile>();
+            return RevealRandomHiddenTile(out _);
+        }
+
+        /// <summary>Reveals a random hidden tile and reports its world position for feedback.</summary>
+        public bool RevealRandomHiddenTile(out Vector3 tilePosition)
+        {
+            tilePosition = transform.position;
+
+            // Reused across calls: a hint can be spammed, and this allocated a List every press.
+            _scratchTiles.Clear();
             foreach (var tile in _gridTiles.Values)
             {
-                if (!tile.IsRevealed) unrevealedTiles.Add(tile);
+                if (!tile.IsRevealed) _scratchTiles.Add(tile);
             }
 
-            if (unrevealedTiles.Count > 0)
+            if (_scratchTiles.Count > 0)
             {
-                int idx = Random.Range(0, unrevealedTiles.Count);
-                unrevealedTiles[idx].Reveal(true);
+                int idx = Random.Range(0, _scratchTiles.Count);
+                GridTile picked = _scratchTiles[idx];
+                picked.Reveal(true);
+                tilePosition = picked.transform.position;
+                _scratchTiles.Clear();
                 return true;
             }
             return false;
         }
 
-        private void RevealWordEntry(TargetWordEntry entry)
+        private void RevealWordEntry(TargetWordEntry entry, ref Vector3 positionSum, ref int counted)
         {
             int row = entry.startRow;
             int col = entry.startCol;
@@ -125,6 +153,8 @@ namespace WordPuzzle.Gameplay
                 if (_gridTiles.TryGetValue(posKey, out GridTile tile))
                 {
                     tile.Reveal(true);
+                    positionSum += tile.transform.position;
+                    counted++;
                 }
             }
         }
