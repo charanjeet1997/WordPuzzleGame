@@ -132,6 +132,9 @@ namespace WordPuzzle.Gameplay
             int targetCount = levelData.targetWords != null ? levelData.targetWords.Count : 0;
             if (_gameModel != null)
             {
+                // The chapter caption is authored per level, so it travels with the level data
+                // rather than being recomputed from the level number in the HUD.
+                _gameModel.CurrentChapterTitle.Value = levelData.chapterTitle ?? string.Empty;
                 _gameModel.ResetLevelProgress(targetCount);
                 _gameModel.State.Value = GameState.Playing;
             }

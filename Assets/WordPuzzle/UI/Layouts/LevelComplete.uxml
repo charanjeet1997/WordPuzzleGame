@@ -17,6 +17,13 @@
 
             <ui:Label name="lbl-score" text="" class="reward-subtext" />
 
+            <ui:Label name="lbl-time" text="" class="reward-subtext" />
+
+            <ui:Label text="WORDS YOU FOUND" class="meanings-heading" />
+            <ui:ScrollView name="meanings-scroll" class="meanings-scroll">
+                <ui:VisualElement name="meanings-list" class="meanings-list" />
+            </ui:ScrollView>
+
             <ui:Button name="btn-next-level" text="NEXT LEVEL" class="btn-victory-primary" />
             <ui:Label name="lbl-subtitle" text="Main Menu" class="victory-subtitle" />
         </ui:VisualElement>

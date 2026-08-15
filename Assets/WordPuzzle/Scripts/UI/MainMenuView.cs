@@ -112,7 +112,7 @@ namespace WordPuzzle.UI
             HapticManager.Play(HapticType.Light);
             if (_gameManager != null)
             {
-                _gameManager.StartCurrentLevel();
+                _gameManager.ShowModeSelect();
             }
         }
 

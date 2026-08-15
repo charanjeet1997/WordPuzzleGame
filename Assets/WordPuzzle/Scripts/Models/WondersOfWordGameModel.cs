@@ -24,6 +24,7 @@ namespace WordPuzzle.Models
         public const string KEY_SCORE = "PlayerScore";
         public const string KEY_GAME_STATE = "GameState";
         public const string KEY_CURRENT_WORD_PREVIEW = "CurrentWordPreview";
+        public const string KEY_CURRENT_CHAPTER = "CurrentChapterTitle";
         public const string KEY_SOLVED_WORDS_COUNT = "SolvedWordsCount";
         public const string KEY_TARGET_WORDS_TOTAL = "TargetWordsTotal";
         public const string KEY_BONUS_WORDS_COUNT = "BonusWordsCount";
@@ -47,6 +48,12 @@ namespace WordPuzzle.Models
         public Property<int> Score { get; private set; }
         public Property<GameState> State { get; private set; }
         public Property<string> CurrentWordPreview { get; private set; }
+
+        /// <summary>Chapter caption of the level being played, e.g. "Chapter 3 - Whispering Woods".</summary>
+        public Property<string> CurrentChapterTitle { get; private set; }
+
+        /// <summary>Seconds spent on the current level. Only ticks in Time Trial.</summary>
+        public Property<float> LevelSeconds { get; private set; }
         public Property<int> SolvedWordsCount { get; private set; }
         public Property<int> TargetWordsTotal { get; private set; }
         public Property<int> BonusWordsCount { get; private set; }
@@ -82,13 +89,15 @@ namespace WordPuzzle.Models
             Score = _propertyManager.GetOrCreateProperty<int>(KEY_SCORE);
             State = _propertyManager.GetOrCreateProperty<GameState>(KEY_GAME_STATE);
             CurrentWordPreview = _propertyManager.GetOrCreateProperty<string>(KEY_CURRENT_WORD_PREVIEW);
+            CurrentChapterTitle = _propertyManager.GetOrCreateProperty<string>(KEY_CURRENT_CHAPTER);
+            LevelSeconds = _propertyManager.GetOrCreateProperty<float>("LevelSeconds");
             SolvedWordsCount = _propertyManager.GetOrCreateProperty<int>(KEY_SOLVED_WORDS_COUNT);
             TargetWordsTotal = _propertyManager.GetOrCreateProperty<int>(KEY_TARGET_WORDS_TOTAL);
             BonusWordsCount = _propertyManager.GetOrCreateProperty<int>(KEY_BONUS_WORDS_COUNT);
             HintsUsed = _propertyManager.GetOrCreateProperty<int>(KEY_HINTS_USED);
 
             var prog = GetProgressionService();
-            int initLevel = prog != null ? prog.CurrentLevelIndex : Mathf.Max(1, PlayerPrefs.GetInt(KEY_CURRENT_LEVEL_INDEX, 1));
+            int initLevel = prog != null ? prog.CurrentLevelIndex : Mathf.Max(1, PlayerPrefs.GetInt(GameModeContext.Key(KEY_CURRENT_LEVEL_INDEX), 1));
             int initCoins = prog != null ? prog.Coins : PlayerPrefs.GetInt(KEY_COINS, 100);
 
             CurrentLevelIndex.Value = initLevel;
@@ -100,6 +109,24 @@ namespace WordPuzzle.Models
             TargetWordsTotal.Value = 0;
             BonusWordsCount.Value = 0;
             HintsUsed.Value = 0;
+            LevelSeconds.Value = 0f;
+        }
+
+        /// <summary>
+        /// Pulls campaign position for whichever mode is now active. Without this a mode
+        /// switch would keep the previous mode's level number in memory and then save it
+        /// under the new mode's key, quietly merging the two campaigns.
+        /// </summary>
+        public void ReloadForCurrentMode()
+        {
+            var prog = GetProgressionService();
+            if (prog is ProgressionService concrete) concrete.ReloadForCurrentMode();
+
+            CurrentLevelIndex.Value = prog != null
+                ? prog.CurrentLevelIndex
+                : Mathf.Max(1, PlayerPrefs.GetInt(GameModeContext.Key(KEY_CURRENT_LEVEL_INDEX), 1));
+
+            LevelSeconds.Value = 0f;
         }
 
         private void InitializeObservers()
@@ -125,7 +152,7 @@ namespace WordPuzzle.Models
             }
             else
             {
-                PlayerPrefs.SetInt(KEY_CURRENT_LEVEL_INDEX, CurrentLevelIndex.Value);
+                PlayerPrefs.SetInt(GameModeContext.Key(KEY_CURRENT_LEVEL_INDEX), CurrentLevelIndex.Value);
                 PlayerPrefs.SetInt(KEY_COINS, Coins.Value);
                 PlayerPrefs.Save();
             }
@@ -290,7 +317,7 @@ namespace WordPuzzle.Models
             }
             else
             {
-                PlayerPrefs.SetInt(KEY_CURRENT_LEVEL_INDEX, completedLevel + 1);
+                PlayerPrefs.SetInt(GameModeContext.Key(KEY_CURRENT_LEVEL_INDEX), completedLevel + 1);
                 PlayerPrefs.Save();
             }
 

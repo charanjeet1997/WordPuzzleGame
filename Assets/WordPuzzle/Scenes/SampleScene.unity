@@ -1071,6 +1071,7 @@ GameObject:
   - component: {fileID: 1963892650}
   - component: {fileID: 1963892649}
   - component: {fileID: 1963892653}
+  - component: {fileID: 1963892654}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -1166,6 +1167,8 @@ MonoBehaviour:
   configPause: {fileID: 11400000, guid: 67628029d2a54bb4b90e41928c52873c, type: 2}
   configLevelComplete: {fileID: 11400000, guid: 63aecadf781c6244d9ed524f49837423, type: 2}
   configSettings: {fileID: 11400000, guid: c5936194dec410d42b452820c50eda6c, type: 2}
+  configModeSelect: {fileID: 11400000, guid: d3ae1d19a1af28144bd52a4e461e5003, type: 2}
+  levelCompleteDelay: 2.6
 --- !u!114 &1963892651
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1209,6 +1212,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d91fa3911f0cd248b81d33aac0662ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WordPuzzle.Services.ProgressionService
+--- !u!114 &1963892654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1963892648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19af05c207a61b24d8c9b4201129745d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordPuzzle.Services.WordDefinitionService
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

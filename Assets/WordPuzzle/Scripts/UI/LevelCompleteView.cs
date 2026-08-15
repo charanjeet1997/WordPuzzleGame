@@ -4,6 +4,7 @@ using WordPuzzle.Models;
 using WordPuzzle.Managers;
 using WordPuzzle.Audio;
 using WordPuzzle.Feedback;
+using WordPuzzle.Services;
 
 namespace WordPuzzle.UI
 {
@@ -13,6 +14,9 @@ namespace WordPuzzle.UI
         private Label _titleLabel;
         private Label _coinsEarnedLabel;
         private Label _scoreLabel;
+        private VisualElement _meaningsList;
+        private Label _timeLabel;
+        private WordDefinitionService _definitions;
 
         private const string CardShownClass = "victory-card--shown";
         private const string StarShownClass = "star--shown";
@@ -29,6 +33,8 @@ namespace WordPuzzle.UI
                 _gameManager = ServiceLocator.Current.Get<GameManager>();
             if (ServiceLocator.Current.Has<AudioManager>())
                 _audioManager = ServiceLocator.Current.Get<AudioManager>();
+            if (ServiceLocator.Current.Has<WordDefinitionService>())
+                _definitions = ServiceLocator.Current.Get<WordDefinitionService>();
         }
 
         protected override void OnShow()
@@ -40,6 +46,8 @@ namespace WordPuzzle.UI
             _titleLabel = rootElement.Q<Label>("TitleLabel") ?? rootElement.Q<Label>(className: "victory-title");
             _coinsEarnedLabel = rootElement.Q<Label>("lbl-reward") ?? rootElement.Q<Label>("CoinsEarnedLabel") ?? rootElement.Q<Label>(className: "reward-text");
             _scoreLabel = rootElement.Q<Label>("lbl-score");
+            _meaningsList = rootElement.Q<VisualElement>("meanings-list");
+            _timeLabel = rootElement.Q<Label>("lbl-time");
 
             if (_nextLevelButton != null)
             {
@@ -52,6 +60,123 @@ namespace WordPuzzle.UI
             }
 
             RefreshResult();
+            RefreshTime();
+            BuildMeaningsList();
+        }
+
+        /// <summary>
+        /// Shows the clear time in Time Trial, and calls out a new record. Hidden entirely in
+        /// Classic, where there is no clock to report.
+        /// </summary>
+        private void RefreshTime()
+        {
+            if (_timeLabel == null) return;
+
+            if (!GameModeContext.IsTimed || _gameModel == null)
+            {
+                _timeLabel.style.display = DisplayStyle.None;
+                return;
+            }
+
+            _timeLabel.style.display = DisplayStyle.Flex;
+
+            float seconds = _gameModel.LevelSeconds.Value;
+            float best = 0f;
+            if (ServiceLocator.Current.Has<IProgressionService>())
+            {
+                best = ServiceLocator.Current.Get<IProgressionService>()
+                    .GetBestTime(_gameModel.CurrentLevelIndex.Value);
+            }
+
+            // The time was submitted before this screen opened, so an equal best means the run
+            // just set it.
+            bool isRecord = best > 0f && seconds <= best + 0.01f;
+
+            _timeLabel.text = isRecord
+                ? $"TIME: {ModeSelectView.FormatTime(seconds)}  -  NEW BEST!"
+                : $"TIME: {ModeSelectView.FormatTime(seconds)}   BEST: {ModeSelectView.FormatTime(best)}";
+        }
+
+        /// <summary>
+        /// Lists every target word cleared this level with its dictionary meaning. Target words
+        /// only: bonus finds include abbreviations and function words that WordNet has nothing
+        /// useful to say about, so they would pad the list with "no definition" rows.
+        /// </summary>
+        private void BuildMeaningsList()
+        {
+            if (_meaningsList == null) return;
+            _meaningsList.Clear();
+
+            if (_definitions == null && ServiceLocator.Current.Has<WordDefinitionService>())
+                _definitions = ServiceLocator.Current.Get<WordDefinitionService>();
+
+            if (_gameModel == null || _definitions == null || !_definitions.IsReady)
+            {
+                ShowMeaningsBlock(false);
+                return;
+            }
+
+            var words = new System.Collections.Generic.List<string>(_gameModel.SolvedTargetWords);
+            words.Sort((a, b) => b.Length.CompareTo(a.Length));   // longest first: the best find leads
+
+            int shown = 0;
+            foreach (string word in words)
+            {
+                string meaning = _definitions.GetPrimaryMeaning(word);
+                if (string.IsNullOrEmpty(meaning)) continue;      // nothing to teach, so no row
+
+                _meaningsList.Add(BuildRow(word, meaning));
+                shown++;
+            }
+
+            // An empty scroll view leaves a gap above the button, so the whole block goes away.
+            ShowMeaningsBlock(shown > 0);
+        }
+
+        private void ShowMeaningsBlock(bool visible)
+        {
+            DisplayStyle display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+
+            VisualElement scroll = rootElement?.Q<VisualElement>("meanings-scroll");
+            if (scroll != null) scroll.style.display = display;
+
+            Label heading = rootElement?.Q<Label>(className: "meanings-heading");
+            if (heading != null) heading.style.display = display;
+        }
+
+        private VisualElement BuildRow(string word, string meaning)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("meaning-row");
+
+            var wordLabel = new Label(word.ToUpperInvariant());
+            wordLabel.AddToClassList("meaning-word");
+            row.Add(wordLabel);
+
+            string pos = _definitions.GetPrimaryPartOfSpeech(word);
+            string baseForm = _definitions.GetBaseForm(word);
+
+            // "noun · form of CAT" tells the player why the definition reads singular.
+            string caption = pos;
+            if (!string.IsNullOrEmpty(baseForm))
+            {
+                caption = string.IsNullOrEmpty(caption)
+                    ? $"form of {baseForm}"
+                    : $"{caption} · form of {baseForm}";
+            }
+
+            if (!string.IsNullOrEmpty(caption))
+            {
+                var posLabel = new Label(caption);
+                posLabel.AddToClassList("meaning-pos");
+                row.Add(posLabel);
+            }
+
+            var meaningLabel = new Label(meaning);
+            meaningLabel.AddToClassList("meaning-text");
+            row.Add(meaningLabel);
+
+            return row;
         }
 
         protected override void OnHide()

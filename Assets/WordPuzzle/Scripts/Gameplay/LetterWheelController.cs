@@ -31,6 +31,13 @@ namespace WordPuzzle.Gameplay
         public float selectionRadius = 0.28f;
         public float nodeSize = 0.44f;
 
+        [Tooltip("Fraction of the screen width the wheel may span. Below this the ring shrinks to fit.")]
+        [Range(0.4f, 1f)]
+        public float wheelWidthFraction = 0.86f;
+
+        [Tooltip("Never shrink nodes below this, even if the ring then overflows.")]
+        public float minNodeSize = 0.2f;
+
         [Tooltip("Letter size in node-local units. Lower values leave more margin inside the circle.")]
         public float letterFontSize = 2.1f;
 
@@ -55,6 +62,7 @@ namespace WordPuzzle.Gameplay
         private string _wheelLetters = "";
         private bool _isDragging = false;
         private Camera _mainCamera;
+        private float _fittedNodeSize;
         private WondersOfWordGameModel _gameModel;
         private AudioManager _audioManager;
 
@@ -80,6 +88,11 @@ namespace WordPuzzle.Gameplay
             int count = _wheelLetters.Length;
             if (count == 0) return;
 
+            // Node size is resolved against the screen before the ring is measured: the ring
+            // grows with letter count, and on a narrow-aspect device (a 4:3 tablet, where the
+            // camera's vertical extent is fixed but horizontal is tighter) a 7-letter wheel at
+            // the authored size runs past both edges.
+            _fittedNodeSize = FitNodeSize(count);
             float radius = GetRingRadius(count);
             float angleStep = 360f / count;
 
@@ -94,13 +107,16 @@ namespace WordPuzzle.Gameplay
                 node.transform.SetParent(transform, false);
                 node.transform.localPosition = pos;
                 node.Initialize(_wheelLetters[i], i);
-                node.SetSize(nodeSize);
+                node.SetSize(_fittedNodeSize);
                 node.SetFontSize(letterFontSize);
                 node.SetFont(letterFont);
                 _nodes.Add(node);
             }
 
             ResizeBackdrop();
+
+            // The trail width was set in Awake, before the fit was known.
+            EnsureLineRenderer();
             ResetSelection();
         }
 
@@ -114,8 +130,40 @@ namespace WordPuzzle.Gameplay
         {
             if (!autoWheelRadius || count < 2) return wheelRadius;
 
-            float chord = nodeSize * nodeSpacingRatio;
+            float chord = EffectiveNodeSize * nodeSpacingRatio;
             return chord / (2f * Mathf.Sin(Mathf.PI / count));
+        }
+
+        /// <summary>Node size actually in use, which is the authored size until the screen forces it down.</summary>
+        private float EffectiveNodeSize => _fittedNodeSize > 0f ? _fittedNodeSize : nodeSize;
+
+        /// <summary>How much the ring was shrunk to fit, 1 when it was not.</summary>
+        private float FitScale => nodeSize > 0.0001f ? EffectiveNodeSize / nodeSize : 1f;
+
+        /// <summary>
+        /// Largest node size whose ring still fits across the screen width, capped at the
+        /// authored <see cref="nodeSize"/>. Ring diameter scales linearly with node size, so
+        /// the fit is a single ratio rather than a search.
+        /// </summary>
+        private float FitNodeSize(int count)
+        {
+            if (_mainCamera == null) _mainCamera = Camera.main;
+            if (_mainCamera == null || count < 2) return nodeSize;
+
+            float depth = Mathf.Abs(_mainCamera.transform.position.z - transform.position.z);
+            float halfWidth = Mathf.Abs(
+                _mainCamera.ViewportToWorldPoint(new Vector3(1f, 0.5f, depth)).x -
+                _mainCamera.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, depth)).x);
+
+            float available = halfWidth * 2f * wheelWidthFraction;
+
+            // Ring outer diameter at the authored size, including the backdrop ring.
+            float chord = nodeSize * nodeSpacingRatio;
+            float radius = chord / (2f * Mathf.Sin(Mathf.PI / count));
+            float diameter = (radius + nodeSize * 0.5f + backdropPadding) * 2f;
+            if (diameter <= available || diameter <= 0.0001f) return nodeSize;
+
+            return Mathf.Max(nodeSize * (available / diameter), minNodeSize);
         }
 
         /// <summary>
@@ -138,7 +186,7 @@ namespace WordPuzzle.Gameplay
             float nativeSize = backdropRenderer.sprite.bounds.size.x;
             if (nativeSize <= 0f) return;
 
-            float backdropRadius = GetRingRadius(_nodes.Count) + nodeSize * 0.5f + backdropPadding;
+            float backdropRadius = GetRingRadius(_nodes.Count) + EffectiveNodeSize * 0.5f + backdropPadding;
             float scale = (backdropRadius * 2f) / nativeSize;
             backdropRenderer.transform.localScale = new Vector3(scale, scale, 1f);
         }
@@ -225,7 +273,9 @@ namespace WordPuzzle.Gameplay
             foreach (var node in _nodes)
             {
                 float dist = Vector3.Distance(node.transform.position, worldPos);
-                if (dist <= selectionRadius)
+                // Hit radius tracks the drawn node, or shrunken letters would be
+                // selectable from well outside their circle.
+                if (dist <= selectionRadius * FitScale)
                 {
                     if (!_selectedNodes.Contains(node))
                     {
@@ -268,7 +318,7 @@ namespace WordPuzzle.Gameplay
             // A near-zero final segment makes the corner join collapse into a spike that reads
             // as an arrowhead, and the pointer sits on the node for the whole of each tap.
             float trailingDistance = Vector3.Distance(currentPointerPos, lastNodePos);
-            bool showTrailing = trailingDistance > nodeSize * 0.5f;
+            bool showTrailing = trailingDistance > EffectiveNodeSize * 0.5f;
 
             int count = _selectedNodes.Count + (showTrailing ? 1 : 0);
 
@@ -348,8 +398,8 @@ namespace WordPuzzle.Gameplay
                 if (lineRenderer == null) lineRenderer = gameObject.AddComponent<LineRenderer>();
             }
 
-            lineRenderer.startWidth = lineWidth;
-            lineRenderer.endWidth = lineWidth;
+            lineRenderer.startWidth = lineWidth * FitScale;
+            lineRenderer.endWidth = lineWidth * FitScale;
 
             // One flat colour at both ends. A start/end gradient is normalised across the whole
             // polyline, so a 2-letter path and a 6-letter path would render different colour

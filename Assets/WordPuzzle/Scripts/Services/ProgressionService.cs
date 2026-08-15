@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using ServiceLocatorFramework;
+using WordPuzzle.Models;
 
 namespace WordPuzzle.Services
 {
@@ -24,18 +25,29 @@ namespace WordPuzzle.Services
 
         void SaveAll();
         void ResetAllProgress();
+
+        /// <summary>Best clear time in seconds for a level in the current mode, or 0 when unset.</summary>
+        float GetBestTime(int levelIndex);
+
+        /// <summary>Records a clear time, keeping it only when it beats the stored one.</summary>
+        void SubmitTime(int levelIndex, float seconds);
     }
 
     public class ProgressionService : MonoBehaviour, IProgressionService
     {
-        private const string PrefKeyCurrentLevel = "WordPuzzle_CurrentLevel";
-        private const string PrefKeyHighestLevel = "WordPuzzle_HighestLevel";
+        // Campaign position is per mode: clearing level 40 in Classic must not move Time
+        // Trial. Keys that describe where you are get the mode suffix; the wallet and the
+        // lifetime totals stay global, because coins are one shared economy.
+        private static string PrefKeyCurrentLevel => GameModeContext.Key("WordPuzzle_CurrentLevel");
+        private static string PrefKeyHighestLevel => GameModeContext.Key("WordPuzzle_HighestLevel");
+        private static string PrefKeyStarsPrefix => GameModeContext.Key("WordPuzzle_Stars") + "_Lvl_";
+        private static string PrefKeyLevelStatePrefix => GameModeContext.Key("WordPuzzle_State") + "_Lvl_";
+        private static string PrefKeyBestTimePrefix => GameModeContext.Key("WordPuzzle_BestTime") + "_Lvl_";
+
         private const string PrefKeyCoins = "WordPuzzle_Coins";
         private const string PrefKeyTotalScore = "WordPuzzle_TotalScore";
         private const string PrefKeyTotalWords = "WordPuzzle_TotalWords";
         private const string PrefKeyTotalBonusWords = "WordPuzzle_TotalBonusWords";
-        private const string PrefKeyStarsPrefix = "WordPuzzle_Stars_Lvl_";
-        private const string PrefKeyLevelStatePrefix = "WordPuzzle_State_Lvl_";
 
         public const int DefaultStartingCoins = 100;
 
@@ -246,6 +258,32 @@ namespace WordPuzzle.Services
                 PlayerPrefs.DeleteKey(key);
                 PlayerPrefs.Save();
             }
+        }
+
+        public float GetBestTime(int levelIndex)
+        {
+            return PlayerPrefs.GetFloat(PrefKeyBestTimePrefix + levelIndex, 0f);
+        }
+
+        public void SubmitTime(int levelIndex, float seconds)
+        {
+            if (seconds <= 0f) return;
+
+            float best = GetBestTime(levelIndex);
+            if (best > 0f && seconds >= best) return;   // slower than the record, so not a record
+
+            PlayerPrefs.SetFloat(PrefKeyBestTimePrefix + levelIndex, seconds);
+            PlayerPrefs.Save();
+        }
+
+        /// <summary>
+        /// Re-reads everything for the mode that is now active. Called on a mode switch: the
+        /// in-memory fields hold the previous mode's numbers and would otherwise be written
+        /// back under the new mode's keys, merging the two campaigns.
+        /// </summary>
+        public void ReloadForCurrentMode()
+        {
+            LoadAll();
         }
 
         public void ResetAllProgress()

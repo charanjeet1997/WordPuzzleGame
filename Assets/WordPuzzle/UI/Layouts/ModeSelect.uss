@@ -1,0 +1,177 @@
+/* Mode select carousel. Same material and rhythm as the pause and settings cards:
+   design px x3, gold on deep navy, sprite-backed panels rather than flat fills. */
+
+.mode-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(4, 10, 16, 0.82);
+    align-items: center;
+    justify-content: center;
+}
+
+.mode-title {
+    font-size: 54px;
+    -unity-font-style: bold;
+    color: #f6dd9a;
+    letter-spacing: 4px;
+    margin-bottom: 42px;
+}
+
+/* ------------------------------------------------------------------ carousel
+   The viewport clips; the track inside it is wider than the viewport and slides. */
+.mode-viewport {
+    width: 100%;
+    height: 630px;
+    overflow: hidden;
+    justify-content: center;
+}
+
+.mode-track {
+    flex-direction: row;
+    align-items: center;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    /* Translated from script. A transition is added only when snapping, so dragging
+       tracks the finger exactly instead of lagging behind it. */
+}
+
+.mode-track--snapping {
+    transition-property: translate;
+    transition-duration: 0.22s;
+    transition-timing-function: ease-out-cubic;
+}
+
+/* Width and the 36px gap must match CardWidth/CardGap in ModeSelectView, which positions
+   the track in pixels. Three cards are visible at 1080 wide: centre plus both neighbours. */
+.mode-card {
+    width: 480px;
+    height: 600px;
+    margin-right: 36px;
+    flex-shrink: 0;
+    background-image: url("../../Sprites/slices/panel_card.png");
+    -unity-slice-left: 42;
+    -unity-slice-right: 42;
+    -unity-slice-top: 42;
+    -unity-slice-bottom: 42;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    align-items: center;
+    justify-content: center;
+    padding: 42px 33px;
+    /* Scale and opacity are driven inline from the view, continuously, so a drag tracks
+       the finger. No transition on them here or the cards would lag behind the gesture,
+       and no border either - size and brightness already say which card is selected. */
+}
+
+.mode-icon {
+    width: 132px;
+    height: 132px;
+    border-radius: 66px;
+    background-color: rgba(246, 221, 154, 0.12);
+    border-width: 6px;
+    border-color: rgba(246, 221, 154, 0.55);
+    margin-bottom: 36px;
+}
+
+/* Endless reads cool violet - a third identity, distinct from calm gold and hot orange. */
+.mode-icon--endless {
+    background-color: rgba(150, 130, 255, 0.14);
+    border-color: rgba(165, 145, 255, 0.7);
+}
+
+/* Time Trial reads red-hot rather than calm gold. */
+.mode-icon--timed {
+    background-color: rgba(255, 140, 100, 0.14);
+    border-color: rgba(255, 150, 110, 0.7);
+}
+
+.mode-name {
+    font-size: 48px;
+    -unity-font-style: bold;
+    color: #f6dd9a;
+    letter-spacing: 3px;
+    margin-bottom: 18px;
+}
+
+.mode-desc {
+    font-size: 27px;
+    color: rgba(255, 255, 255, 0.72);
+    white-space: normal;
+    -unity-text-align: middle-center;
+    width: 100%;
+    margin-bottom: 36px;
+}
+
+.mode-stat-row {
+    align-items: center;
+}
+
+.mode-stat {
+    font-size: 33px;
+    -unity-font-style: bold;
+    color: #e8f0f0;
+    letter-spacing: 2px;
+}
+
+.mode-stat--dim {
+    font-size: 27px;
+    color: rgba(255, 255, 255, 0.45);
+    margin-top: 6px;
+}
+
+/* ------------------------------------------------------------------ dots */
+.mode-dots {
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.mode-dot {
+    width: 21px;
+    height: 21px;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.22);
+    margin: 0 9px;
+    transition-property: background-color, scale;
+    transition-duration: 0.15s, 0.15s;
+}
+
+.mode-dot--active {
+    background-color: #f6dd9a;
+    scale: 1.2 1.2;
+}
+
+/* ------------------------------------------------------------------ actions */
+.mode-play-button {
+    width: 570px;
+    height: 132px;
+    margin-top: 48px;
+    background-image: url("../../Sprites/slices/btn_primary.png");
+    -unity-slice-left: 79;
+    -unity-slice-right: 79;
+    -unity-slice-top: 79;
+    -unity-slice-bottom: 79;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    color: #4a2c05;
+    font-size: 45px;
+    -unity-font-style: bold;
+    letter-spacing: 4px;
+    transition-property: scale;
+    transition-duration: 0.12s;
+}
+
+.mode-play-button:active { scale: 0.96 0.96; }
+
+.mode-back {
+    font-size: 33px;
+    -unity-font-style: bold;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 2px;
+    margin-top: 30px;
+}

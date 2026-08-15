@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ServiceLocatorFramework;
+using WordPuzzle.Data;
+using WordPuzzle.Models;
 
 namespace WordPuzzle.Audio
 {
@@ -27,6 +29,10 @@ namespace WordPuzzle.Audio
         private const string PrefKeyMusicEnabled = "MusicEnabled";
 
         private AudioSource _source;
+        private WondersOfWordGameModel _gameModel;
+
+        /// <summary>False on the splash and the main menu, where the playlist stays silent.</summary>
+        private bool _inGameplay;
         private readonly List<int> _order = new List<int>();
         private int _orderIndex = -1;
         private float _fadeTarget;
@@ -53,6 +59,7 @@ namespace WordPuzzle.Audio
 
         private void OnDestroy()
         {
+            OnDestroyModelBinding();
             if (ServiceLocator.Current != null
                 && ServiceLocator.Current.Has<MusicPlayer>()
                 && ServiceLocator.Current.Get<MusicPlayer>() == this)
@@ -66,8 +73,56 @@ namespace WordPuzzle.Audio
             // AudioManager registers in Awake, so the Background source is only reliably
             // reachable from Start onwards.
             ResolveSource();
-
             BuildOrder();
+
+            // Music belongs to gameplay only - the splash and the menu stay silent - so
+            // playback follows game state rather than starting on load.
+            if (ServiceLocator.Current != null && ServiceLocator.Current.Has<WondersOfWordGameModel>())
+            {
+                _gameModel = ServiceLocator.Current.Get<WondersOfWordGameModel>();
+                _gameModel.State.Bind(this, OnGameStateChanged);
+                ApplyStateGate(_gameModel.State.Value);
+            }
+            else
+            {
+                // No model to follow (a test scene, say): behave as before rather than
+                // leaving the playlist permanently silent.
+                _inGameplay = true;
+                if (MusicEnabled) PlayNext();
+            }
+        }
+
+        private void OnDestroyModelBinding()
+        {
+            if (_gameModel != null)
+            {
+                _gameModel.State.Unbind(OnGameStateChanged);
+                _gameModel = null;
+            }
+        }
+
+        private void OnGameStateChanged(GameState state) => ApplyStateGate(state);
+
+        /// <summary>
+        /// Starts the playlist on entering gameplay and stops it on returning to the menu.
+        /// Paused and LevelComplete still count as in-game: the track should carry across a
+        /// pause popup and the victory card rather than cutting out and restarting.
+        /// </summary>
+        private void ApplyStateGate(GameState state)
+        {
+            bool shouldPlay = state != GameState.MainMenu;
+            if (shouldPlay == _inGameplay) return;
+
+            _inGameplay = shouldPlay;
+
+            if (!shouldPlay)
+            {
+                _fadeTarget = 0f;
+                if (_source != null) _source.Stop();
+                return;
+            }
+
+            _fadeTarget = MusicEnabled ? volume : 0f;
             if (MusicEnabled) PlayNext();
         }
 
@@ -110,7 +165,7 @@ namespace WordPuzzle.Audio
 
             // Advance when the current track ends. Checked here rather than with a coroutine
             // so a paused game (timeScale 0) still hands over to the next track.
-            if (MusicEnabled && !_source.isPlaying && _source.clip != null)
+            if (_inGameplay && MusicEnabled && !_source.isPlaying && _source.clip != null)
             {
                 PlayNext();
             }
@@ -126,7 +181,9 @@ namespace WordPuzzle.Audio
 
             if (enabled)
             {
-                if (_source != null && !_source.isPlaying) PlayNext();
+                // Only resumes if we are actually in a level: switching music on from the
+                // menu should not start a track over the menu.
+                if (_inGameplay && _source != null && !_source.isPlaying) PlayNext();
             }
             else if (_source != null)
             {

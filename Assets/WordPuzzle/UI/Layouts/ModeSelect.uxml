@@ -1,0 +1,23 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" path="Assets/WordPuzzle/UI/Layouts/ModeSelect.uxml">
+    <ui:Style src="ModeSelect.uss" />
+    <ui:VisualElement name="mode-root" class="mode-backdrop">
+
+        <ui:Label text="CHOOSE A MODE" class="mode-title" />
+
+        <!-- Cards are built by ModeSelectView: the track repeats the mode list so the
+             carousel can wrap, which two modes alone could not fill three slots. -->
+        <ui:VisualElement name="mode-viewport" class="mode-viewport">
+            <ui:VisualElement name="mode-track" class="mode-track" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="mode-dots" class="mode-dots">
+            <ui:VisualElement name="dot-0" class="mode-dot mode-dot--active" />
+            <ui:VisualElement name="dot-1" class="mode-dot" />
+            <ui:VisualElement name="dot-2" class="mode-dot" />
+        </ui:VisualElement>
+
+        <ui:Button name="btn-play-mode" text="PLAY" class="mode-play-button" />
+        <ui:Label name="lbl-mode-back" text="Back" class="mode-back" />
+
+    </ui:VisualElement>
+</ui:UXML>

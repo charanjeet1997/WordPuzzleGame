@@ -10,6 +10,7 @@ using WordPuzzle.UI;
 using WordPuzzle.Gameplay;
 using WordPuzzle.Audio;
 using WordPuzzle.Feedback;
+using WordPuzzle.Services;
 
 namespace WordPuzzle.Managers
 {
@@ -28,7 +29,13 @@ namespace WordPuzzle.Managers
         public ViewConfig configPause;
         public ViewConfig configLevelComplete;
         public ViewConfig configSettings;
+        public ViewConfig configModeSelect;
 
+        [Header("Level Complete")]
+        [Tooltip("Seconds the last word's meaning stays on screen before the victory card appears.")]
+        public float levelCompleteDelay = 2.6f;
+
+        private Coroutine _levelCompleteRoutine;
         private WondersOfWordGameModel _model;
         private UIManager _uiManager;
         private GameplayHandler _gameplayHandler;
@@ -60,6 +67,7 @@ namespace WordPuzzle.Managers
 
         private void OnDestroy()
         {
+            CancelPendingLevelComplete();
             if (_levelCompletedObserver != null)
             {
                 _levelCompletedObserver.Unbind(OnLevelCompletedNotification);
@@ -94,6 +102,29 @@ namespace WordPuzzle.Managers
 
         private void OnLevelCompletedNotification(int levelIndex)
         {
+            // Deliberately not immediate: the final word's meaning toast is still on screen,
+            // and the victory card would cover it before it could be read.
+            if (_levelCompleteRoutine != null) StopCoroutine(_levelCompleteRoutine);
+            _levelCompleteRoutine = StartCoroutine(ShowLevelCompleteAfterDelay());
+        }
+
+        private System.Collections.IEnumerator ShowLevelCompleteAfterDelay()
+        {
+            // Recorded before the state flip, while the level's elapsed time is still current.
+            if (GameModeContext.IsTimed && _model != null && ServiceLocator.Current.Has<IProgressionService>())
+            {
+                ServiceLocator.Current.Get<IProgressionService>()
+                    .SubmitTime(_model.CurrentLevelIndex.Value, _model.LevelSeconds.Value);
+            }
+
+            // The state flips now so no further swipes are scored during the pause, while the
+            // card itself waits for the toast.
+            if (_model != null) _model.State.Value = GameState.LevelComplete;
+
+            // Unscaled: the level-complete path is allowed to run with a paused time scale.
+            yield return new WaitForSecondsRealtime(levelCompleteDelay);
+
+            _levelCompleteRoutine = null;
             ShowLevelComplete();
         }
 
@@ -101,6 +132,13 @@ namespace WordPuzzle.Managers
         {
             if (_model != null && _model.State.Value == GameState.Playing)
             {
+                // Scaled time on purpose: pausing the game must stop the clock, or players
+                // would pause to think and keep their record.
+                if (GameModeContext.IsTimed)
+                {
+                    _model.LevelSeconds.Value += Time.deltaTime;
+                }
+
                 if (WorldManager.Instance != null)
                 {
                     var entities = WorldManager.Instance.GetCurrentWorldEntity();
@@ -115,6 +153,12 @@ namespace WordPuzzle.Managers
 
         public void StartCurrentLevel()
         {
+            // A card queued by the previous level must not land on top of the new one.
+            CancelPendingLevelComplete();
+
+            // Each level is timed from zero, not from when the mode was entered.
+            if (_model != null) _model.LevelSeconds.Value = 0f;
+
             SpawnWorldIfRequired();
 
             int lvlIndex = _model != null ? _model.CurrentLevelIndex.Value : 1;
@@ -182,6 +226,26 @@ namespace WordPuzzle.Managers
             StartCurrentLevel();
         }
 
+        /// <summary>
+        /// Opens the mode carousel. PLAY routes here rather than straight into a level so the
+        /// player picks which campaign to continue - the two advance independently.
+        /// </summary>
+        public void ShowModeSelect()
+        {
+            if (_uiManager == null && ServiceLocator.Current.Has<UIManager>())
+                _uiManager = ServiceLocator.Current.Get<UIManager>();
+
+            // Without the screen wired up, falling through to the last played mode beats
+            // doing nothing when PLAY is pressed.
+            if (_uiManager == null || configModeSelect == null)
+            {
+                StartCurrentLevel();
+                return;
+            }
+
+            _uiManager.ShowOverlay(configModeSelect);
+        }
+
         public void ShowSettings()
         {
             if (_uiManager == null && ServiceLocator.Current.Has<UIManager>())
@@ -237,6 +301,15 @@ namespace WordPuzzle.Managers
             {
                 _uiManager.ShowView(configMainMenu);
             }
+        }
+
+        /// <summary>Drops any queued victory card, e.g. when the player quits to the menu mid-delay.</summary>
+        public void CancelPendingLevelComplete()
+        {
+            if (_levelCompleteRoutine == null) return;
+
+            StopCoroutine(_levelCompleteRoutine);
+            _levelCompleteRoutine = null;
         }
 
         public void ShowLevelComplete()

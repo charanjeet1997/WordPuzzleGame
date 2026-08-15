@@ -10,8 +10,25 @@ namespace WordPuzzle.Gameplay
     public class CrosswordGridController : MonoBehaviour
     {
         [Header("Grid Layout Parameters")]
+        [Tooltip("Preferred tile size. Levels with a large grid shrink below this to fit the screen.")]
         public float tileSize = 0.4615f;
         public float tileSpacing = 0.046f;
+
+        [Header("Screen Fit")]
+        [Tooltip("Camera used to measure the visible area. Falls back to Camera.main.")]
+        public Camera viewCamera;
+
+        [Tooltip("Vertical band of the screen the grid may occupy, in viewport coords (0 = bottom). " +
+                 "The default leaves the HUD bar above and the letter wheel below.")]
+        public float areaBottom = 0.52f;
+        public float areaTop = 0.94f;
+
+        [Tooltip("Fraction of the screen width the grid may occupy.")]
+        [Range(0.5f, 1f)]
+        public float areaWidth = 0.92f;
+
+        [Tooltip("Never shrink tiles below this, even if the grid then overflows.")]
+        public float minTileSize = 0.16f;
 
         [Tooltip("Letter size in tile-local units. Lower values leave more margin inside the tile.")]
         public float letterFontSize = 2.4f;
@@ -33,10 +50,20 @@ namespace WordPuzzle.Gameplay
             int maxRows = levelData.GetMaxGridRows();
             int maxCols = levelData.GetMaxGridCols();
 
-            float totalWidth = maxCols * tileSize + (maxCols - 1) * tileSpacing;
-            float totalHeight = maxRows * tileSize + (maxRows - 1) * tileSpacing;
+            // Tile size is per level, not fixed: a 7x9 grid at the authored size runs off a
+            // 19.5:9 screen and collides with the HUD, so large levels scale down to fit.
+            float fittedTile = FitTileSize(maxRows, maxCols, out Vector3 areaCenter);
+            float fittedSpacing = tileSpacing * (fittedTile / tileSize);
 
-            Vector3 startPos = new Vector3(-totalWidth * 0.5f + tileSize * 0.5f, totalHeight * 0.5f - tileSize * 0.5f, 0f);
+            float totalWidth = maxCols * fittedTile + (maxCols - 1) * fittedSpacing;
+            float totalHeight = maxRows * fittedTile + (maxRows - 1) * fittedSpacing;
+
+            // Centred on the measured band rather than on this transform, so the grid sits
+            // between the HUD and the wheel whatever the level's dimensions are.
+            Vector3 gridOrigin = areaCenter + new Vector3(
+                -totalWidth * 0.5f + fittedTile * 0.5f,
+                totalHeight * 0.5f - fittedTile * 0.5f,
+                0f);
 
             foreach (var entry in levelData.targetWords)
             {
@@ -52,7 +79,10 @@ namespace WordPuzzle.Gameplay
                     Vector2Int posKey = new Vector2Int(r, c);
                     if (!_gridTiles.ContainsKey(posKey))
                     {
-                        Vector3 worldPos = transform.position + startPos + new Vector3(c * (tileSize + tileSpacing), -r * (tileSize + tileSpacing), 0f);
+                        Vector3 worldPos = gridOrigin + new Vector3(
+                            c * (fittedTile + fittedSpacing),
+                            -r * (fittedTile + fittedSpacing),
+                            0f);
 
                         GridTile tile = FactoryFuncMapping.CreateGridTile();
                         if (tile == null) continue;
@@ -60,13 +90,48 @@ namespace WordPuzzle.Gameplay
                         tile.transform.SetParent(transform, false);
                         tile.transform.position = worldPos;
                         tile.Initialize(word[i], r, c);
-                        tile.SetSize(tileSize);
+                        tile.SetSize(fittedTile);
                         tile.SetFontSize(letterFontSize);
                         tile.SetFont(letterFont);
                         _gridTiles.Add(posKey, tile);
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Largest tile size at which a rows x cols grid fits the allotted band of the screen,
+        /// never larger than the authored <see cref="tileSize"/>. Also reports the world-space
+        /// centre of that band so the caller can centre the grid in it.
+        /// </summary>
+        private float FitTileSize(int rows, int cols, out Vector3 areaCenter)
+        {
+            areaCenter = transform.position;
+            if (rows <= 0 || cols <= 0) return tileSize;
+
+            Camera cam = viewCamera != null ? viewCamera : Camera.main;
+            if (cam == null) return tileSize;
+
+            float depth = Mathf.Abs(transform.position.z - cam.transform.position.z);
+            Vector3 bottomLeft = cam.ViewportToWorldPoint(new Vector3(0f, areaBottom, depth));
+            Vector3 topRight = cam.ViewportToWorldPoint(new Vector3(1f, areaTop, depth));
+
+            float availableWidth = Mathf.Abs(topRight.x - bottomLeft.x) * areaWidth;
+            float availableHeight = Mathf.Abs(topRight.y - bottomLeft.y);
+
+            areaCenter = new Vector3(
+                (bottomLeft.x + topRight.x) * 0.5f,
+                (bottomLeft.y + topRight.y) * 0.5f,
+                transform.position.z);
+
+            // Spacing scales with the tile, so solve for tile size directly:
+            //   width = cols * t + (cols - 1) * t * spacingRatio
+            float spacingRatio = tileSize > 0.0001f ? tileSpacing / tileSize : 0f;
+            float widthFit = availableWidth / (cols + (cols - 1) * spacingRatio);
+            float heightFit = availableHeight / (rows + (rows - 1) * spacingRatio);
+
+            float fitted = Mathf.Min(widthFit, heightFit, tileSize);
+            return Mathf.Max(fitted, minTileSize);
         }
 
         public bool TryRevealWord(string submittedWord)

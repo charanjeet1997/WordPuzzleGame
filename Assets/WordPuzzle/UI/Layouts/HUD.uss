@@ -115,6 +115,16 @@
     -unity-font-style: bold;
 }
 
+/* Only shown in Time Trial; the view hides it entirely in Classic so the top bar keeps
+   its three-item balance. */
+.timer-pill {
+    margin-right: 18px;
+}
+
+.timer-text {
+    color: #ffd0b0;
+}
+
 /* ------------------------------------------------------------------ lower stack */
 .hud-lower {
     align-items: center;
@@ -125,8 +135,11 @@
 }
 
 .word-toast {
-    width: 660px;
-    height: 132px;
+    /* Height grows with the text: the pill now carries a wrapped definition, not just a
+       one-line caption, so a fixed height would clip it. */
+    width: 820px;
+    min-height: 132px;
+    padding: 21px 36px;
     background-image: url("../../Sprites/slices/pill_toast.png");
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
@@ -159,6 +172,11 @@
     -unity-font-style: bold;
     color: rgba(74, 44, 5, 0.7);
     margin-top: 3px;
+    /* Definitions are sentences, not captions: they must wrap and stay inside the toast
+       instead of stretching it off both edges of the screen. */
+    white-space: normal;
+    width: 100%;
+    -unity-text-align: middle-center;
 }
 
 .word-preview-box {

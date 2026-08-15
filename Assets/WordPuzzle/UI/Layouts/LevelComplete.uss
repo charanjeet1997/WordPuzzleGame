@@ -114,6 +114,55 @@
     margin-bottom: 27px;
 }
 
+/* ------------------------------------------------- word meanings
+   Capped height with its own scroll: a level can be cleared with eight target words, and
+   letting the list grow freely would push the NEXT LEVEL button off the card. */
+.meanings-heading {
+    font-size: 27px;
+    -unity-font-style: bold;
+    color: rgba(246, 221, 154, 0.75);
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+}
+
+.meanings-scroll {
+    width: 100%;
+    max-height: 420px;
+    margin-bottom: 24px;
+}
+
+.meanings-list {
+    width: 100%;
+}
+
+.meaning-row {
+    width: 100%;
+    padding: 18px 24px;
+    margin-bottom: 12px;
+    border-radius: 24px;
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.meaning-word {
+    font-size: 32px;
+    -unity-font-style: bold;
+    color: #f6dd9a;
+    letter-spacing: 2px;
+}
+
+.meaning-pos {
+    font-size: 24px;
+    -unity-font-style: italic;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 4px;
+}
+
+.meaning-text {
+    font-size: 26px;
+    color: rgba(255, 255, 255, 0.8);
+    white-space: normal;
+}
+
 /* ------------------------------------------------------------------ actions */
 .btn-victory-primary {
     width: 714px;

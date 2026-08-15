@@ -11,6 +11,9 @@
                 <ui:Label name="lbl-level-number" text="CH.1 • LV.1" class="hud-level-text" />
                 <ui:Label name="lbl-chapter-title" text="" class="hud-chapter-text" />
             </ui:VisualElement>
+            <ui:VisualElement name="timer-pill" class="coin-pill timer-pill">
+                <ui:Label name="lbl-timer" text="0:00" class="coin-text timer-text" />
+            </ui:VisualElement>
             <ui:VisualElement class="coin-pill">
                 <ui:VisualElement class="coin-icon" />
                 <ui:Label name="lbl-coins" text="0" class="coin-text" />

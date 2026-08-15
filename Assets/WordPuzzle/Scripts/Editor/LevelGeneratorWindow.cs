@@ -7,6 +7,14 @@ using WordPuzzle.Data;
 
 namespace WordPuzzle.Editor
 {
+    /// <summary>Order the campaign walks through wheel sizes.</summary>
+    public enum WheelOrder
+    {
+        ShortToLong,   // 4-letter wheels open the campaign, 7-letter ones close it
+        LongToShort,   // more sub-words available early, but a denser opening screen
+        Random         // shuffled, so difficulty does not climb monotonically
+    }
+
     /// <summary>
     /// Authoring tool for the level campaign. Generates validated crossword levels from a
     /// word list and stores them inline in the LevelDatabase asset.
@@ -24,6 +32,10 @@ namespace WordPuzzle.Editor
         private int _minWordsPerLevel = 3;
         private int _maxWordsPerLevel = 8;
         private bool _appendInsteadOfReplace;
+        private WheelOrder _wheelOrder = WheelOrder.ShortToLong;
+        private int _mixedSeed = 12345;
+        private int _levelsPerChapter = 20;
+        private bool _useThemedChapterNames = true;
 
         private string _manualWheel = "";
         private string _status = "";
@@ -73,6 +85,29 @@ namespace WordPuzzle.Editor
             _minWordsPerLevel = Mathf.Max(2, EditorGUILayout.IntField("Min Words Per Level", _minWordsPerLevel));
             _maxWordsPerLevel = Mathf.Max(_minWordsPerLevel, EditorGUILayout.IntField("Max Words Per Level", _maxWordsPerLevel));
             _appendInsteadOfReplace = EditorGUILayout.Toggle("Append To Existing", _appendInsteadOfReplace);
+
+            _wheelOrder = (WheelOrder)EditorGUILayout.EnumPopup("Wheel Order", _wheelOrder);
+
+            // Shown for every order: even the sorted ones shuffle within a length band, so the
+            // seed decides which word opens the campaign.
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                _mixedSeed = EditorGUILayout.IntField("Shuffle Seed", _mixedSeed);
+                if (GUILayout.Button("New", GUILayout.Width(48f)))
+                {
+                    _mixedSeed = Random.Range(1, int.MaxValue);
+                }
+            }
+
+            EditorGUILayout.HelpBox(DescribeOrder(_wheelOrder) +
+                "\n\nWheels of the same length are shuffled by the seed, so a chapter mixes different " +
+                "letter sets instead of running alphabetically. Change the seed for a different campaign; " +
+                "keep it to rebuild the same one.", MessageType.None);
+
+            _levelsPerChapter = Mathf.Max(1, EditorGUILayout.IntField("Levels Per Chapter", _levelsPerChapter));
+            _useThemedChapterNames = EditorGUILayout.Toggle("Themed Chapter Names", _useThemedChapterNames);
+            EditorGUILayout.LabelField(" ", $"{_levelCount} levels = " +
+                $"{Mathf.CeilToInt(_levelCount / (float)_levelsPerChapter)} chapters", EditorStyles.miniLabel);
 
             using (new EditorGUI.DisabledScope(_wordListAsset == null))
             {
@@ -131,10 +166,8 @@ namespace WordPuzzle.Editor
 
             List<LevelData> levels = _appendInsteadOfReplace ? new List<LevelData>(db.Levels) : new List<LevelData>();
 
-            var wheelPool = words
-                .Where(w => w.Length >= _minWheelLetters && w.Length <= _maxWheelLetters)
-                .OrderBy(w => w.Length)
-                .ToList();
+            var candidates = words.Where(w => w.Length >= _minWheelLetters && w.Length <= _maxWheelLetters);
+            List<string> wheelPool = OrderWheels(candidates);
 
             var used = new HashSet<string>(levels.Where(l => l != null).Select(l => l.wheelLetters));
             int made = 0;
@@ -197,6 +230,79 @@ namespace WordPuzzle.Editor
             _status = $"Added level {levels.Count} for '{wheel}' with {level.targetWords.Count} words.";
         }
 
+        /// <summary>
+        /// Orders the wheel pool, which is what sets the campaign's difficulty curve: levels
+        /// are handed out in this order, so position in this list is the level number.
+        /// </summary>
+        private List<string> OrderWheels(IEnumerable<string> candidates)
+        {
+            // Seeded so a given seed always rebuilds the same campaign - regenerating must not
+            // silently reshuffle levels players have already progressed past.
+            var rng = new System.Random(_mixedSeed);
+
+            switch (_wheelOrder)
+            {
+                case WheelOrder.LongToShort:
+                    // Shuffled within each length band. Ordering ties alphabetically instead
+                    // made a whole chapter run ABBE, ABED, ABET - same length, nearly the same
+                    // letters, and level 1 identical on every regeneration.
+                    return candidates
+                        .OrderByDescending(w => w.Length)
+                        .ThenBy(_ => rng.Next())
+                        .ToList();
+
+                case WheelOrder.Random:
+                    return candidates.OrderBy(_ => rng.Next()).ToList();
+
+                default:
+                    return candidates
+                        .OrderBy(w => w.Length)
+                        .ThenBy(_ => rng.Next())
+                        .ToList();
+            }
+        }
+
+        /// <summary>
+        /// Chapter names, cycled across the campaign. Drawn from the same night-forest and
+        /// mountain palette the background art uses, so the caption matches what is on screen.
+        /// </summary>
+        private static readonly string[] ChapterNames =
+        {
+            "Green Valley", "Starlight Peak", "Whispering Woods", "Amber Hollow", "Frost Ridge",
+            "Quiet Meadow", "Ember Trail", "Silver Lake", "Mossy Glade", "Dawn Cliffs",
+            "Hidden Spring", "Wildflower Path", "Cedar Pass", "Twilight Fen", "Autumn Reach",
+            "Crystal Falls", "Northern Pines", "Sunset Dunes", "Willow Bend", "Storm Hollow",
+            "Lantern Grove", "Misty Fjord", "Copper Canyon", "Aurora Fields", "Driftwood Bay"
+        };
+
+        /// <summary>
+        /// "Chapter 3 - Whispering Woods" for the level, or a bare number when themed names
+        /// are off. Names repeat once the list runs out, which a 1000-level campaign will do.
+        /// </summary>
+        private string ChapterTitleFor(int levelNumber)
+        {
+            int chapter = ((levelNumber - 1) / _levelsPerChapter) + 1;
+            if (!_useThemedChapterNames) return $"Chapter {chapter}";
+
+            string name = ChapterNames[(chapter - 1) % ChapterNames.Length];
+            return $"Chapter {chapter} - {name}";
+        }
+
+        private static string DescribeOrder(WheelOrder order)
+        {
+            switch (order)
+            {
+                case WheelOrder.LongToShort:
+                    return "Long to short: starts at 7-letter wheels and works down. More words are " +
+                           "findable early, but the opening levels are dense and the grid is large.";
+                case WheelOrder.Random:
+                    return "Random: wheel sizes are shuffled, so difficulty does not climb steadily.";
+                default:
+                    return "Short to long: starts at 4-letter wheels and grows to 7. Gentlest opening, " +
+                           "and difficulty rises with the level number.";
+            }
+        }
+
         private LevelData BuildLevel(string wheel, List<string> words, int levelNumber)
         {
             var candidates = words
@@ -214,7 +320,7 @@ namespace WordPuzzle.Editor
             var level = new LevelData();
             level.levelName = $"Level_{levelNumber:D4}";
             level.levelNumber = levelNumber;
-            level.chapterTitle = $"Chapter {((levelNumber - 1) / 20) + 1}";
+            level.chapterTitle = ChapterTitleFor(levelNumber);
             level.wheelLetters = wheel;
             level.targetWords = placed.Select(p => new TargetWordEntry
             {

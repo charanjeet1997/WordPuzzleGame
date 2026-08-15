@@ -46,6 +46,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WordPuzzle.Gameplay.CrosswordGridController
   tileSize: 0.4615
   tileSpacing: 0.046
+  viewCamera: {fileID: 0}
+  areaBottom: 0.52
+  areaTop: 0.94
+  areaWidth: 0.92
+  minTileSize: 0.16
   letterFontSize: 2.4
   letterFont: {fileID: 0}
 --- !u!1 &4902043852229764415
@@ -257,6 +262,8 @@ MonoBehaviour:
   nodeSpacingRatio: 1.55
   selectionRadius: 0.28
   nodeSize: 0.44
+  wheelWidthFraction: 0.86
+  minNodeSize: 0.2
   letterFontSize: 2.1
   letterFont: {fileID: 0}
   showBackdrop: 0
