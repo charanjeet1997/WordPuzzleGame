@@ -14,6 +14,7 @@ namespace WordPuzzle.Services
     public class WordDefinitionService : MonoBehaviour
     {
         private const string ResourcePath = "word_definitions";
+        private const string OverridesPath = "word_definition_overrides";
 
         // Serialized shapes matching the JSON. JsonUtility needs concrete classes with public
         // fields; it cannot deserialize a dictionary, which is why the file is an array.
@@ -95,7 +96,39 @@ namespace WordPuzzle.Services
             }
 
             Resources.UnloadAsset(asset);
+
+            LoadOverrides();
             IsReady = true;
+        }
+
+        /// <summary>
+        /// Applies hand-written entries over the generated ones. WordNet orders senses by how
+        /// often they appear in news corpora, which is not always the reading a player expects
+        /// - BANK as a river slope, ACE as the number one - and no heuristic fixes taste. An
+        /// override replaces the entry outright, so correcting a word is a one-line data edit
+        /// with no rebuild.
+        /// </summary>
+        private void LoadOverrides()
+        {
+            var asset = Resources.Load<TextAsset>(OverridesPath);
+            if (asset == null) return;   // optional file
+
+            FileDto file = JsonUtility.FromJson<FileDto>(asset.text);
+            Resources.UnloadAsset(asset);
+
+            if (file?.entries == null) return;
+
+            int applied = 0;
+            foreach (EntryDto entry in file.entries)
+            {
+                if (string.IsNullOrEmpty(entry.word)) continue;
+                if (entry.senses == null || entry.senses.Length == 0) continue;
+
+                _entries[entry.word.Trim().ToUpperInvariant()] = entry;
+                applied++;
+            }
+
+            if (applied > 0) Debug.Log($"[WordDefinitionService] Applied {applied} definition overrides.");
         }
 
         public bool HasDefinition(string word) => TryResolve(word, out _);

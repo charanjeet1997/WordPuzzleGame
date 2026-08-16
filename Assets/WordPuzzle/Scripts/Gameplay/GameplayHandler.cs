@@ -135,6 +135,7 @@ namespace WordPuzzle.Gameplay
                 // The chapter caption is authored per level, so it travels with the level data
                 // rather than being recomputed from the level number in the HUD.
                 _gameModel.CurrentChapterTitle.Value = levelData.chapterTitle ?? string.Empty;
+                _gameModel.CurrentWheelLetters = levelData.wheelLetters ?? string.Empty;
                 _gameModel.ResetLevelProgress(targetCount);
                 _gameModel.State.Value = GameState.Playing;
             }
@@ -148,7 +149,8 @@ namespace WordPuzzle.Gameplay
             if (_gameModel != null && ServiceLocator.Current.Has<IProgressionService>())
             {
                 var prog = ServiceLocator.Current.Get<IProgressionService>();
-                if (prog.TryGetSavedLevelState(_gameModel.CurrentLevelIndex.Value, out var savedSolved, out var savedBonus, out var savedHints))
+                if (prog.TryGetSavedLevelState(_gameModel.CurrentLevelIndex.Value, levelData.wheelLetters,
+                        out var savedSolved, out var savedBonus, out var savedHints))
                 {
                     if (savedSolved != null && savedSolved.Count > 0 && levelData.targetWords != null)
                     {

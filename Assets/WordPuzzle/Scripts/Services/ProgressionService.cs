@@ -19,8 +19,8 @@ namespace WordPuzzle.Services
         void SetStarsForLevel(int levelIndex, int stars);
 
         bool HasSavedLevelState(int levelIndex);
-        bool TryGetSavedLevelState(int levelIndex, out List<string> solvedWords, out List<string> bonusWords, out int hintsUsed);
-        void SaveLevelState(int levelIndex, IEnumerable<string> solvedWords, IEnumerable<string> bonusWords, int hintsUsed);
+        bool TryGetSavedLevelState(int levelIndex, string fingerprint, out List<string> solvedWords, out List<string> bonusWords, out int hintsUsed);
+        void SaveLevelState(int levelIndex, string fingerprint, IEnumerable<string> solvedWords, IEnumerable<string> bonusWords, int hintsUsed);
         void ClearLevelState(int levelIndex);
 
         void SaveAll();
@@ -55,6 +55,11 @@ namespace WordPuzzle.Services
         private class LevelResumeData
         {
             public int levelIndex;
+
+            /// <summary>The level's wheel letters. Regenerating the campaign replaces the
+            /// puzzle at a given index, and resuming into a different puzzle would restore
+            /// words the new grid never asked for.</summary>
+            public string fingerprint;
             public List<string> solvedWords = new List<string>();
             public List<string> bonusWords = new List<string>();
             public int hintsUsed;
@@ -204,7 +209,7 @@ namespace WordPuzzle.Services
             return PlayerPrefs.HasKey(PrefKeyLevelStatePrefix + levelIndex);
         }
 
-        public bool TryGetSavedLevelState(int levelIndex, out List<string> solvedWords, out List<string> bonusWords, out int hintsUsed)
+        public bool TryGetSavedLevelState(int levelIndex, string fingerprint, out List<string> solvedWords, out List<string> bonusWords, out int hintsUsed)
         {
             solvedWords = new List<string>();
             bonusWords = new List<string>();
@@ -219,7 +224,21 @@ namespace WordPuzzle.Services
             try
             {
                 LevelResumeData data = JsonUtility.FromJson<LevelResumeData>(json);
-                if (data != null && data.levelIndex == levelIndex)
+                bool sameLevel = data != null && data.levelIndex == levelIndex;
+
+                // Old saves carry no fingerprint; treating those as a mismatch discards them
+                // once, which is the safe direction - a wrongly resumed level looks broken.
+                bool samePuzzle = sameLevel && !string.IsNullOrEmpty(data.fingerprint)
+                                  && string.Equals(data.fingerprint, fingerprint,
+                                      StringComparison.OrdinalIgnoreCase);
+
+                if (sameLevel && !samePuzzle)
+                {
+                    ClearLevelState(levelIndex);
+                    return false;
+                }
+
+                if (samePuzzle)
                 {
                     if (data.solvedWords != null) solvedWords.AddRange(data.solvedWords);
                     if (data.bonusWords != null) bonusWords.AddRange(data.bonusWords);
@@ -235,11 +254,12 @@ namespace WordPuzzle.Services
             return false;
         }
 
-        public void SaveLevelState(int levelIndex, IEnumerable<string> solvedWords, IEnumerable<string> bonusWords, int hintsUsed)
+        public void SaveLevelState(int levelIndex, string fingerprint, IEnumerable<string> solvedWords, IEnumerable<string> bonusWords, int hintsUsed)
         {
             LevelResumeData data = new LevelResumeData
             {
                 levelIndex = levelIndex,
+                fingerprint = fingerprint ?? string.Empty,
                 solvedWords = solvedWords != null ? new List<string>(solvedWords) : new List<string>(),
                 bonusWords = bonusWords != null ? new List<string>(bonusWords) : new List<string>(),
                 hintsUsed = hintsUsed

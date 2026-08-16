@@ -1,0 +1,13 @@
+{
+  "_comment": "Hand-written meanings that beat the generated ones. WordNet orders senses by corpus frequency, which is not always the reading a player expects - MEN as 'the force of workers available', BANK as a river slope. Anything listed here replaces the generated entry outright. Same shape as word_definitions.json, so add a word, a part of speech and one clear sentence.",
+  "entries": [
+    { "word": "MEN", "senses": [ { "pos": "noun", "meaning": "more than one man" } ] },
+    { "word": "BANK", "senses": [ { "pos": "noun", "meaning": "a business that keeps and lends money" } ] },
+    { "word": "ACE", "senses": [ { "pos": "noun", "meaning": "a playing card with a single mark, usually the highest in its suit" } ] },
+    { "word": "SAW", "senses": [ { "pos": "noun", "meaning": "a tool with a toothed blade for cutting wood or metal" } ] },
+    { "word": "TRAIL", "senses": [ { "pos": "noun", "meaning": "a path or track through open country" } ] },
+    { "word": "ARE", "senses": [ { "pos": "verb", "meaning": "the form of 'be' used with you, we and they" } ] },
+    { "word": "WAS", "senses": [ { "pos": "verb", "meaning": "the past form of 'be' used with I, he, she and it" } ] },
+    { "word": "STAR", "senses": [ { "pos": "noun", "meaning": "a huge ball of burning gas seen as a point of light in the night sky" } ] }
+  ]
+}

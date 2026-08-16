@@ -52,6 +52,9 @@ namespace WordPuzzle.Models
         /// <summary>Chapter caption of the level being played, e.g. "Chapter 3 - Whispering Woods".</summary>
         public Property<string> CurrentChapterTitle { get; private set; }
 
+        /// <summary>Wheel letters of the level being played, used to fingerprint saved state.</summary>
+        public string CurrentWheelLetters { get; set; } = string.Empty;
+
         /// <summary>Seconds spent on the current level. Only ticks in Time Trial.</summary>
         public Property<float> LevelSeconds { get; private set; }
         public Property<int> SolvedWordsCount { get; private set; }
@@ -211,7 +214,7 @@ namespace WordPuzzle.Models
             var prog = GetProgressionService();
             if (prog != null)
             {
-                prog.SaveLevelState(CurrentLevelIndex.Value, SolvedTargetWords, FoundBonusWords, HintsUsed.Value);
+                prog.SaveLevelState(CurrentLevelIndex.Value, CurrentWheelLetters, SolvedTargetWords, FoundBonusWords, HintsUsed.Value);
             }
         }
 
