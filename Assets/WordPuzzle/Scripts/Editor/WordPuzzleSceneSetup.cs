@@ -69,6 +69,7 @@ namespace WordPuzzle.Editor
             ViewConfig configPause = CreateOrGetViewConfig("ViewConfig_PauseOverlay", "PauseOverlay", "WordPuzzle.UI.PauseOverlayView", panelSettings, false, "Assets/WordPuzzle/UI/Layouts/PauseOverlay.uxml");
             ViewConfig configLevelComplete = CreateOrGetViewConfig("ViewConfig_LevelComplete", "LevelComplete", "WordPuzzle.UI.LevelCompleteView", panelSettings, false, "Assets/WordPuzzle/UI/Layouts/LevelComplete.uxml");
             ViewConfig configSettings = CreateOrGetViewConfig("ViewConfig_Settings", "Settings", "WordPuzzle.UI.SettingsOverlayView", panelSettings, false, "Assets/WordPuzzle/UI/Layouts/SettingsOverlay.uxml");
+            ViewConfig configCollection = CreateOrGetViewConfig("ViewConfig_Collection", "Collection", "WordPuzzle.UI.CollectionView", panelSettings, false, "Assets/WordPuzzle/UI/Layouts/Collection.uxml");
             ViewConfig configModeSelect = CreateOrGetViewConfig("ViewConfig_ModeSelect", "ModeSelect", "WordPuzzle.UI.ModeSelectView", panelSettings, false, "Assets/WordPuzzle/UI/Layouts/ModeSelect.uxml");
 
             // 8. Main Camera setup (Exact Air Hockey Specification)
@@ -144,6 +145,9 @@ namespace WordPuzzle.Editor
             // Dictionary meanings shown on the level-complete screen. Loads its JSON off the
             // first frame, so having it in the scene costs nothing at boot.
             GetOrAddComponent<WordDefinitionService>(managersObj);
+
+            // Tracks which words the player has discovered, for the collection screen.
+            GetOrAddComponent<WordCollectionService>(managersObj);
             GameManager gameManager = GetOrAddComponent<GameManager>(managersObj);
             WordPuzzleInitializer initializer = GetOrAddComponent<WordPuzzleInitializer>(managersObj);
 
@@ -239,6 +243,7 @@ namespace WordPuzzle.Editor
             gameManager.configPause = configPause;
             gameManager.configLevelComplete = configLevelComplete;
             gameManager.configSettings = configSettings;
+            gameManager.configCollection = configCollection;
             gameManager.configModeSelect = configModeSelect;
             EditorUtility.SetDirty(gameManager);
 

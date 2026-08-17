@@ -1,0 +1,214 @@
+/* Word collection screen. Same material as the other panels: design px x3, gold on deep
+   navy, sprite-backed panel rather than a flat fill. */
+
+.collection-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(4, 10, 16, 0.86);
+    align-items: center;
+    justify-content: center;
+}
+
+.collection-panel {
+    width: 960px;
+    height: 90%;
+    background-image: url("../../Sprites/slices/panel_modal.png");
+    -unity-slice-left: 57;
+    -unity-slice-right: 57;
+    -unity-slice-top: 57;
+    -unity-slice-bottom: 57;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    padding: 54px 42px;
+    align-items: center;
+}
+
+.collection-title {
+    font-size: 54px;
+    -unity-font-style: bold;
+    color: #f6dd9a;
+    letter-spacing: 4px;
+    margin-bottom: 24px;
+}
+
+/* ------------------------------------------------------------------ summary */
+.collection-summary {
+    align-items: center;
+    width: 100%;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+
+.collection-count {
+    font-size: 60px;
+    -unity-font-style: bold;
+    color: #ffffff;
+    letter-spacing: 2px;
+    /* Explicit height: the label's line box is taller than the glyphs, and without it the
+       caption below crept up into the number. */
+    height: 72px;
+    -unity-text-align: middle-center;
+}
+
+.collection-caption {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 3px;
+    margin-top: 6px;
+    margin-bottom: 21px;
+}
+
+.progress-track {
+    width: 100%;
+    height: 24px;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+/* Width is set from script as a percentage of the track. */
+/* min-width keeps the first discovery visible: 1 of 6417 is a sliver of a pixel. */
+.progress-fill {
+    height: 100%;
+    width: 0;
+    min-width: 12px;
+    border-radius: 12px;
+    background-color: #f6dd9a;
+}
+
+/* ------------------------------------------------------------------ filters */
+.collection-filters {
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 12px;
+    margin-bottom: 21px;
+    flex-shrink: 0;
+}
+
+.filter-chip {
+    height: 78px;
+    padding: 0 36px;
+    margin: 0 9px;
+    border-radius: 39px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-width: 0;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 27px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    transition-property: background-color, color;
+    transition-duration: 0.12s, 0.12s;
+}
+
+.filter-chip--on {
+    background-color: rgba(246, 221, 154, 0.85);
+    color: #4a2c05;
+}
+
+/* ------------------------------------------------------------------ list */
+.collection-list {
+    flex-grow: 1;
+    width: 100%;
+    margin-bottom: 18px;
+}
+
+/* One ListView row = three chips. */
+.chip-row {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    height: 108px;
+    padding-right: 18px;   /* room for the scrollbar */
+}
+
+.word-chip {
+    flex-grow: 1;
+    flex-basis: 0;
+    width: auto;
+    height: 90px;
+    margin: 0 6px;
+    border-radius: 18px;
+    background-color: rgba(246, 221, 154, 0.16);
+    border-width: 3px;
+    border-color: rgba(246, 221, 154, 0.4);
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 30px;
+    -unity-font-style: bold;
+    letter-spacing: 3px;
+    color: #f6dd9a;
+    transition-property: scale, background-color;
+    transition-duration: 0.1s, 0.1s;
+}
+
+.word-chip:hover { background-color: rgba(246, 221, 154, 0.26); }
+.word-chip:active { scale: 0.95 0.95; }
+
+/* Locked chips keep the letter count visible - the collection should read as something to
+   complete, not as a blank space. */
+.word-chip--locked {
+    background-color: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 6px;
+}
+
+.word-chip--selected {
+    background-color: #f6dd9a;
+    color: #4a2c05;
+    border-color: #ffffff;
+}
+
+/* ------------------------------------------------------------------ detail */
+.detail-panel {
+    width: 100%;
+    min-height: 150px;
+    flex-shrink: 0;
+    padding: 24px 27px;
+    margin-bottom: 18px;
+    border-radius: 24px;
+    background-color: rgba(255, 255, 255, 0.06);
+    justify-content: center;
+}
+
+.detail-word {
+    font-size: 36px;
+    -unity-font-style: bold;
+    color: #f6dd9a;
+    letter-spacing: 3px;
+}
+
+.detail-pos {
+    font-size: 24px;
+    -unity-font-style: italic;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 6px;
+}
+
+.detail-meaning {
+    font-size: 27px;
+    color: rgba(255, 255, 255, 0.8);
+    white-space: normal;
+}
+
+/* ------------------------------------------------------------------ close */
+.collection-close {
+    width: 100%;
+    padding: 27px;
+    border-radius: 42px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-width: 3px;
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    font-size: 36px;
+    -unity-font-style: bold;
+    letter-spacing: 3px;
+    transition-property: scale;
+    transition-duration: 0.12s;
+}
+
+.collection-close:active { scale: 0.97 0.97; }

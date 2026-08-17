@@ -6,12 +6,14 @@ using WordPuzzle.Models;
 using WordPuzzle.Managers;
 using WordPuzzle.Audio;
 using WordPuzzle.Feedback;
+using WordPuzzle.Services;
 
 namespace WordPuzzle.UI
 {
     public class MainMenuView : BaseUI
     {
         private Button _playButton;
+        private Button _collectionButton;
         private Button _settingsButton;
         private Button _soundButton;
         private Label _titleLabel;
@@ -47,6 +49,7 @@ namespace WordPuzzle.UI
 
             // Match UXML names: btn-play, btn-settings, btn-sound
             _playButton = rootElement.Q<Button>("btn-play") ?? rootElement.Q<Button>("PlayButton") ?? rootElement.Q<Button>(className: "btn-primary") ?? rootElement.Q<Button>();
+            _collectionButton = rootElement.Q<Button>("btn-collection");
             _settingsButton = rootElement.Q<Button>("btn-settings") ?? rootElement.Q<Button>("SettingsButton");
             _soundButton = rootElement.Q<Button>("btn-sound") ?? rootElement.Q<Button>("SoundButton");
             
@@ -71,6 +74,12 @@ namespace WordPuzzle.UI
             if (_settingsButton != null)
             {
                 _settingsButton.clicked += OnSettingsClicked;
+            }
+
+            if (_collectionButton != null)
+            {
+                _collectionButton.clicked += OnCollectionClicked;
+                RefreshCollectionCount();
             }
 
             RefreshSoundIcon();
@@ -98,6 +107,11 @@ namespace WordPuzzle.UI
             if (_settingsButton != null)
             {
                 _settingsButton.clicked -= OnSettingsClicked;
+            }
+
+            if (_collectionButton != null)
+            {
+                _collectionButton.clicked -= OnCollectionClicked;
             }
         }
 
@@ -174,6 +188,33 @@ namespace WordPuzzle.UI
             {
                 _progressDots[i].EnableInClassList("dot--on", i < filled);
             }
+        }
+
+        /// <summary>The count is the hook - the button says how far along the collection is.</summary>
+        private void RefreshCollectionCount()
+        {
+            Label count = rootElement?.Q<Label>("lbl-menu-collection-count");
+            if (count == null) return;
+
+            if (!ServiceLocator.Current.Has<WordCollectionService>())
+            {
+                count.text = "";
+                return;
+            }
+
+            var collection = ServiceLocator.Current.Get<WordCollectionService>();
+            count.text = $"{collection.DiscoveredCount} of {collection.TotalCount} words discovered";
+        }
+
+        private void OnCollectionClicked()
+        {
+            if (_audioManager != null) _audioManager.PlayButtonClickSound();
+            HapticManager.Play(HapticType.Light);
+
+            if (_gameManager == null && ServiceLocator.Current.Has<GameManager>())
+                _gameManager = ServiceLocator.Current.Get<GameManager>();
+
+            if (_gameManager != null) _gameManager.ShowCollection();
         }
 
         private void OnSettingsClicked()

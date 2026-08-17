@@ -228,6 +228,13 @@ namespace WordPuzzle.Gameplay
                 if (_audioManager != null) _audioManager.PlayWordMatchedSound();
                 if (_particleService != null) _particleService.PlayWordMatchBurst(wordCenter);
                 HapticManager.Play(HapticType.Medium);
+
+                // Only required words are collectable: bonus finds come from a far wider list
+                // and would make "words discovered" meaningless as a learning count.
+                if (ServiceLocator.Current.Has<WordCollectionService>())
+                {
+                    ServiceLocator.Current.Get<WordCollectionService>().Discover(upperWord);
+                }
             }
             else if (eventData.IsBonusWord)
             {

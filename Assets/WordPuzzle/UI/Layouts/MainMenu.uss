@@ -168,6 +168,35 @@
 .btn-primary:hover { scale: 1.05 1.05; }
 .btn-primary:active { scale: 0.95 0.95; opacity: 0.9; }
 
+.btn-collection {
+    width: 650px;
+    padding: 24px;
+    margin-top: 30px;
+    border-radius: 42px;
+    background-color: rgba(255, 255, 255, 0.07);
+    border-width: 3px;
+    border-color: rgba(246, 221, 154, 0.35);
+    align-items: center;
+    transition-property: scale, background-color;
+    transition-duration: 0.13s, 0.13s;
+}
+
+.btn-collection:hover { background-color: rgba(255, 255, 255, 0.11); }
+.btn-collection:active { scale: 0.97 0.97; }
+
+.btn-collection-title {
+    font-size: 33px;
+    -unity-font-style: bold;
+    color: #f6dd9a;
+    letter-spacing: 3px;
+}
+
+.btn-collection-count {
+    font-size: 27px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 4px;
+}
+
 .menu-footer {
     height: 72px;
 }

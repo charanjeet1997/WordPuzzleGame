@@ -164,18 +164,20 @@
 }
 
 /* ------------------------------------------------------------------ actions */
+/* Smaller than the design's hero button: this card now carries a word list above it, and
+   a 176px button pushed the meanings into a cramped scroll. */
 .btn-victory-primary {
-    width: 714px;
-    height: 176px;
+    width: 540px;
+    height: 126px;
     background-image: url("../../Sprites/slices/btn_primary.png");
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
     border-width: 0;
     color: #4a2c05;
-    font-size: 48px;
+    font-size: 39px;
     -unity-font-style: bold;
-    letter-spacing: 4.5px;
-    margin-bottom: 36px;
+    letter-spacing: 4px;
+    margin-bottom: 18px;
     transition-property: scale, opacity;
     transition-duration: 0.13s, 0.13s;
 }
@@ -183,7 +185,9 @@
 .btn-victory-primary:hover { scale: 1.04 1.04; }
 .btn-victory-primary:active { scale: 0.95 0.95; opacity: 0.88; }
 
+/* Reads as a link and behaves like one - it carries a click handler in LevelCompleteView. */
 .victory-subtitle {
+    padding: 18px 36px;
     font-size: 36px;
     -unity-font-style: bold;
     color: rgba(255, 255, 255, 0.55);

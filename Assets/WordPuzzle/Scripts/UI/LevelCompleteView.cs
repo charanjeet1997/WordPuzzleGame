@@ -14,6 +14,7 @@ namespace WordPuzzle.UI
         private Label _titleLabel;
         private Label _coinsEarnedLabel;
         private Label _scoreLabel;
+        private Label _mainMenuLabel;
         private VisualElement _meaningsList;
         private Label _timeLabel;
         private WordDefinitionService _definitions;
@@ -46,12 +47,21 @@ namespace WordPuzzle.UI
             _titleLabel = rootElement.Q<Label>("TitleLabel") ?? rootElement.Q<Label>(className: "victory-title");
             _coinsEarnedLabel = rootElement.Q<Label>("lbl-reward") ?? rootElement.Q<Label>("CoinsEarnedLabel") ?? rootElement.Q<Label>(className: "reward-text");
             _scoreLabel = rootElement.Q<Label>("lbl-score");
+
+            // A Label, not a Button, so it needs an explicit click handler - it looked
+            // tappable and did nothing.
+            _mainMenuLabel = rootElement.Q<Label>("lbl-subtitle");
             _meaningsList = rootElement.Q<VisualElement>("meanings-list");
             _timeLabel = rootElement.Q<Label>("lbl-time");
 
             if (_nextLevelButton != null)
             {
                 _nextLevelButton.clicked += OnNextLevelClicked;
+            }
+
+            if (_mainMenuLabel != null)
+            {
+                _mainMenuLabel.RegisterCallback<ClickEvent>(OnMainMenuClicked);
             }
 
             if (_coinsEarnedLabel != null)
@@ -185,6 +195,11 @@ namespace WordPuzzle.UI
             {
                 _nextLevelButton.clicked -= OnNextLevelClicked;
             }
+
+            if (_mainMenuLabel != null)
+            {
+                _mainMenuLabel.UnregisterCallback<ClickEvent>(OnMainMenuClicked);
+            }
         }
 
         /// <summary>
@@ -233,6 +248,20 @@ namespace WordPuzzle.UI
                     ? $"SCORE: {_gameModel.Score.Value}   (-{hints * WondersOfWordGameModel.HINT_SCORE_PENALTY} FOR {hints} HINT{(hints > 1 ? "S" : "")})"
                     : $"SCORE: {_gameModel.Score.Value}";
             }
+        }
+
+        private void OnMainMenuClicked(ClickEvent evt)
+        {
+            if (_audioManager != null) _audioManager.PlayButtonClickSound();
+            HapticManager.Play(HapticType.Light);
+
+            if (_gameManager == null && ServiceLocator.Current.Has<GameManager>())
+                _gameManager = ServiceLocator.Current.Get<GameManager>();
+
+            if (config != null && ServiceLocator.Current.Has<UIManager>())
+                ServiceLocator.Current.Get<UIManager>().HideOverlay(config);
+
+            if (_gameManager != null) _gameManager.QuitToMainMenu();
         }
 
         private void OnNextLevelClicked()

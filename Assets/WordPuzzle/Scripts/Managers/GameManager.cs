@@ -29,6 +29,7 @@ namespace WordPuzzle.Managers
         public ViewConfig configPause;
         public ViewConfig configLevelComplete;
         public ViewConfig configSettings;
+        public ViewConfig configCollection;
         public ViewConfig configModeSelect;
 
         [Header("Level Complete")]
@@ -254,6 +255,17 @@ namespace WordPuzzle.Managers
             if (_uiManager != null && configSettings != null)
             {
                 _uiManager.ShowOverlay(configSettings);
+            }
+        }
+
+        public void ShowCollection()
+        {
+            if (_uiManager == null && ServiceLocator.Current.Has<UIManager>())
+                _uiManager = ServiceLocator.Current.Get<UIManager>();
+
+            if (_uiManager != null && configCollection != null)
+            {
+                _uiManager.ShowOverlay(configCollection);
             }
         }
 

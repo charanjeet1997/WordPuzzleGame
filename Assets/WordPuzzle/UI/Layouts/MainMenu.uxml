@@ -36,6 +36,13 @@
             </ui:VisualElement>
 
             <ui:Button name="btn-play" text="PLAY" class="btn-primary" />
+
+            <!-- Collection entry doubles as a progress display: the count is the reason to
+                 tap it, so it lives on the button rather than behind it. -->
+            <ui:Button name="btn-collection" class="btn-collection">
+                <ui:Label name="lbl-menu-collection" text="WORD COLLECTION" class="btn-collection-title" picking-mode="Ignore" />
+                <ui:Label name="lbl-menu-collection-count" text="0 words discovered" class="btn-collection-count" picking-mode="Ignore" />
+            </ui:Button>
         </ui:VisualElement>
 
         <ui:VisualElement class="menu-footer" />

@@ -1,0 +1,42 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" path="Assets/WordPuzzle/UI/Layouts/Collection.uxml">
+    <ui:Style src="Collection.uss" />
+    <ui:VisualElement name="collection-root" class="collection-backdrop">
+        <ui:VisualElement class="collection-panel">
+
+            <ui:Label text="WORD COLLECTION" class="collection-title" />
+
+            <ui:VisualElement class="collection-summary">
+                <ui:Label name="lbl-collection-count" text="0 / 0" class="collection-count" />
+                <ui:Label name="lbl-collection-caption" text="words discovered" class="collection-caption" />
+
+                <ui:VisualElement class="progress-track">
+                    <ui:VisualElement name="progress-fill" class="progress-fill" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="collection-filters">
+                <ui:Button name="btn-filter-all" text="ALL" class="filter-chip filter-chip--on" />
+                <ui:Button name="btn-filter-found" text="FOUND" class="filter-chip" />
+                <ui:Button name="btn-filter-missing" text="LOCKED" class="filter-chip" />
+            </ui:VisualElement>
+
+            <!-- Chips in a virtualised list: each ListView row holds three words, so the
+                 screen reads as a grid being filled in rather than a column of paragraphs.
+                 6,000+ words cannot all be live elements at once. -->
+            <ui:ListView name="collection-list" class="collection-list"
+                         virtualization-method="FixedHeight"
+                         fixed-item-height="108"
+                         selection-type="None"
+                         show-border="false" />
+
+            <!-- Meaning appears here on tap, so long definitions never distort the grid. -->
+            <ui:VisualElement name="detail-panel" class="detail-panel">
+                <ui:Label name="lbl-detail-word" text="" class="detail-word" />
+                <ui:Label name="lbl-detail-pos" text="" class="detail-pos" />
+                <ui:Label name="lbl-detail-meaning" text="Tap a word to read its meaning." class="detail-meaning" />
+            </ui:VisualElement>
+
+            <ui:Button name="btn-collection-close" text="CLOSE" class="collection-close" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
