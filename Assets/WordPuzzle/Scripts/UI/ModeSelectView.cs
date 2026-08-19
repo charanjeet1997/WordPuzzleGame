@@ -21,22 +21,20 @@ namespace WordPuzzle.UI
     /// </summary>
     public class ModeSelectView : BaseUI
     {
-        private static readonly GameMode[] Modes =
-            { GameMode.Classic, GameMode.TimeTrial, GameMode.Endless };
+        private static readonly GameMode[] Modes = { GameMode.Classic, GameMode.TimeTrial };
 
         /// <summary>How many times the mode list is tiled. Odd, so there is a middle copy to sit in.</summary>
-        private const int Repeats = 3;
+        private const int Repeats = 5;
 
         private const float CardWidth = 480f;
         private const float CardGap = 36f;
         private const float Step = CardWidth + CardGap;
 
-        private const string TrackSnapClass = "mode-track--snapping";
         private const string IconTimedClass = "mode-icon--timed";
-        private const string IconEndlessClass = "mode-icon--endless";
         private const string DotActiveClass = "mode-dot--active";
 
         private const float SwipeThresholdPx = 40f;
+        private const float SnapSeconds = 0.24f;
         private const long SnapMs = 240;
 
         private VisualElement _viewport;
@@ -149,8 +147,7 @@ namespace WordPuzzle.UI
 
             var icon = new VisualElement();
             icon.AddToClassList("mode-icon");
-            if (mode == GameMode.TimeTrial) icon.AddToClassList(IconTimedClass);
-            if (mode == GameMode.Endless) icon.AddToClassList(IconEndlessClass);
+            if (timed) icon.AddToClassList(IconTimedClass);
             card.Add(icon);
 
             var name = new Label(GameModeContext.DisplayName(mode));
@@ -170,14 +167,7 @@ namespace WordPuzzle.UI
             progress.AddToClassList("mode-stat");
             card.Add(progress);
 
-            // Endless has no level to resume - a run always starts fresh - so it shows the
-            // best run instead of a position in the campaign.
-            if (mode == GameMode.Endless)
-            {
-                int bestRun = PlayerPrefs.GetInt(GameModeContext.KeyFor(mode, "WordPuzzle_BestRun"), 0);
-                progress.text = bestRun > 0 ? $"BEST RUN  {bestRun}" : "NO RUN YET";
-            }
-            else if (timed)
+            if (timed)
             {
                 float best = PlayerPrefs.GetFloat(
                     GameModeContext.KeyFor(mode, "WordPuzzle_BestTime") + "_Lvl_" + level, 0f);
@@ -207,7 +197,14 @@ namespace WordPuzzle.UI
             if (_track == null) return;
 
             _offset = offset;
-            _track.EnableInClassList(TrackSnapClass, animate);
+
+            // Duration, not the transition itself: see the note on .mode-track. Zero while the
+            // finger is down, eased on release.
+            _track.style.transitionDuration = new StyleList<TimeValue>(new List<TimeValue>
+            {
+                new TimeValue(animate ? SnapSeconds : 0f, TimeUnit.Second)
+            });
+
             _track.style.translate = new Translate(offset, 0f, 0f);
         }
 

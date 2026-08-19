@@ -29,7 +29,7 @@ namespace WordPuzzle.Editor
             "Nunito-ExtraBold"    // design: Nunito 800 - pills, counters, tile + wheel letters
         };
 
-        [MenuItem("WordPuzzle/Build TMP Font Assets From Fonts Folder")]
+        [MenuItem("Aurora Words/Build TMP Font Assets From Fonts Folder")]
         public static void BuildAll()
         {
             if (!AssetDatabase.IsValidFolder(FontsFolder))

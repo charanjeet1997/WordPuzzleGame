@@ -24,6 +24,9 @@
                 <ui:VisualElement name="meanings-list" class="meanings-list" />
             </ui:ScrollView>
 
+            <!-- First clear only: points the player at the collection now that it has words. -->
+            <ui:Label name="lbl-onboarding-tip" text="" class="onboarding-tip" />
+
             <ui:Button name="btn-next-level" text="NEXT LEVEL" class="btn-victory-primary" />
             <ui:Label name="lbl-subtitle" text="Main Menu" class="victory-subtitle" />
         </ui:VisualElement>

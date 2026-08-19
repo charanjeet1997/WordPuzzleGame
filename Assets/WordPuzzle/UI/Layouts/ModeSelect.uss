@@ -29,6 +29,11 @@
     justify-content: center;
 }
 
+/* The transition is declared here permanently and its DURATION is what the view changes:
+   0 while dragging so the track sits exactly under the finger, and back to 0.22s on
+   release so it eases into place. Toggling the transition itself with a class did not
+   animate - UI Toolkit needs the transition already active when the value changes, and
+   adding the class in the same frame as the new translate produced an instant jump. */
 .mode-track {
     flex-direction: row;
     align-items: center;
@@ -36,13 +41,8 @@
     left: 0;
     top: 0;
     bottom: 0;
-    /* Translated from script. A transition is added only when snapping, so dragging
-       tracks the finger exactly instead of lagging behind it. */
-}
-
-.mode-track--snapping {
     transition-property: translate;
-    transition-duration: 0.22s;
+    transition-duration: 0s;
     transition-timing-function: ease-out-cubic;
 }
 
@@ -76,12 +76,6 @@
     border-width: 6px;
     border-color: rgba(246, 221, 154, 0.55);
     margin-bottom: 36px;
-}
-
-/* Endless reads cool violet - a third identity, distinct from calm gold and hot orange. */
-.mode-icon--endless {
-    background-color: rgba(150, 130, 255, 0.14);
-    border-color: rgba(165, 145, 255, 0.7);
 }
 
 /* Time Trial reads red-hot rather than calm gold. */

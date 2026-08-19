@@ -163,6 +163,21 @@
     white-space: normal;
 }
 
+/* Shown once, on the clear that first fills the collection. */
+.onboarding-tip {
+    width: 100%;
+    padding: 18px 24px;
+    margin-bottom: 18px;
+    border-radius: 21px;
+    background-color: rgba(246, 221, 154, 0.12);
+    border-width: 2px;
+    border-color: rgba(246, 221, 154, 0.35);
+    font-size: 25px;
+    color: #f6dd9a;
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+
 /* ------------------------------------------------------------------ actions */
 /* Smaller than the design's hero button: this card now carries a word list above it, and
    a 176px button pushed the meanings into a cramped scroll. */

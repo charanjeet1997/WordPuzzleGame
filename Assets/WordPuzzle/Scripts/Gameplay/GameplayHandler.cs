@@ -26,6 +26,9 @@ namespace WordPuzzle.Gameplay
         private AudioManager _audioManager;
         private IParticleService _particleService;
         private LevelData _currentLevelData;
+
+        /// <summary>The level being played, for systems that need its words (onboarding hints).</summary>
+        public LevelData CurrentLevelData => _currentLevelData;
         private bool _isInitialized = false;
         private bool _subscribedToWheel = false;
 

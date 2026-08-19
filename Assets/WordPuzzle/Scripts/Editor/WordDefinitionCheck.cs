@@ -33,7 +33,7 @@ namespace WordPuzzle.Editor
             public EntryDto[] entries;
         }
 
-        [MenuItem("WordPuzzle/Check Word Definitions")]
+        [MenuItem("Aurora Words/Check Word Definitions")]
         public static void Check()
         {
             var asset = Resources.Load<TextAsset>("word_definitions");

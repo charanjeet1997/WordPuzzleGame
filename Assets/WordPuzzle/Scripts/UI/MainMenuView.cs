@@ -204,6 +204,12 @@ namespace WordPuzzle.UI
 
             var collection = ServiceLocator.Current.Get<WordCollectionService>();
             count.text = $"{collection.DiscoveredCount} of {collection.TotalCount} words discovered";
+
+            // Highlighted only while the player has words to look at but has never opened the
+            // screen. It stops the moment they do, so it never nags.
+            bool prompt = OnboardingFlow.Step == OnboardingStep.FindCollection
+                          && collection.DiscoveredCount > 0;
+            _collectionButton?.EnableInClassList("btn-collection--prompt", prompt);
         }
 
         private void OnCollectionClicked()
@@ -213,6 +219,9 @@ namespace WordPuzzle.UI
 
             if (_gameManager == null && ServiceLocator.Current.Has<GameManager>())
                 _gameManager = ServiceLocator.Current.Get<GameManager>();
+
+            OnboardingFlow.MarkCollectionSeen();
+            RefreshCollectionCount();
 
             if (_gameManager != null) _gameManager.ShowCollection();
         }

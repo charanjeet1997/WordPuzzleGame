@@ -41,7 +41,7 @@ namespace WordPuzzle.Editor
         private string _status = "";
         private Vector2 _scroll;
 
-        [MenuItem("WordPuzzle/Level Generator")]
+        [MenuItem("Aurora Words/Level Generator")]
         public static void Open()
         {
             GetWindow<LevelGeneratorWindow>("Level Generator").minSize = new Vector2(420f, 460f);

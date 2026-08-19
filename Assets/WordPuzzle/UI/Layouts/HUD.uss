@@ -20,16 +20,19 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding-left: 42px;
-    padding-right: 42px;
+    padding-left: 30px;
+    padding-right: 30px;
 }
 
+/* Sized to match the pills beside it, so the bar reads as one row rather than a button
+   next to some badges. */
 .icon-btn-round {
     background-image: url("../../Sprites/slices/btn_icon_round.png");
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
-    width: 156px;
-    height: 156px;
+    width: 108px;
+    height: 108px;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
     padding: 0;
@@ -39,8 +42,8 @@
 
 /* Sprite icons rather than font glyphs, which only render if the active font has them. */
 .btn-icon {
-    width: 66px;
-    height: 66px;
+    width: 48px;
+    height: 48px;
 }
 
 .icon-pause {
@@ -60,8 +63,13 @@
     background-image: url("../../Sprites/slices/icon_hint_bulb.png");
 }
 
+/* Takes the middle and is allowed to grow, so a long chapter name has somewhere to go
+   instead of forcing the readouts off the edge. */
 .level-info-pill {
-    min-height: 96px;
+    flex-grow: 1;
+    max-width: 480px;
+    margin: 0 18px;
+    min-height: 108px;
     background-image: url("../../Sprites/slices/pill_hud.png");
     -unity-slice-left: 42;
     -unity-slice-right: 42;
@@ -71,25 +79,42 @@
     border-width: 0;
     align-items: center;
     justify-content: center;
-    padding: 18px 42px;
+    padding: 12px 30px;
 }
 
 .hud-level-text {
-    font-size: 36px;
-    color: #e8f0f0;
+    font-size: 33px;
+    color: #ffffff;
     -unity-font-style: bold;
-    letter-spacing: 1.5px;
+    letter-spacing: 2px;
 }
 
+/* Secondary by design: the chapter name is flavour, the level number is the fact the
+   player is looking for. */
 .hud-chapter-text {
-    font-size: 24px;
-    color: rgba(255, 255, 255, 0.45);
+    font-size: 21px;
+    color: rgba(255, 255, 255, 0.42);
     -unity-font-style: bold;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
+    margin-top: 2px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 100%;
 }
 
-.coin-pill {
-    min-height: 96px;
+/* ------------------------------------------------- readouts (timer + coins)
+   Grouped so the two numbers sit together as one block on the right. */
+.hud-readouts {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.stat-pill {
+    height: 108px;
+    min-width: 132px;
+    margin-left: 12px;
     background-image: url("../../Sprites/slices/pill_hud.png");
     -unity-slice-left: 42;
     -unity-slice-right: 42;
@@ -99,20 +124,35 @@
     border-width: 0;
     flex-direction: row;
     align-items: center;
-    padding: 15px 33px;
+    justify-content: center;
+    padding: 0 24px;
+}
+
+.stat-text {
+    font-size: 33px;
+    -unity-font-style: bold;
+    color: #ffffff;
+}
+
+/* Clock face drawn in USS - a ring with a tick, so no sprite is needed. */
+.timer-icon {
+    width: 33px;
+    height: 33px;
+    margin-right: 12px;
+    border-radius: 18px;
+    border-width: 4px;
+    border-color: rgba(255, 255, 255, 0.75);
 }
 
 .coin-icon {
-    width: 45px;
-    height: 45px;
-    margin-right: 18px;
+    width: 39px;
+    height: 39px;
+    margin-right: 12px;
     background-image: url("../../Sprites/slices/icon_coin.png");
 }
 
 .coin-text {
-    font-size: 39px;
     color: #f6dd9a;
-    -unity-font-style: bold;
 }
 
 /* Only shown in Time Trial; the view hides it entirely in Classic so the top bar keeps

@@ -28,15 +28,15 @@ namespace WordPuzzle.Editor
         // Breathing room between the outermost letter node and the wheel backdrop edge, in world units.
         private const float BackdropPadding = 0.1f;
 
-        [MenuItem("WordPuzzle/Reset All Saved Progress (PlayerPrefs)")]
+        [MenuItem("Aurora Words/Reset All Saved Progress (PlayerPrefs)")]
         public static void ResetAllSavedProgress()
         {
             PlayerPrefs.DeleteAll();
             PlayerPrefs.Save();
-            Debug.Log("<color=green>[WordPuzzle]</color> All saved level states, coins, and progress have been completely reset!");
+            Debug.Log("<color=green>[Aurora Words]</color> All saved level states, coins, progress and onboarding have been completely reset!");
         }
 
-        [MenuItem("WordPuzzle/Setup Wonders of Word Scene")]
+        [MenuItem("Aurora Words/Setup Scene")]
         public static void BuildSceneSetup()
         {
             // 1. Ensure Directory Structure (NO Resources folder used!)
@@ -209,29 +209,16 @@ namespace WordPuzzle.Editor
             uiManager.defaultPanelSettings = panelSettings;
             EditorUtility.SetDirty(uiManager);
 
-            // 12. Instantiate World from WorldPrefab in scene if not present
-            GameObject worldInstance = GameObject.Find("WordPuzzleWorld");
-            if (worldInstance == null && worldPrefab != null)
+            // 12. The world is spawned at runtime by WorldManager, so setup deliberately leaves
+            // the scene without one. An instance left here would be a second, stale copy the
+            // moment the prefab changes - and StartCurrentLevel would find the wrong handler.
+            // Any instance from an earlier setup run is removed.
+            GameObject staleWorld = GameObject.Find("WordPuzzleWorld");
+            if (staleWorld != null)
             {
-                worldInstance = PrefabUtility.InstantiatePrefab(worldPrefab) as GameObject;
-            }
-
-            GameplayHandler gameplayHandler = worldInstance != null ? worldInstance.GetComponentInChildren<GameplayHandler>() : null;
-            if (gameplayHandler != null)
-            {
-                if (gameplayHandler.gridController != null)
-                {
-                    EditorUtility.SetDirty(gameplayHandler.gridController);
-                }
-                if (gameplayHandler.wheelController != null)
-                {
-                    if (gameplayHandler.wheelController.lineRenderer == null)
-                    {
-                        gameplayHandler.wheelController.lineRenderer = gameplayHandler.wheelController.GetComponent<LineRenderer>() ?? gameplayHandler.wheelController.gameObject.AddComponent<LineRenderer>();
-                    }
-                    EditorUtility.SetDirty(gameplayHandler.wheelController);
-                }
-                EditorUtility.SetDirty(gameplayHandler);
+                Undo.DestroyObjectImmediate(staleWorld);
+                Debug.Log("<color=green>[Aurora Words Setup]</color> Removed the WordPuzzleWorld instance " +
+                          "from the scene - it is spawned at runtime.");
             }
 
             // Wire Direct Asset References to GameManager & Initializer
@@ -269,7 +256,7 @@ namespace WordPuzzle.Editor
                 EditorSceneManager.SaveScene(currentScene);
             }
 
-            Debug.Log("<color=green>[Wonders of Word Setup]</color> Complete end-to-end setup finished! 100% of Inspector fields assigned to AudioManager and saved to scene.");
+            Debug.Log("<color=green>[Aurora Words Setup]</color> Complete end-to-end setup finished! 100% of Inspector fields assigned to AudioManager and saved to scene.");
         }
 
         private static void CleanupLegacyStandaloneManagerObjects()
@@ -617,6 +604,14 @@ namespace WordPuzzle.Editor
             LetterWheelController wheelController = wheelObj.AddComponent<LetterWheelController>();
             wheelController.lineRenderer = wheelObj.GetComponent<LineRenderer>() ?? wheelObj.AddComponent<LineRenderer>();
 
+            // First-run swipe demonstration. Lives under the gameplay object so it can reach the
+            // wheel's world-space nodes, and disables itself once the player has learned.
+            GameObject onboardingObj = new GameObject("Onboarding");
+            onboardingObj.transform.SetParent(gameplayObj.transform, false);
+            OnboardingHint onboardingHint = onboardingObj.AddComponent<OnboardingHint>();
+            onboardingHint.markerSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/WordPuzzle/Sprites/hint_finger.png");
+            onboardingObj.AddComponent<OnboardingController>();
+
             Sprite backdropSpr = Resources.Load<Sprite>("Sprites/wheel_backdrop");
             if (backdropSpr == null)
             {
@@ -742,7 +737,7 @@ namespace WordPuzzle.Editor
 
             if (tracks.Count == 0)
             {
-                Debug.LogWarning($"[Wonders of Word Setup] No music clips found in {musicFolder} - the playlist will be silent.");
+                Debug.LogWarning($"[Aurora Words Setup] No music clips found in {musicFolder} - the playlist will be silent.");
             }
         }
 

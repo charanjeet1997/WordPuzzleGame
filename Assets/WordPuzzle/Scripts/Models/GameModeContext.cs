@@ -10,13 +10,7 @@ namespace WordPuzzle.Models
         Classic = 0,
 
         /// <summary>Same puzzles, timed. The clock counts up and a best time is kept per level.</summary>
-        TimeTrial = 1,
-
-        /// <summary>
-        /// Levels chained under one shared clock. Each solved word adds seconds; the run ends
-        /// when the clock does, and the score is how far you got.
-        /// </summary>
-        Endless = 2
+        TimeTrial = 1
     }
 
     /// <summary>
@@ -58,11 +52,8 @@ namespace WordPuzzle.Models
         /// </summary>
         public static string KeySuffix => SuffixFor(Current);
 
-        /// <summary>True when a clock is on screen, in either timed mode.</summary>
-        public static bool IsTimed => Current != GameMode.Classic;
-
-        /// <summary>True when the clock counts down and can end the run.</summary>
-        public static bool IsCountdown => Current == GameMode.Endless;
+        /// <summary>True when a clock is on screen.</summary>
+        public static bool IsTimed => Current == GameMode.TimeTrial;
 
         public static void SetMode(GameMode mode)
         {
@@ -91,35 +82,15 @@ namespace WordPuzzle.Models
         /// </summary>
         private static string SuffixFor(GameMode mode)
         {
-            switch (mode)
-            {
-                case GameMode.TimeTrial: return "_TimeTrial";
-                case GameMode.Endless: return "_Endless";
-                default: return string.Empty;
-            }
+            return mode == GameMode.TimeTrial ? "_TimeTrial" : string.Empty;
         }
 
-        public static string DisplayName(GameMode mode)
-        {
-            switch (mode)
-            {
-                case GameMode.TimeTrial: return "TIME TRIAL";
-                case GameMode.Endless: return "ENDLESS";
-                default: return "CLASSIC";
-            }
-        }
+        public static string DisplayName(GameMode mode) =>
+            mode == GameMode.TimeTrial ? "TIME TRIAL" : "CLASSIC";
 
-        public static string Description(GameMode mode)
-        {
-            switch (mode)
-            {
-                case GameMode.TimeTrial:
-                    return "Same puzzles, against the clock. Your best time is kept for every level.";
-                case GameMode.Endless:
-                    return "One clock, level after level. Every word you find buys more time.";
-                default:
-                    return "Solve at your own pace. No timer, no pressure.";
-            }
-        }
+        public static string Description(GameMode mode) =>
+            mode == GameMode.TimeTrial
+                ? "Same puzzles, against the clock. Your best time is kept for every level."
+                : "Solve at your own pace. No timer, no pressure.";
     }
 }

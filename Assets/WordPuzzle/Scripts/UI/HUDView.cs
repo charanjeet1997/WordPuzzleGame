@@ -226,7 +226,7 @@ namespace WordPuzzle.UI
                     _warnedNoDefinitionService = true;
                     UnityEngine.Debug.LogWarning(
                         "[HUDView] WordDefinitionService is not in the scene, so word meanings cannot show. " +
-                        "Run WordPuzzle > Setup Wonders of Word Scene to add it.");
+                        "Run Aurora Words > Setup Scene to add it.");
                 }
                 return string.IsNullOrEmpty(prefix) ? "WORD FOUND" : prefix;
             }

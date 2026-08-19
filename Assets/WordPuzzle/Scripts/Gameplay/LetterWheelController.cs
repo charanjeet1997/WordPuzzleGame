@@ -57,6 +57,12 @@ namespace WordPuzzle.Gameplay
 
         public event Action<string> OnWordSubmitted;
 
+        /// <summary>
+        /// Raised after the ring is rebuilt - a new level or a shuffle. Anything holding node
+        /// positions (the onboarding hint traces them) must drop them: the letters have moved.
+        /// </summary>
+        public event Action WheelRebuilt;
+
         private readonly List<LetterNode> _nodes = new List<LetterNode>();
         private readonly List<LetterNode> _selectedNodes = new List<LetterNode>();
         private string _wheelLetters = "";
@@ -118,6 +124,8 @@ namespace WordPuzzle.Gameplay
             // The trail width was set in Awake, before the fit was known.
             EnsureLineRenderer();
             ResetSelection();
+
+            WheelRebuilt?.Invoke();
         }
 
         /// <summary>
@@ -134,8 +142,49 @@ namespace WordPuzzle.Gameplay
             return chord / (2f * Mathf.Sin(Mathf.PI / count));
         }
 
+        /// <summary>
+        /// World positions to swipe through to spell a word, or false if the wheel cannot spell
+        /// it. Repeated letters consume separate nodes, so ABASHED uses both As rather than
+        /// pointing at the same one twice.
+        /// </summary>
+        public bool TryGetSwipePath(string word, List<Vector3> path)
+        {
+            path.Clear();
+            if (string.IsNullOrEmpty(word) || _nodes.Count == 0) return false;
+
+            var used = new bool[_nodes.Count];
+
+            foreach (char letter in word.ToUpperInvariant())
+            {
+                int match = -1;
+                for (int i = 0; i < _nodes.Count; i++)
+                {
+                    if (used[i] || _nodes[i] == null || _nodes[i].Letter != letter) continue;
+                    match = i;
+                    break;
+                }
+
+                if (match < 0)
+                {
+                    path.Clear();
+                    return false;
+                }
+
+                used[match] = true;
+                path.Add(_nodes[match].transform.position);
+            }
+
+            return path.Count > 0;
+        }
+
         /// <summary>Node size actually in use, which is the authored size until the screen forces it down.</summary>
         private float EffectiveNodeSize => _fittedNodeSize > 0f ? _fittedNodeSize : nodeSize;
+
+        /// <summary>
+        /// The on-screen size of one letter, after the screen-fit shrink. Overlays size
+        /// themselves against this so they hold their proportions on any aspect ratio.
+        /// </summary>
+        public float NodeSizeInUse => EffectiveNodeSize;
 
         /// <summary>How much the ring was shrunk to fit, 1 when it was not.</summary>
         private float FitScale => nodeSize > 0.0001f ? EffectiveNodeSize / nodeSize : 1f;

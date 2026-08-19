@@ -13,7 +13,6 @@
         <ui:VisualElement name="mode-dots" class="mode-dots">
             <ui:VisualElement name="dot-0" class="mode-dot mode-dot--active" />
             <ui:VisualElement name="dot-1" class="mode-dot" />
-            <ui:VisualElement name="dot-2" class="mode-dot" />
         </ui:VisualElement>
 
         <ui:Button name="btn-play-mode" text="PLAY" class="mode-play-button" />

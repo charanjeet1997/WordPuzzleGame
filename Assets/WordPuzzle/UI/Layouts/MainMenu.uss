@@ -181,6 +181,19 @@
     transition-duration: 0.13s, 0.13s;
 }
 
+/* Pulses only while onboarding is pointing at it. USS has no keyframes, so the view
+   drives nothing here - the transition-free gold state is enough to draw the eye without
+   an animation loop to manage. */
+.btn-collection--prompt {
+    background-color: rgba(246, 221, 154, 0.22);
+    border-color: rgba(246, 221, 154, 0.9);
+    scale: 1.03 1.03;
+}
+
+.btn-collection--prompt .btn-collection-count {
+    color: #f6dd9a;
+}
+
 .btn-collection:hover { background-color: rgba(255, 255, 255, 0.11); }
 .btn-collection:active { scale: 0.97 0.97; }
 

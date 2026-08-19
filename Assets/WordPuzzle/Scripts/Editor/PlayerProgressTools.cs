@@ -12,7 +12,7 @@ namespace WordPuzzle.Editor
     /// </summary>
     public static class PlayerProgressTools
     {
-        [MenuItem("WordPuzzle/Reset Player Progress")]
+        [MenuItem("Aurora Words/Reset Player Progress")]
         public static void ResetProgress()
         {
             if (!EditorUtility.DisplayDialog(
@@ -40,10 +40,10 @@ namespace WordPuzzle.Editor
             PlayerPrefs.DeleteKey("SoundEnabled");
             PlayerPrefs.Save();
 
-            Debug.Log("[WordPuzzle] Player progress reset - next run starts on level 1.");
+            Debug.Log("[Aurora Words] Player progress reset - next run starts on level 1.");
         }
 
-        [MenuItem("WordPuzzle/Show Saved Progress")]
+        [MenuItem("Aurora Words/Show Saved Progress")]
         public static void ShowProgress()
         {
             int level = PlayerPrefs.GetInt("WordPuzzle_CurrentLevel", PlayerPrefs.GetInt(WondersOfWordGameModel.KEY_CURRENT_LEVEL_INDEX, 1));

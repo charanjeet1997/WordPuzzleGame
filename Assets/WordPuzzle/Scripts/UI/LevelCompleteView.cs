@@ -72,6 +72,7 @@ namespace WordPuzzle.UI
             RefreshResult();
             RefreshTime();
             BuildMeaningsList();
+            RefreshOnboardingTip();
         }
 
         /// <summary>
@@ -141,6 +142,20 @@ namespace WordPuzzle.UI
 
             // An empty scroll view leaves a gap above the button, so the whole block goes away.
             ShowMeaningsBlock(shown > 0);
+        }
+
+        /// <summary>
+        /// One line, shown only on the clear that first fills the collection, telling the
+        /// player where their words went. Any earlier and there would be nothing to look at.
+        /// </summary>
+        private void RefreshOnboardingTip()
+        {
+            Label tip = rootElement?.Q<Label>("lbl-onboarding-tip");
+            if (tip == null) return;
+
+            bool show = OnboardingFlow.Step == OnboardingStep.FindCollection;
+            tip.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+            if (show) tip.text = "Every word you find is saved. See them all in WORD COLLECTION on the main menu.";
         }
 
         private void ShowMeaningsBlock(bool visible)

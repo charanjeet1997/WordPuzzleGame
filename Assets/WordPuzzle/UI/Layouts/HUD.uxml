@@ -2,21 +2,28 @@
     <ui:Style src="HUD.uss" />
     <ui:VisualElement name="hud-root" class="hud-container">
 
-        <!-- Top bar: pause / chapter+level pill / coin pill -->
+        <!-- Top bar. Pause sits alone on the left; level identity takes the centre and is
+             allowed to grow; the numeric readouts group together on the right so the eye
+             finds them in one place instead of scanning three competing pills. -->
         <ui:VisualElement class="hud-top-bar">
             <ui:Button name="btn-pause" text="" class="icon-btn-round">
                 <ui:VisualElement class="btn-icon icon-pause" picking-mode="Ignore" />
             </ui:Button>
+
             <ui:VisualElement class="level-info-pill">
-                <ui:Label name="lbl-level-number" text="CH.1 • LV.1" class="hud-level-text" />
+                <ui:Label name="lbl-level-number" text="LEVEL 1" class="hud-level-text" />
                 <ui:Label name="lbl-chapter-title" text="" class="hud-chapter-text" />
             </ui:VisualElement>
-            <ui:VisualElement name="timer-pill" class="coin-pill timer-pill">
-                <ui:Label name="lbl-timer" text="0:00" class="coin-text timer-text" />
-            </ui:VisualElement>
-            <ui:VisualElement class="coin-pill">
-                <ui:VisualElement class="coin-icon" />
-                <ui:Label name="lbl-coins" text="0" class="coin-text" />
+
+            <ui:VisualElement class="hud-readouts">
+                <ui:VisualElement name="timer-pill" class="stat-pill timer-pill">
+                    <ui:VisualElement class="timer-icon" picking-mode="Ignore" />
+                    <ui:Label name="lbl-timer" text="0:00" class="stat-text timer-text" />
+                </ui:VisualElement>
+                <ui:VisualElement class="stat-pill coin-pill">
+                    <ui:VisualElement class="coin-icon" />
+                    <ui:Label name="lbl-coins" text="0" class="stat-text coin-text" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
