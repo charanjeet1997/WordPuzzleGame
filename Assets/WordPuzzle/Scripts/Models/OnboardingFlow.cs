@@ -1,4 +1,5 @@
 using UnityEngine;
+using WordPuzzle.Services;
 
 namespace WordPuzzle.Models
 {
@@ -32,11 +33,11 @@ namespace WordPuzzle.Models
 
         public static OnboardingStep Step
         {
-            get => (OnboardingStep)PlayerPrefs.GetInt(PrefKeyStep, (int)OnboardingStep.LearnSwipe);
+            get => (OnboardingStep)GameStorage.GetInt(PrefKeyStep, (int)OnboardingStep.LearnSwipe);
             private set
             {
-                PlayerPrefs.SetInt(PrefKeyStep, (int)value);
-                PlayerPrefs.Save();
+                GameStorage.SetInt(PrefKeyStep, (int)value);
+                GameStorage.Save();
             }
         }
 
@@ -55,6 +56,6 @@ namespace WordPuzzle.Models
         }
 
         /// <summary>Replays the whole flow. Wired to Reset Progress.</summary>
-        public static void Clear() => PlayerPrefs.DeleteKey(PrefKeyStep);
+        public static void Clear() => GameStorage.DeleteKey(PrefKeyStep);
     }
 }

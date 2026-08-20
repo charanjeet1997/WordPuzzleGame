@@ -160,7 +160,7 @@ namespace WordPuzzle.UI
 
             // Each card reads its own mode's saved progress: the two campaigns advance
             // independently, so the player needs to see both before choosing.
-            int level = Mathf.Max(1, PlayerPrefs.GetInt(
+            int level = Mathf.Max(1, GameStorage.GetInt(
                 GameModeContext.KeyFor(mode, "WordPuzzle_CurrentLevel"), 1));
 
             var progress = new Label($"LEVEL {level}");
@@ -169,7 +169,7 @@ namespace WordPuzzle.UI
 
             if (timed)
             {
-                float best = PlayerPrefs.GetFloat(
+                float best = GameStorage.GetFloat(
                     GameModeContext.KeyFor(mode, "WordPuzzle_BestTime") + "_Lvl_" + level, 0f);
 
                 var extra = new Label(best > 0f ? $"BEST  {FormatTime(best)}" : "NO TIME SET YET");

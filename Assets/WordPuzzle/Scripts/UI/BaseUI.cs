@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using WordPuzzle.Services;
 using WordPuzzle.Data;
 
 namespace WordPuzzle.UI
@@ -20,6 +21,19 @@ namespace WordPuzzle.UI
 
         protected virtual void OnInitialize() { }
 
+        protected virtual void OnEnable() => LayoutService.LayoutChanged += ApplyLayoutClass;
+
+        protected virtual void OnDisable() => LayoutService.LayoutChanged -= ApplyLayoutClass;
+
+        /// <summary>Tags the root with `layout--portrait` or `layout--landscape`.</summary>
+        private void ApplyLayoutClass(ScreenLayout layout)
+        {
+            if (rootElement == null) return;
+
+            rootElement.EnableInClassList("layout--portrait", layout == ScreenLayout.Portrait);
+            rootElement.EnableInClassList("layout--landscape", layout == ScreenLayout.Landscape);
+        }
+
         public virtual void Show()
         {
             if (mainUIDocument != null && config != null && config.visualTreeAsset != null)
@@ -29,6 +43,10 @@ namespace WordPuzzle.UI
                 if (rootElement != null)
                 {
                     rootElement.style.display = DisplayStyle.Flex;
+
+                    // Every screen gets the orientation as a class, so layout differences live
+                    // in USS next to the rules they modify rather than in each view's code.
+                    ApplyLayoutClass(LayoutService.Current);
                 }
             }
             IsVisible = true;

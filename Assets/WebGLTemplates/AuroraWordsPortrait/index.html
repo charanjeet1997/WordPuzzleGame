@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>{{{ PRODUCT_NAME }}}</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #060d16;
+      /* The page never scrolls or bounces: on a phone browser a drag on the wheel would
+         otherwise pull the page instead of tracing letters. */
+      overscroll-behavior: none;
+      touch-action: none;
+    }
+
+    #wrap {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Sized by script to the largest 9:16 rectangle that fits, so the game stays portrait
+       on a desktop window instead of being stretched to a landscape canvas. */
+    #unity-canvas {
+      display: block;
+      background: #060d16;
+      touch-action: none;
+    }
+
+    #unity-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #f6dd9a;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      letter-spacing: 0.2em;
+      gap: 18px;
+    }
+
+    #unity-loading-bar {
+      width: 220px;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.12);
+      overflow: hidden;
+    }
+
+    #unity-loading-fill {
+      width: 0;
+      height: 100%;
+      background: #f6dd9a;
+      transition: width 0.2s;
+    }
+  </style>
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="unity-canvas" tabindex="-1"></canvas>
+
+    <div id="unity-loading">
+      <div>AURORA WORDS</div>
+      <div id="unity-loading-bar"><div id="unity-loading-fill"></div></div>
+    </div>
+  </div>
+
+  <script>
+    // The game handles both orientations, so the canvas simply fills the frame and the
+    // game rearranges itself. Clamped only so an extremely wide desktop window does not
+    // stretch a phone-shaped layout across three feet of monitor.
+    var MAX_ASPECT = 16 / 9;
+
+    var canvas = document.querySelector("#unity-canvas");
+    var loading = document.querySelector("#unity-loading");
+    var loadingFill = document.querySelector("#unity-loading-fill");
+
+    function resize() {
+      var w = window.innerWidth;
+      var h = window.innerHeight;
+
+      var width = w;
+      var height = h;
+
+      if (width / height > MAX_ASPECT) {
+        width = height * MAX_ASPECT;
+      }
+
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
+
+      // Backing store follows the device pixel ratio, capped: an uncapped ratio on a modern
+      // phone renders four times the pixels for no visible gain and halves the frame rate.
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+    }
+
+    window.addEventListener("resize", resize);
+    window.addEventListener("orientationchange", resize);
+    resize();
+
+    var script = document.createElement("script");
+    script.src = "{{{ LOADER_FILENAME }}}";
+    script.onload = function () {
+      createUnityInstance(canvas, {
+        dataUrl: "{{{ DATA_FILENAME }}}",
+        frameworkUrl: "{{{ FRAMEWORK_FILENAME }}}",
+        codeUrl: "{{{ CODE_FILENAME }}}",
+#if MEMORY_FILENAME
+        memoryUrl: "{{{ MEMORY_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+        symbolsUrl: "{{{ SYMBOLS_FILENAME }}}",
+#endif
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "{{{ COMPANY_NAME }}}",
+        productName: "{{{ PRODUCT_NAME }}}",
+        productVersion: "{{{ PRODUCT_VERSION }}}",
+        matchWebGLToCanvasSize: true
+      }, function (progress) {
+        loadingFill.style.width = (progress * 100) + "%";
+      }).then(function () {
+        loading.style.display = "none";
+        resize();
+      }).catch(function (message) {
+        loading.textContent = message;
+      });
+    };
+
+    document.body.appendChild(script);
+  </script>
+</body>
+</html>

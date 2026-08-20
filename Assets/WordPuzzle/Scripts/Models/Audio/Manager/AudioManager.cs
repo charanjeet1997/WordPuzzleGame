@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using ServiceLocatorFramework;
+using WordPuzzle.Services;
 
 namespace WordPuzzle.Audio
 {
@@ -33,7 +34,7 @@ namespace WordPuzzle.Audio
                 ServiceLocator.Current.Register<AudioManager>(this);
             }
 
-            SoundEnabled = PlayerPrefs.GetInt(PrefKeySoundEnabled, 1) == 1;
+            SoundEnabled = GameStorage.GetInt(PrefKeySoundEnabled, 1) == 1;
             ApplySoundState();
         }
 
@@ -50,8 +51,8 @@ namespace WordPuzzle.Audio
         public void SetSoundEnabled(bool enabled)
         {
             SoundEnabled = enabled;
-            PlayerPrefs.SetInt(PrefKeySoundEnabled, enabled ? 1 : 0);
-            PlayerPrefs.Save();
+            GameStorage.SetInt(PrefKeySoundEnabled, enabled ? 1 : 0);
+            GameStorage.Save();
             ApplySoundState();
         }
 

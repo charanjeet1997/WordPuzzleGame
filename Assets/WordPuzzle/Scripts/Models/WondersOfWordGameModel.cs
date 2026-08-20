@@ -100,8 +100,8 @@ namespace WordPuzzle.Models
             HintsUsed = _propertyManager.GetOrCreateProperty<int>(KEY_HINTS_USED);
 
             var prog = GetProgressionService();
-            int initLevel = prog != null ? prog.CurrentLevelIndex : Mathf.Max(1, PlayerPrefs.GetInt(GameModeContext.Key(KEY_CURRENT_LEVEL_INDEX), 1));
-            int initCoins = prog != null ? prog.Coins : PlayerPrefs.GetInt(KEY_COINS, 100);
+            int initLevel = prog != null ? prog.CurrentLevelIndex : Mathf.Max(1, GameStorage.GetInt(GameModeContext.Key(KEY_CURRENT_LEVEL_INDEX), 1));
+            int initCoins = prog != null ? prog.Coins : GameStorage.GetInt(KEY_COINS, 100);
 
             CurrentLevelIndex.Value = initLevel;
             Coins.Value = initCoins;
@@ -127,7 +127,7 @@ namespace WordPuzzle.Models
 
             CurrentLevelIndex.Value = prog != null
                 ? prog.CurrentLevelIndex
-                : Mathf.Max(1, PlayerPrefs.GetInt(GameModeContext.Key(KEY_CURRENT_LEVEL_INDEX), 1));
+                : Mathf.Max(1, GameStorage.GetInt(GameModeContext.Key(KEY_CURRENT_LEVEL_INDEX), 1));
 
             LevelSeconds.Value = 0f;
         }
@@ -155,9 +155,9 @@ namespace WordPuzzle.Models
             }
             else
             {
-                PlayerPrefs.SetInt(GameModeContext.Key(KEY_CURRENT_LEVEL_INDEX), CurrentLevelIndex.Value);
-                PlayerPrefs.SetInt(KEY_COINS, Coins.Value);
-                PlayerPrefs.Save();
+                GameStorage.SetInt(GameModeContext.Key(KEY_CURRENT_LEVEL_INDEX), CurrentLevelIndex.Value);
+                GameStorage.SetInt(KEY_COINS, Coins.Value);
+                GameStorage.Save();
             }
         }
 
@@ -172,8 +172,8 @@ namespace WordPuzzle.Models
             }
             else
             {
-                PlayerPrefs.SetInt(KEY_COINS, Coins.Value);
-                PlayerPrefs.Save();
+                GameStorage.SetInt(KEY_COINS, Coins.Value);
+                GameStorage.Save();
             }
         }
 
@@ -190,8 +190,8 @@ namespace WordPuzzle.Models
                 }
                 else
                 {
-                    PlayerPrefs.SetInt(KEY_COINS, Coins.Value);
-                    PlayerPrefs.Save();
+                    GameStorage.SetInt(KEY_COINS, Coins.Value);
+                    GameStorage.Save();
                 }
                 return true;
             }
@@ -320,8 +320,8 @@ namespace WordPuzzle.Models
             }
             else
             {
-                PlayerPrefs.SetInt(GameModeContext.Key(KEY_CURRENT_LEVEL_INDEX), completedLevel + 1);
-                PlayerPrefs.Save();
+                GameStorage.SetInt(GameModeContext.Key(KEY_CURRENT_LEVEL_INDEX), completedLevel + 1);
+                GameStorage.Save();
             }
 
             var observer = _observerManager.GetOrCreateObserver<int>(OBS_LEVEL_COMPLETED);

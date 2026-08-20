@@ -4,6 +4,7 @@ using TMPro;
 using ServiceLocatorFramework;
 using WordPuzzle.Data;
 using WordPuzzle.Factory;
+using WordPuzzle.Services;
 
 namespace WordPuzzle.Gameplay
 {
@@ -18,17 +19,20 @@ namespace WordPuzzle.Gameplay
         [Tooltip("Camera used to measure the visible area. Falls back to Camera.main.")]
         public Camera viewCamera;
 
-        [Tooltip("Vertical band of the screen the grid may occupy, in viewport coords (0 = bottom). " +
-                 "The default leaves the HUD bar above and the letter wheel below.")]
-        public float areaBottom = 0.52f;
-        public float areaTop = 0.94f;
+        [Tooltip("Viewport rect the grid may occupy in portrait: the band between the HUD bar " +
+                 "and the letter wheel. x/y are the bottom-left corner, in 0-1 viewport coords.")]
+        public Rect portraitArea = new Rect(0.04f, 0.52f, 0.92f, 0.42f);
 
-        [Tooltip("Fraction of the screen width the grid may occupy.")]
-        [Range(0.5f, 1f)]
-        public float areaWidth = 0.92f;
+        [Tooltip("Viewport rect in landscape. The wheel takes the left, so the grid sits on " +
+                 "the right and gains most of the height back.")]
+        public Rect landscapeArea = new Rect(0.45f, 0.08f, 0.52f, 0.84f);
 
         [Tooltip("Never shrink tiles below this, even if the grid then overflows.")]
         public float minTileSize = 0.16f;
+
+        [Tooltip("Largest a tile may grow to. The authored size is a starting point, not a cap: " +
+                 "on a wide screen a three-word grid was leaving most of its area empty.")]
+        public float maxTileSize = 0.95f;
 
         [Tooltip("Letter size in tile-local units. Lower values leave more margin inside the tile.")]
         public float letterFontSize = 2.4f;
@@ -40,8 +44,24 @@ namespace WordPuzzle.Gameplay
         private readonly List<TargetWordEntry> _targetWords = new List<TargetWordEntry>();
         private readonly List<GridTile> _scratchTiles = new List<GridTile>();
 
+        private LevelData _lastLevel;
+
+        private void OnEnable() => LayoutService.LayoutChanged += OnLayoutChanged;
+        private void OnDisable() => LayoutService.LayoutChanged -= OnLayoutChanged;
+
+        /// <summary>
+        /// Rebuilds at the new size. Cheap enough to do wholesale - a grid is at most a few
+        /// dozen tiles - and rebuilding preserves reveal state because it is replayed from the
+        /// level data and the model rather than held in the tiles.
+        /// </summary>
+        private void OnLayoutChanged(ScreenLayout layout)
+        {
+            if (_lastLevel != null) BuildGrid(_lastLevel);
+        }
+
         public void BuildGrid(LevelData levelData)
         {
+            _lastLevel = levelData;
             ClearGrid();
             if (levelData == null || levelData.targetWords == null) return;
 
@@ -112,11 +132,14 @@ namespace WordPuzzle.Gameplay
             Camera cam = viewCamera != null ? viewCamera : Camera.main;
             if (cam == null) return tileSize;
 
-            float depth = Mathf.Abs(transform.position.z - cam.transform.position.z);
-            Vector3 bottomLeft = cam.ViewportToWorldPoint(new Vector3(0f, areaBottom, depth));
-            Vector3 topRight = cam.ViewportToWorldPoint(new Vector3(1f, areaTop, depth));
+            // The band differs by orientation: stacked in portrait, side by side in landscape.
+            Rect area = LayoutService.IsLandscape ? landscapeArea : portraitArea;
 
-            float availableWidth = Mathf.Abs(topRight.x - bottomLeft.x) * areaWidth;
+            float depth = Mathf.Abs(transform.position.z - cam.transform.position.z);
+            Vector3 bottomLeft = cam.ViewportToWorldPoint(new Vector3(area.xMin, area.yMin, depth));
+            Vector3 topRight = cam.ViewportToWorldPoint(new Vector3(area.xMax, area.yMax, depth));
+
+            float availableWidth = Mathf.Abs(topRight.x - bottomLeft.x);
             float availableHeight = Mathf.Abs(topRight.y - bottomLeft.y);
 
             areaCenter = new Vector3(
@@ -130,7 +153,9 @@ namespace WordPuzzle.Gameplay
             float widthFit = availableWidth / (cols + (cols - 1) * spacingRatio);
             float heightFit = availableHeight / (rows + (rows - 1) * spacingRatio);
 
-            float fitted = Mathf.Min(widthFit, heightFit, tileSize);
+            // Grows as well as shrinks: capped by maxTileSize rather than by the authored
+            // size, so a small grid fills the space it is given instead of floating in it.
+            float fitted = Mathf.Min(widthFit, heightFit, maxTileSize);
             return Mathf.Max(fitted, minTileSize);
         }
 

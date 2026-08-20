@@ -3,6 +3,7 @@ using UnityEngine;
 using ServiceLocatorFramework;
 using WordPuzzle.Data;
 using WordPuzzle.Models;
+using WordPuzzle.Services;
 
 namespace WordPuzzle.Audio
 {
@@ -47,7 +48,7 @@ namespace WordPuzzle.Audio
         {
             ResolveSource();
 
-            MusicEnabled = PlayerPrefs.GetInt(PrefKeyMusicEnabled, 1) == 1;
+            MusicEnabled = GameStorage.GetInt(PrefKeyMusicEnabled, 1) == 1;
             _fadeTarget = MusicEnabled ? volume : 0f;
             if (_source != null) _source.volume = _fadeTarget;
 
@@ -174,8 +175,8 @@ namespace WordPuzzle.Audio
         public void SetMusicEnabled(bool enabled)
         {
             MusicEnabled = enabled;
-            PlayerPrefs.SetInt(PrefKeyMusicEnabled, enabled ? 1 : 0);
-            PlayerPrefs.Save();
+            GameStorage.SetInt(PrefKeyMusicEnabled, enabled ? 1 : 0);
+            GameStorage.Save();
 
             _fadeTarget = enabled ? volume : 0f;
 

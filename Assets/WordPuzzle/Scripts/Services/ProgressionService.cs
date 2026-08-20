@@ -81,9 +81,9 @@ namespace WordPuzzle.Services
                 if (_currentLevelIndex > _highestUnlockedLevel)
                 {
                     _highestUnlockedLevel = _currentLevelIndex;
-                    PlayerPrefs.SetInt(PrefKeyHighestLevel, _highestUnlockedLevel);
+                    GameStorage.SetInt(PrefKeyHighestLevel, _highestUnlockedLevel);
                 }
-                PlayerPrefs.SetInt(PrefKeyCurrentLevel, _currentLevelIndex);
+                GameStorage.SetInt(PrefKeyCurrentLevel, _currentLevelIndex);
             }
         }
 
@@ -93,7 +93,7 @@ namespace WordPuzzle.Services
             set
             {
                 _highestUnlockedLevel = Mathf.Max(1, value);
-                PlayerPrefs.SetInt(PrefKeyHighestLevel, _highestUnlockedLevel);
+                GameStorage.SetInt(PrefKeyHighestLevel, _highestUnlockedLevel);
             }
         }
 
@@ -103,7 +103,7 @@ namespace WordPuzzle.Services
             set
             {
                 _coins = Mathf.Max(0, value);
-                PlayerPrefs.SetInt(PrefKeyCoins, _coins);
+                GameStorage.SetInt(PrefKeyCoins, _coins);
             }
         }
 
@@ -113,7 +113,7 @@ namespace WordPuzzle.Services
             set
             {
                 _totalScore = Mathf.Max(0, value);
-                PlayerPrefs.SetInt(PrefKeyTotalScore, _totalScore);
+                GameStorage.SetInt(PrefKeyTotalScore, _totalScore);
             }
         }
 
@@ -123,7 +123,7 @@ namespace WordPuzzle.Services
             set
             {
                 _totalWordsFound = Mathf.Max(0, value);
-                PlayerPrefs.SetInt(PrefKeyTotalWords, _totalWordsFound);
+                GameStorage.SetInt(PrefKeyTotalWords, _totalWordsFound);
             }
         }
 
@@ -133,7 +133,7 @@ namespace WordPuzzle.Services
             set
             {
                 _totalBonusWordsFound = Mathf.Max(0, value);
-                PlayerPrefs.SetInt(PrefKeyTotalBonusWords, _totalBonusWordsFound);
+                GameStorage.SetInt(PrefKeyTotalBonusWords, _totalBonusWordsFound);
             }
         }
 
@@ -170,28 +170,28 @@ namespace WordPuzzle.Services
 
         public void LoadAll()
         {
-            _currentLevelIndex = Mathf.Max(1, PlayerPrefs.GetInt(PrefKeyCurrentLevel, 1));
-            _highestUnlockedLevel = Mathf.Max(_currentLevelIndex, PlayerPrefs.GetInt(PrefKeyHighestLevel, 1));
-            _coins = PlayerPrefs.GetInt(PrefKeyCoins, DefaultStartingCoins);
-            _totalScore = PlayerPrefs.GetInt(PrefKeyTotalScore, 0);
-            _totalWordsFound = PlayerPrefs.GetInt(PrefKeyTotalWords, 0);
-            _totalBonusWordsFound = PlayerPrefs.GetInt(PrefKeyTotalBonusWords, 0);
+            _currentLevelIndex = Mathf.Max(1, GameStorage.GetInt(PrefKeyCurrentLevel, 1));
+            _highestUnlockedLevel = Mathf.Max(_currentLevelIndex, GameStorage.GetInt(PrefKeyHighestLevel, 1));
+            _coins = GameStorage.GetInt(PrefKeyCoins, DefaultStartingCoins);
+            _totalScore = GameStorage.GetInt(PrefKeyTotalScore, 0);
+            _totalWordsFound = GameStorage.GetInt(PrefKeyTotalWords, 0);
+            _totalBonusWordsFound = GameStorage.GetInt(PrefKeyTotalBonusWords, 0);
         }
 
         public void SaveAll()
         {
-            PlayerPrefs.SetInt(PrefKeyCurrentLevel, _currentLevelIndex);
-            PlayerPrefs.SetInt(PrefKeyHighestLevel, _highestUnlockedLevel);
-            PlayerPrefs.SetInt(PrefKeyCoins, _coins);
-            PlayerPrefs.SetInt(PrefKeyTotalScore, _totalScore);
-            PlayerPrefs.SetInt(PrefKeyTotalWords, _totalWordsFound);
-            PlayerPrefs.SetInt(PrefKeyTotalBonusWords, _totalBonusWordsFound);
-            PlayerPrefs.Save();
+            GameStorage.SetInt(PrefKeyCurrentLevel, _currentLevelIndex);
+            GameStorage.SetInt(PrefKeyHighestLevel, _highestUnlockedLevel);
+            GameStorage.SetInt(PrefKeyCoins, _coins);
+            GameStorage.SetInt(PrefKeyTotalScore, _totalScore);
+            GameStorage.SetInt(PrefKeyTotalWords, _totalWordsFound);
+            GameStorage.SetInt(PrefKeyTotalBonusWords, _totalBonusWordsFound);
+            GameStorage.Save();
         }
 
         public int GetStarsForLevel(int levelIndex)
         {
-            return Mathf.Clamp(PlayerPrefs.GetInt(PrefKeyStarsPrefix + levelIndex, 0), 0, 3);
+            return Mathf.Clamp(GameStorage.GetInt(PrefKeyStarsPrefix + levelIndex, 0), 0, 3);
         }
 
         public void SetStarsForLevel(int levelIndex, int stars)
@@ -199,14 +199,14 @@ namespace WordPuzzle.Services
             int currentStars = GetStarsForLevel(levelIndex);
             if (stars > currentStars)
             {
-                PlayerPrefs.SetInt(PrefKeyStarsPrefix + levelIndex, Mathf.Clamp(stars, 1, 3));
-                PlayerPrefs.Save();
+                GameStorage.SetInt(PrefKeyStarsPrefix + levelIndex, Mathf.Clamp(stars, 1, 3));
+                GameStorage.Save();
             }
         }
 
         public bool HasSavedLevelState(int levelIndex)
         {
-            return PlayerPrefs.HasKey(PrefKeyLevelStatePrefix + levelIndex);
+            return GameStorage.HasKey(PrefKeyLevelStatePrefix + levelIndex);
         }
 
         public bool TryGetSavedLevelState(int levelIndex, string fingerprint, out List<string> solvedWords, out List<string> bonusWords, out int hintsUsed)
@@ -216,9 +216,9 @@ namespace WordPuzzle.Services
             hintsUsed = 0;
 
             string key = PrefKeyLevelStatePrefix + levelIndex;
-            if (!PlayerPrefs.HasKey(key)) return false;
+            if (!GameStorage.HasKey(key)) return false;
 
-            string json = PlayerPrefs.GetString(key, "");
+            string json = GameStorage.GetString(key, "");
             if (string.IsNullOrEmpty(json)) return false;
 
             try
@@ -266,23 +266,23 @@ namespace WordPuzzle.Services
             };
 
             string json = JsonUtility.ToJson(data);
-            PlayerPrefs.SetString(PrefKeyLevelStatePrefix + levelIndex, json);
-            PlayerPrefs.Save();
+            GameStorage.SetString(PrefKeyLevelStatePrefix + levelIndex, json);
+            GameStorage.Save();
         }
 
         public void ClearLevelState(int levelIndex)
         {
             string key = PrefKeyLevelStatePrefix + levelIndex;
-            if (PlayerPrefs.HasKey(key))
+            if (GameStorage.HasKey(key))
             {
-                PlayerPrefs.DeleteKey(key);
-                PlayerPrefs.Save();
+                GameStorage.DeleteKey(key);
+                GameStorage.Save();
             }
         }
 
         public float GetBestTime(int levelIndex)
         {
-            return PlayerPrefs.GetFloat(PrefKeyBestTimePrefix + levelIndex, 0f);
+            return GameStorage.GetFloat(PrefKeyBestTimePrefix + levelIndex, 0f);
         }
 
         public void SubmitTime(int levelIndex, float seconds)
@@ -292,8 +292,8 @@ namespace WordPuzzle.Services
             float best = GetBestTime(levelIndex);
             if (best > 0f && seconds >= best) return;   // slower than the record, so not a record
 
-            PlayerPrefs.SetFloat(PrefKeyBestTimePrefix + levelIndex, seconds);
-            PlayerPrefs.Save();
+            GameStorage.SetFloat(PrefKeyBestTimePrefix + levelIndex, seconds);
+            GameStorage.Save();
         }
 
         /// <summary>
@@ -316,8 +316,8 @@ namespace WordPuzzle.Services
             _totalBonusWordsFound = 0;
 
             // Clear all stored keys and level states completely
-            PlayerPrefs.DeleteAll();
-            PlayerPrefs.Save();
+            GameStorage.DeleteAll();
+            GameStorage.Save();
 
             // Re-save fresh clean defaults
             SaveAll();

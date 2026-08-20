@@ -31,12 +31,28 @@ namespace WordPuzzle.Gameplay
         public float selectionRadius = 0.28f;
         public float nodeSize = 0.44f;
 
-        [Tooltip("Fraction of the screen width the wheel may span. Below this the ring shrinks to fit.")]
-        [Range(0.4f, 1f)]
+        [Tooltip("Fraction of the screen width the wheel may span in portrait, where it has " +
+                 "the full width to itself.")]
+        [Range(0.3f, 1f)]
         public float wheelWidthFraction = 0.86f;
+
+        [Tooltip("Fraction of the screen width the wheel may span in landscape, where it shares " +
+                 "the screen with the grid.")]
+        [Range(0.2f, 0.8f)]
+        public float landscapeWidthFraction = 0.4f;
+
+        [Header("Placement")]
+        [Tooltip("Viewport point the ring centres on in portrait: bottom centre, under the grid.")]
+        public Vector2 portraitAnchor = new Vector2(0.5f, 0.22f);
+
+        [Tooltip("Viewport point in landscape: left of centre, with the grid on the right.")]
+        public Vector2 landscapeAnchor = new Vector2(0.22f, 0.45f);
 
         [Tooltip("Never shrink nodes below this, even if the ring then overflows.")]
         public float minNodeSize = 0.2f;
+
+        [Tooltip("Largest a letter may grow to when there is room to spare.")]
+        public float maxNodeSize = 0.85f;
 
         [Tooltip("Letter size in node-local units. Lower values leave more margin inside the circle.")]
         public float letterFontSize = 2.1f;
@@ -98,6 +114,8 @@ namespace WordPuzzle.Gameplay
             // grows with letter count, and on a narrow-aspect device (a 4:3 tablet, where the
             // camera's vertical extent is fixed but horizontal is tighter) a 7-letter wheel at
             // the authored size runs past both edges.
+            MoveToAnchor();
+
             _fittedNodeSize = FitNodeSize(count);
             float radius = GetRingRadius(count);
             float angleStep = 360f / count;
@@ -177,6 +195,36 @@ namespace WordPuzzle.Gameplay
             return path.Count > 0;
         }
 
+        private void OnEnable() => LayoutService.LayoutChanged += OnLayoutChanged;
+
+        private void OnDisable() => LayoutService.LayoutChanged -= OnLayoutChanged;
+
+        /// <summary>
+        /// Rebuilt rather than repositioned: the ring's radius depends on the width it is
+        /// allowed, which differs between orientations, so moving it alone would leave a
+        /// portrait-sized wheel sitting in the landscape slot.
+        /// </summary>
+        private void OnLayoutChanged(ScreenLayout layout)
+        {
+            if (!string.IsNullOrEmpty(_wheelLetters)) SetupWheel(_wheelLetters);
+        }
+
+        /// <summary>
+        /// Puts the ring where the current orientation wants it: bottom centre in portrait,
+        /// left of centre in landscape with the grid taking the right.
+        /// </summary>
+        private void MoveToAnchor()
+        {
+            if (_mainCamera == null) _mainCamera = Camera.main;
+            if (_mainCamera == null) return;
+
+            Vector2 anchor = LayoutService.IsLandscape ? landscapeAnchor : portraitAnchor;
+
+            float depth = Mathf.Abs(_mainCamera.transform.position.z - transform.position.z);
+            Vector3 world = _mainCamera.ViewportToWorldPoint(new Vector3(anchor.x, anchor.y, depth));
+            transform.position = new Vector3(world.x, world.y, transform.position.z);
+        }
+
         /// <summary>Node size actually in use, which is the authored size until the screen forces it down.</summary>
         private float EffectiveNodeSize => _fittedNodeSize > 0f ? _fittedNodeSize : nodeSize;
 
@@ -204,15 +252,19 @@ namespace WordPuzzle.Gameplay
                 _mainCamera.ViewportToWorldPoint(new Vector3(1f, 0.5f, depth)).x -
                 _mainCamera.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, depth)).x);
 
-            float available = halfWidth * 2f * wheelWidthFraction;
+            float fraction = LayoutService.IsLandscape ? landscapeWidthFraction : wheelWidthFraction;
+            float available = halfWidth * 2f * fraction;
 
             // Ring outer diameter at the authored size, including the backdrop ring.
             float chord = nodeSize * nodeSpacingRatio;
             float radius = chord / (2f * Mathf.Sin(Mathf.PI / count));
             float diameter = (radius + nodeSize * 0.5f + backdropPadding) * 2f;
-            if (diameter <= available || diameter <= 0.0001f) return nodeSize;
+            if (diameter <= 0.0001f) return nodeSize;
 
-            return Mathf.Max(nodeSize * (available / diameter), minNodeSize);
+            // Scales both ways: a four-letter wheel on a wide screen was a tiny cluster in a
+            // large empty column, which is what made landscape look unfinished.
+            float scaled = nodeSize * (available / diameter);
+            return Mathf.Clamp(scaled, minNodeSize, maxNodeSize);
         }
 
         /// <summary>

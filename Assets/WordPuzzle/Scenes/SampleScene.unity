@@ -469,7 +469,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &852907839
 SpriteRenderer:
   serializedVersion: 2
@@ -1073,6 +1073,8 @@ GameObject:
   - component: {fileID: 1963892653}
   - component: {fileID: 1963892654}
   - component: {fileID: 1963892655}
+  - component: {fileID: 1963892657}
+  - component: {fileID: 1963892656}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -1238,6 +1240,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19ad353987816274b9d6f7f1b8a291ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WordPuzzle.Services.WordCollectionService
+--- !u!114 &1963892656
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1963892648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20462917d59dd8248933599e1fc8d0ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordPuzzle.Services.CrazyGamesBridge
+--- !u!114 &1963892657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1963892648}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb0fc9a101965444380ab93c2f120163, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WordPuzzle.Services.LayoutService
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

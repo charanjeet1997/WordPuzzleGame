@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using WordPuzzle.Services;
 
 namespace WordPuzzle.Models
 {
@@ -38,7 +39,7 @@ namespace WordPuzzle.Models
             {
                 if (!_loaded)
                 {
-                    _current = (GameMode)PlayerPrefs.GetInt(PrefKeyLastMode, (int)GameMode.Classic);
+                    _current = (GameMode)GameStorage.GetInt(PrefKeyLastMode, (int)GameMode.Classic);
                     _loaded = true;
                 }
                 return _current;
@@ -61,8 +62,8 @@ namespace WordPuzzle.Models
 
             _current = mode;
             _loaded = true;
-            PlayerPrefs.SetInt(PrefKeyLastMode, (int)mode);
-            PlayerPrefs.Save();
+            GameStorage.SetInt(PrefKeyLastMode, (int)mode);
+            GameStorage.Save();
 
             ModeChanged?.Invoke(mode);
         }

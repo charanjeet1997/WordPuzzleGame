@@ -58,7 +58,7 @@ namespace WordPuzzle.Services
         }
 
         // Writes are batched rather than per word: a level can add eight entries, and
-        // PlayerPrefs.Save() flushes to disk every time it is called.
+        // GameStorage.Save() flushes to disk every time it is called.
         private void OnApplicationPause(bool paused)
         {
             if (paused) Save();
@@ -88,7 +88,7 @@ namespace WordPuzzle.Services
 
         private void LoadDiscovered()
         {
-            string stored = PlayerPrefs.GetString(PrefKeyDiscovered, string.Empty);
+            string stored = GameStorage.GetString(PrefKeyDiscovered, string.Empty);
             if (string.IsNullOrEmpty(stored)) return;
 
             foreach (string word in stored.Split(','))
@@ -135,8 +135,8 @@ namespace WordPuzzle.Services
         {
             if (!_dirty) return;
 
-            PlayerPrefs.SetString(PrefKeyDiscovered, string.Join(",", _discovered));
-            PlayerPrefs.Save();
+            GameStorage.SetString(PrefKeyDiscovered, string.Join(",", _discovered));
+            GameStorage.Save();
             _dirty = false;
         }
 
@@ -144,8 +144,8 @@ namespace WordPuzzle.Services
         public void ResetCollection()
         {
             _discovered.Clear();
-            PlayerPrefs.DeleteKey(PrefKeyDiscovered);
-            PlayerPrefs.Save();
+            GameStorage.DeleteKey(PrefKeyDiscovered);
+            GameStorage.Save();
             _dirty = false;
         }
     }

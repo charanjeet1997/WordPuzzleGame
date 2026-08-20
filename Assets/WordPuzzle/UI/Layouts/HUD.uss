@@ -337,3 +337,56 @@
 .word-toast--neutral .word-toast-note {
     color: rgba(255, 255, 255, 0.6);
 }
+
+
+/* ============================================================ landscape
+   The wheel moves to the left half and the grid takes the right, so the lower stack no
+   longer reserves a tall band beneath itself - that space is now the wheel's column, not
+   empty screen. The word preview and the action buttons move to the right of the wheel. */
+
+.layout--landscape .word-preview-box {
+    /* Portrait holds 720px open for the world-space wheel below. In landscape the wheel is
+       beside the UI, not under it, so that reservation is pure wasted height. */
+    margin-bottom: 24px;
+}
+
+.layout--landscape .hud-lower {
+    padding-bottom: 36px;
+}
+
+.layout--landscape .word-toast {
+    width: 640px;
+    margin-bottom: 18px;
+}
+
+/* Compact top bar: landscape is short, and the bar is competing with the grid for height. */
+.layout--landscape .icon-btn-round {
+    width: 84px;
+    height: 84px;
+}
+
+.layout--landscape .btn-icon {
+    width: 39px;
+    height: 39px;
+}
+
+.layout--landscape .level-info-pill,
+.layout--landscape .stat-pill {
+    min-height: 84px;
+    height: 84px;
+}
+
+.layout--landscape .action-btn {
+    width: 132px;
+    height: 132px;
+}
+
+.layout--landscape .action-icon {
+    width: 60px;
+    height: 60px;
+}
+
+.layout--landscape .action-column {
+    width: 168px;
+    margin: 0 15px;
+}

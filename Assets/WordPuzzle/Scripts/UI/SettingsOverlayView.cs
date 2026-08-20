@@ -5,6 +5,7 @@ using WordPuzzle.Audio;
 using WordPuzzle.Feedback;
 using WordPuzzle.Managers;
 using WordPuzzle.Models;
+using WordPuzzle.Services;
 
 namespace WordPuzzle.UI
 {
@@ -192,8 +193,8 @@ namespace WordPuzzle.UI
             }
             else
             {
-                PlayerPrefs.DeleteAll();
-                PlayerPrefs.Save();
+                GameStorage.DeleteAll();
+                GameStorage.Save();
             }
 
             if (ServiceLocator.Current.Has<WondersOfWordGameModel>())

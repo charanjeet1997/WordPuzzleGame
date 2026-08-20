@@ -47,9 +47,18 @@ MonoBehaviour:
   tileSize: 0.4615
   tileSpacing: 0.046
   viewCamera: {fileID: 0}
-  areaBottom: 0.52
-  areaTop: 0.94
-  areaWidth: 0.92
+  portraitArea:
+    serializedVersion: 2
+    x: 0.04
+    y: 0.52
+    width: 0.92
+    height: 0.42
+  landscapeArea:
+    serializedVersion: 2
+    x: 0.45
+    y: 0.08
+    width: 0.52
+    height: 0.84
   minTileSize: 0.16
   letterFontSize: 2.4
   letterFont: {fileID: 0}
@@ -264,6 +273,9 @@ MonoBehaviour:
   selectionRadius: 0.28
   nodeSize: 0.44
   wheelWidthFraction: 0.86
+  landscapeWidthFraction: 0.4
+  portraitAnchor: {x: 0.5, y: 0.22}
+  landscapeAnchor: {x: 0.22, y: 0.45}
   minNodeSize: 0.2
   letterFontSize: 2.1
   letterFont: {fileID: 0}

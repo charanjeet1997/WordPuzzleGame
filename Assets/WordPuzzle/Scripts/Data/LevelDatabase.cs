@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using WordPuzzle.Services;
 
 namespace WordPuzzle.Data
 {
@@ -83,12 +84,12 @@ namespace WordPuzzle.Data
         /// </summary>
         private static int GetSeed()
         {
-            if (!PlayerPrefs.HasKey(PrefKeyShuffleSeed))
+            if (!GameStorage.HasKey(PrefKeyShuffleSeed))
             {
-                PlayerPrefs.SetInt(PrefKeyShuffleSeed, Random.Range(1, int.MaxValue));
-                PlayerPrefs.Save();
+                GameStorage.SetInt(PrefKeyShuffleSeed, Random.Range(1, int.MaxValue));
+                GameStorage.Save();
             }
-            return PlayerPrefs.GetInt(PrefKeyShuffleSeed, 1);
+            return GameStorage.GetInt(PrefKeyShuffleSeed, 1);
         }
 
 #if UNITY_EDITOR

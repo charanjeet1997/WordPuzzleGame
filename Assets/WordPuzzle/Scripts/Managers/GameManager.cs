@@ -335,6 +335,9 @@ namespace WordPuzzle.Managers
 
             HapticManager.Play(HapticType.Heavy);
 
+            // Portal signal: a cleared level is the point the player is actually pleased.
+            CrazyGamesBridge.ReportHappyMoment();
+
             if (_uiManager != null && configLevelComplete != null)
             {
                 _uiManager.ShowOverlay(configLevelComplete);

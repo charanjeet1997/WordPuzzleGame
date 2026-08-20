@@ -1,4 +1,5 @@
 using UnityEngine;
+using WordPuzzle.Services;
 
 namespace WordPuzzle.Feedback
 {
@@ -42,7 +43,7 @@ namespace WordPuzzle.Feedback
             {
                 if (!_loaded)
                 {
-                    _enabled = PlayerPrefs.GetInt(PrefKeyHapticsEnabled, 1) == 1;
+                    _enabled = GameStorage.GetInt(PrefKeyHapticsEnabled, 1) == 1;
                     _loaded = true;
                 }
                 return _enabled;
@@ -58,8 +59,8 @@ namespace WordPuzzle.Feedback
         {
             _enabled = enabled;
             _loaded = true;
-            PlayerPrefs.SetInt(PrefKeyHapticsEnabled, enabled ? 1 : 0);
-            PlayerPrefs.Save();
+            GameStorage.SetInt(PrefKeyHapticsEnabled, enabled ? 1 : 0);
+            GameStorage.Save();
 
             // Confirm the switch with the thing being switched on.
             if (enabled) Play(HapticType.Light);

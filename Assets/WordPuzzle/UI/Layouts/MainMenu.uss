@@ -1,11 +1,16 @@
 /* Ported from "Word Wonders Screens" S01 (Main Menu). Design px x3. */
 
+/* The panel paints the background itself, exactly as the splash screen does:
+   scale-and-crop covers whatever shape the screen is, so there are no bars at the sides in
+   landscape and it needs no world-space sprite or fitter behind it. */
 .menu-container {
     flex-grow: 1;
     width: 100%;
     height: 100%;
     align-items: center;
     justify-content: space-between;
+    background-image: url("../../Sprites/game_background.png");
+    -unity-background-scale-mode: scale-and-crop;
     background-color: rgba(0, 0, 0, 0);
 }
 
@@ -52,6 +57,9 @@
 .icon-btn-round:hover { scale: 1.05 1.05; }
 .icon-btn-round:active { scale: 0.93 0.93; opacity: 0.85; }
 
+/* Children keep their natural height (flex-shrink 0): compressing them made "WORDS" sit on
+   top of "AURORA". Nothing clips it now because the panel shrink-to-fits, so the whole
+   design is guaranteed to fit the screen whatever its shape. */
 .center-content {
     flex-grow: 1;
     align-items: center;
@@ -60,13 +68,23 @@
     padding: 0 66px;
 }
 
+.center-content > * {
+    flex-shrink: 0;
+}
+
 /* ------------------------------------------------------------------ title */
 .title-lockup {
     align-items: center;
+    flex-shrink: 0;
     margin-bottom: 102px;
 }
 
+/* Explicit heights: a Label's line box is taller than its glyphs, and the negative margin
+   below is measured against this rather than against whatever the font happens to report. */
 .game-title {
+    height: 132px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
     font-size: 126px;
     -unity-font-style: bold;
     color: #f6dd9a;
@@ -76,15 +94,19 @@
 
 /* Negative top margin pulls the wordmark up under the title, as in the design. */
 .game-subtitle {
+    height: 78px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
     font-size: 72px;
     -unity-font-style: bold;
     color: #cfe8ea;
     letter-spacing: 18px;
-    margin-top: -18px;
+    margin-top: -6px;
 }
 
 /* ------------------------------------------------------------------ chapter card */
 .chapter-card {
+    flex-shrink: 0;
     background-image: url("../../Sprites/slices/panel_card.png");
     -unity-slice-left: 42;
     -unity-slice-right: 42;
@@ -99,6 +121,8 @@
 }
 
 .chapter-card-row {
+    flex-shrink: 0;
+    min-height: 42px;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
@@ -119,6 +143,9 @@
 }
 
 .chapter-name {
+    height: 63px;
+    -unity-text-align: middle-left;
+    flex-shrink: 0;
     font-size: 57px;
     -unity-font-style: bold;
     color: #ffffff;
@@ -217,4 +244,44 @@
 /* Sound off: dim the speaker so the state is visible on an icon-only button. */
 .icon-btn--muted {
     opacity: 0.45;
+}
+
+
+/* ============================================================ landscape
+   A short window cannot carry the full-size title lockup and the chapter card, so the
+   type comes down rather than the layout scrambling. */
+
+.layout--landscape .game-title {
+    font-size: 84px;
+    height: 90px;
+}
+
+.layout--landscape .game-subtitle {
+    font-size: 48px;
+    height: 54px;
+    letter-spacing: 12px;
+}
+
+.layout--landscape .chapter-card {
+    max-width: 720px;
+    padding: 30px 42px;
+}
+
+.layout--landscape .chapter-name {
+    font-size: 42px;
+    height: 48px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.layout--landscape .btn-primary {
+    width: 480px;
+    height: 120px;
+    font-size: 48px;
+}
+
+.layout--landscape .btn-collection {
+    width: 480px;
+    padding: 15px;
+    margin-top: 18px;
 }

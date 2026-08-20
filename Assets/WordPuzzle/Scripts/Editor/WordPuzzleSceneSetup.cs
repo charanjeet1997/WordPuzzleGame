@@ -109,7 +109,11 @@ namespace WordPuzzle.Editor
                 bgSR.sprite = bgSpr;
                 bgSR.sortingOrder = -10;
                 bgObj.transform.position = new Vector3(0f, 0f, 10f);
-                bgObj.transform.localScale = Vector3.one;
+
+                // Scale is computed at runtime to cover whatever shape the screen is: the
+                // artwork is portrait, and a fixed scale leaves bars down the sides in
+                // landscape.
+                GetOrAddComponent<BackgroundFitter>(bgObj);
             }
 
             // 9. ProcessingUpdate (CommanTickManager)
@@ -148,6 +152,13 @@ namespace WordPuzzle.Editor
 
             // Tracks which words the player has discovered, for the collection screen.
             GetOrAddComponent<WordCollectionService>(managersObj);
+
+            // Watches the window shape and tells the grid, wheel and UI to rearrange.
+            GetOrAddComponent<LayoutService>(managersObj);
+
+            // Initialises the CrazyGames SDK and reports gameplay start/stop. Compiles to an
+            // empty component off WebGL, so it is harmless in the Android build.
+            GetOrAddComponent<CrazyGamesBridge>(managersObj);
             GameManager gameManager = GetOrAddComponent<GameManager>(managersObj);
             WordPuzzleInitializer initializer = GetOrAddComponent<WordPuzzleInitializer>(managersObj);
 

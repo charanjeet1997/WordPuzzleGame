@@ -7,6 +7,8 @@
     left: 0;
     right: 0;
     bottom: 0;
+    background-image: url("../../Sprites/game_background.png");
+    -unity-background-scale-mode: scale-and-crop;
     background-color: rgba(4, 10, 16, 0.86);
     align-items: center;
     justify-content: center;
