@@ -60,6 +60,7 @@ MonoBehaviour:
     width: 0.52
     height: 0.84
   minTileSize: 0.16
+  maxTileSize: 0.95
   letterFontSize: 2.4
   letterFont: {fileID: 0}
 --- !u!1 &4902043852229764415
@@ -277,6 +278,7 @@ MonoBehaviour:
   portraitAnchor: {x: 0.5, y: 0.22}
   landscapeAnchor: {x: 0.22, y: 0.45}
   minNodeSize: 0.2
+  maxNodeSize: 0.85
   letterFontSize: 2.1
   letterFont: {fileID: 0}
   showBackdrop: 0

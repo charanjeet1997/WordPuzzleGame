@@ -220,6 +220,12 @@ namespace WordPuzzle.UI
             if (_gameManager == null && ServiceLocator.Current.Has<GameManager>())
                 _gameManager = ServiceLocator.Current.Get<GameManager>();
 
+            if (ServiceLocator.Current.Has<WordCollectionService>())
+            {
+                var collection = ServiceLocator.Current.Get<WordCollectionService>();
+                AnalyticsService.CollectionOpened(collection.DiscoveredCount, collection.TotalCount);
+            }
+
             OnboardingFlow.MarkCollectionSeen();
             RefreshCollectionCount();
 

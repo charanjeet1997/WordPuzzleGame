@@ -135,6 +135,55 @@
     width: 100%;
 }
 
+/* ------------------------------------------------- scrollbar
+   UI Toolkit's default scroller is a grey Windows-style widget with arrow buttons at both
+   ends - visually from a different application than the rest of this card. Slimmed to a
+   thin gold thumb on a faint track, with the arrows removed. */
+.meanings-scroll .unity-scroller--vertical {
+    width: 18px;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    margin-left: 9px;
+}
+
+/* The two arrow buttons: nobody taps them on a touch screen. */
+.meanings-scroll .unity-scroller__low-button,
+.meanings-scroll .unity-scroller__high-button {
+    display: none;
+}
+
+.meanings-scroll .unity-base-slider--vertical {
+    width: 18px;
+    margin: 0;
+}
+
+.meanings-scroll .unity-base-slider__tracker {
+    background-color: rgba(255, 255, 255, 0.07);
+    border-width: 0;
+    border-radius: 9px;
+    width: 6px;
+    left: 6px;
+    margin: 0;
+}
+
+.meanings-scroll .unity-base-slider__dragger {
+    background-color: rgba(246, 221, 154, 0.75);
+    border-width: 0;
+    border-radius: 9px;
+    width: 8px;
+    left: 5px;
+    margin: 0;
+}
+
+.meanings-scroll .unity-base-slider__dragger:hover {
+    background-color: #f6dd9a;
+}
+
+/* The row list should not sit hard against the scrollbar. */
+.meanings-scroll .unity-scroll-view__content-container {
+    padding-right: 6px;
+}
+
 .meaning-row {
     width: 100%;
     padding: 18px 24px;

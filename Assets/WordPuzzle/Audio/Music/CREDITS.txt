@@ -1,23 +1,32 @@
-Background music
-================
+Background music - Aurora Words
+===============================
 
-Source : "Royalty free game music loops" by Pudgyplatypus
-URL    : https://opengameart.org/content/royalty-free-game-music-loops
-Licence: CC0 1.0 Universal (Public Domain Dedication)
-         https://creativecommons.org/publicdomain/zero/1.0/
+All tracks are CC0 1.0 Universal (public domain dedication):
+https://creativecommons.org/publicdomain/zero/1.0/
 
-CC0 means no attribution is required and the tracks may be used in a commercial
-game. This file is kept as a record of provenance, not as a licence obligation.
+CC0 requires no attribution and permits commercial use. This file records provenance and
+credits the creators as a courtesy, not as an obligation.
 
-Tracks used (renamed from the original pack):
+  BGM_Piano_Vaporware.mp3    "Calm Piano 1 (Vaporware)"
+                             The Cynic Project - cynicmusic.com / pixelsphere.org
+                             https://opengameart.org/content/calm-piano-1-vaporware
 
-  BGM_Chillstep_1.wav  <- Chillstep_1.wav
-  BGM_Chillstep_2.wav  <- Chillstep_2.wav
-  BGM_Ambient_1.wav    <- FutureAmbient_1.wav
-  BGM_Ambient_2.wav    <- FutureAmbient_4.wav
-  BGM_Melodic_1.wav    <- MelodicHouse_1.wav
-  BGM_Melodic_2.wav    <- MelodicHouse_3.wav
+  BGM_Ambient_Nightfall.mp3  "Calm Ambient 1 (Synthwave 4k)"
+                             The Cynic Project - cynicmusic.com / pixelsphere.org
+                             https://opengameart.org/content/calm-ambient-1-synthwave-4k
 
-Adding a track: drop any AudioClip into this folder and re-run
-WordPuzzle > Setup (WordPuzzleSceneSetup) - MusicPlayer's playlist is rebuilt from
-every clip in this folder.
+  BGM_Contemplation.mp3      "Contemplation" by Joth
+                             https://opengameart.org/content/contemplation-0
+
+  BGM_Chilly_Bells.wav       "Chilly Bells" by Pro Sensory
+                             https://opengameart.org/content/chilly-bells
+
+These replaced an earlier set of chillstep / house loops, which were energetic dance tracks
+at odds with a slow word puzzle - the wrong music for a game people play to unwind.
+
+Adding a track: drop any AudioClip into this folder and re-run Aurora Words > Setup Scene.
+MusicPlayer's playlist is rebuilt from every clip here.
+
+Note on size: BGM_Chilly_Bells.wav is ~23 MB as source. Unity compresses it to streaming
+Vorbis in the build (see MusicImportSettings.cs), so the shipped size is far smaller - but
+delete it if repository size matters more than having a fourth track.

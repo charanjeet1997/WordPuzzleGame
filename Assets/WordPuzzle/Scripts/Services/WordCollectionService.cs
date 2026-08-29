@@ -16,6 +16,12 @@ namespace WordPuzzle.Services
         private const string PrefKeyDiscovered = "WordCollection_Discovered";
         private const string TargetListResource = "word_list_targets";
 
+        /// <summary>
+        /// Marks a bitmask payload, as "b1:signature:base64". Anything without this prefix is
+        /// the older comma-joined word list and is read once, then rewritten in the new form.
+        /// </summary>
+        private const string BitmaskPrefix = "b1:";
+
         /// <summary>Every collectable word, alphabetical. Bonus-only words are not collectable.</summary>
         private readonly List<string> _allWords = new List<string>();
 
@@ -91,9 +97,102 @@ namespace WordPuzzle.Services
             string stored = GameStorage.GetString(PrefKeyDiscovered, string.Empty);
             if (string.IsNullOrEmpty(stored)) return;
 
+            if (stored.StartsWith(BitmaskPrefix, StringComparison.Ordinal))
+            {
+                LoadBitmask(stored);
+                return;
+            }
+
+            // Legacy comma-joined list. Read as-is; the next Save writes a bitmask.
             foreach (string word in stored.Split(','))
             {
                 if (word.Length > 0) _discovered.Add(word);
+            }
+
+            _dirty = true;
+        }
+
+        /// <summary>
+        /// A bit per catalogue word, packed and base64'd. The comma-joined list reached about
+        /// 50 KB at full completion, which is a heavy write against the 1 MB the portal allows
+        /// for the whole save; the bitmask is roughly 1 KB regardless of progress.
+        ///
+        /// Bit positions are indices into the alphabetical catalogue, so they are only
+        /// meaningful for the exact word list that produced them. The signature guards that.
+        /// </summary>
+        private void LoadBitmask(string stored)
+        {
+            string[] parts = stored.Split(':');
+            if (parts.Length != 3)
+            {
+                Debug.LogWarning("[WordCollectionService] Malformed collection payload - ignoring.");
+                return;
+            }
+
+            if (parts[1] != CatalogueSignature())
+            {
+                // The word list changed since this was written, so every bit now points at a
+                // different word. Discarding is the only honest option: keeping them would
+                // show words the player never found.
+                Debug.LogWarning("[WordCollectionService] Saved collection was built against a " +
+                                 "different word list and has been discarded.");
+                _dirty = true;
+                return;
+            }
+
+            byte[] bits;
+            try
+            {
+                bits = Convert.FromBase64String(parts[2]);
+            }
+            catch (FormatException)
+            {
+                Debug.LogWarning("[WordCollectionService] Collection payload was not valid base64.");
+                return;
+            }
+
+            for (int i = 0; i < _allWords.Count; i++)
+            {
+                int index = i >> 3;
+                if (index >= bits.Length) break;
+
+                if ((bits[index] & (1 << (i & 7))) != 0) _discovered.Add(_allWords[i]);
+            }
+        }
+
+        private string EncodeBitmask()
+        {
+            var bits = new byte[(_allWords.Count + 7) / 8];
+
+            for (int i = 0; i < _allWords.Count; i++)
+            {
+                if (!_discovered.Contains(_allWords[i])) continue;
+                bits[i >> 3] |= (byte)(1 << (i & 7));
+            }
+
+            return BitmaskPrefix + CatalogueSignature() + ":" + Convert.ToBase64String(bits);
+        }
+
+        /// <summary>
+        /// Identifies the catalogue a bitmask was built against - word count plus an FNV-1a
+        /// hash of the words themselves. Cheap, and changes if a single word is added,
+        /// removed or reordered.
+        /// </summary>
+        private string CatalogueSignature()
+        {
+            unchecked
+            {
+                const uint offset = 2166136261;
+                const uint prime = 16777619;
+
+                uint hash = offset;
+                foreach (string word in _allWords)
+                {
+                    foreach (char c in word) hash = (hash ^ c) * prime;
+                    hash = (hash ^ (byte)'|') * prime;
+                }
+
+                return _allWords.Count.ToString() + "-" + hash.ToString("x8");
             }
         }
 
@@ -135,7 +234,7 @@ namespace WordPuzzle.Services
         {
             if (!_dirty) return;
 
-            GameStorage.SetString(PrefKeyDiscovered, string.Join(",", _discovered));
+            GameStorage.SetString(PrefKeyDiscovered, EncodeBitmask());
             GameStorage.Save();
             _dirty = false;
         }

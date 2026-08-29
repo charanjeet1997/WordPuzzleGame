@@ -6,8 +6,6 @@
     height: 100%;
     align-items: center;
     justify-content: space-between;
-    background-image: url("../../Sprites/game_background.png");
-    -unity-background-scale-mode: scale-and-crop;
     background-color: rgba(0, 0, 0, 0);
     opacity: 1;
     transition-property: opacity;

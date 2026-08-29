@@ -189,6 +189,8 @@ namespace WordPuzzle.Managers
             {
                 _uiManager.ShowView(configHUD);
             }
+
+            AnalyticsService.LevelStarted(lvlIndex, GameModeContext.DisplayName(GameModeContext.Current));
         }
 
         private void SpawnWorldIfRequired()
@@ -228,7 +230,7 @@ namespace WordPuzzle.Managers
         }
 
         /// <summary>
-        /// Opens the mode carousel. PLAY routes here rather than straight into a level so the
+        /// Opens mode select. PLAY routes here rather than straight into a level so the
         /// player picks which campaign to continue - the two advance independently.
         /// </summary>
         public void ShowModeSelect()
@@ -337,6 +339,15 @@ namespace WordPuzzle.Managers
 
             // Portal signal: a cleared level is the point the player is actually pleased.
             CrazyGamesBridge.ReportHappyMoment();
+
+            if (_model != null)
+            {
+                AnalyticsService.LevelCompleted(
+                    _model.CurrentLevelIndex.Value,
+                    GameModeContext.DisplayName(GameModeContext.Current),
+                    _model.LevelSeconds.Value,
+                    _model.HintsUsed.Value);
+            }
 
             if (_uiManager != null && configLevelComplete != null)
             {

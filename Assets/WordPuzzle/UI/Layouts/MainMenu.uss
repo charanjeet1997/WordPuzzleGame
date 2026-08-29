@@ -1,16 +1,13 @@
 /* Ported from "Word Wonders Screens" S01 (Main Menu). Design px x3. */
 
-/* The panel paints the background itself, exactly as the splash screen does:
-   scale-and-crop covers whatever shape the screen is, so there are no bars at the sides in
-   landscape and it needs no world-space sprite or fitter behind it. */
+/* Transparent: the scene background is rendered behind the panel, so painting one here
+   would just cover it with a second copy. */
 .menu-container {
     flex-grow: 1;
     width: 100%;
     height: 100%;
     align-items: center;
     justify-content: space-between;
-    background-image: url("../../Sprites/game_background.png");
-    -unity-background-scale-mode: scale-and-crop;
     background-color: rgba(0, 0, 0, 0);
 }
 

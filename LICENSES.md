@@ -38,13 +38,17 @@ are distributed with this project.
 
 ## 3. Background music
 
-**Files:** `Assets/WordPuzzle/Audio/Music/*.wav`
+**Files:** `Assets/WordPuzzle/Audio/Music/*` (mp3 and wav)
 
-**Source:** "Royalty free game music loops" by **Pudgyplatypus**, via OpenGameArt.org —
-<https://opengameart.org/content/royalty-free-game-music-loops>
-
-**Licence:** CC0 1.0 Universal (public domain dedication) —
+**Licence:** all tracks CC0 1.0 Universal (public domain dedication) —
 <https://creativecommons.org/publicdomain/zero/1.0/>
+
+**Sources**, all via OpenGameArt.org:
+
+- "Calm Piano 1 (Vaporware)" and "Calm Ambient 1 (Synthwave 4k)" — The Cynic Project
+  (cynicmusic.com / pixelsphere.org)
+- "Contemplation" — Joth
+- "Chilly Bells" — Pro Sensory
 
 No attribution required and commercial use is permitted. Provenance is recorded in
 `Assets/WordPuzzle/Audio/Music/CREDITS.txt` as a record, not an obligation.

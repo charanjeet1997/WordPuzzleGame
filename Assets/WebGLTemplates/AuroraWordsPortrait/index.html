@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>{{{ PRODUCT_NAME }}}</title>
+  <link rel="icon" href="data:,">
   <style>
     html, body {
       margin: 0;
@@ -108,18 +109,22 @@
     window.addEventListener("orientationchange", resize);
     resize();
 
+    // Unity's macros expand to bare filenames, and the build output lives in a Build/
+    // subfolder next to index.html - without this prefix every file 404s.
+    var buildUrl = "Build";
+
     var script = document.createElement("script");
-    script.src = "{{{ LOADER_FILENAME }}}";
+    script.src = buildUrl + "/{{{ LOADER_FILENAME }}}";
     script.onload = function () {
       createUnityInstance(canvas, {
-        dataUrl: "{{{ DATA_FILENAME }}}",
-        frameworkUrl: "{{{ FRAMEWORK_FILENAME }}}",
-        codeUrl: "{{{ CODE_FILENAME }}}",
+        dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+        frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+        codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
 #if MEMORY_FILENAME
-        memoryUrl: "{{{ MEMORY_FILENAME }}}",
+        memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}",
 #endif
 #if SYMBOLS_FILENAME
-        symbolsUrl: "{{{ SYMBOLS_FILENAME }}}",
+        symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
 #endif
         streamingAssetsUrl: "StreamingAssets",
         companyName: "{{{ COMPANY_NAME }}}",

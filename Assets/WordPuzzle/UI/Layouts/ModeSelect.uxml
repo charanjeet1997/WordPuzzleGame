@@ -4,15 +4,28 @@
 
         <ui:Label text="CHOOSE A MODE" class="mode-title" />
 
-        <!-- Cards are built by ModeSelectView: the track repeats the mode list so the
-             carousel can wrap, which two modes alone could not fill three slots. -->
-        <ui:VisualElement name="mode-viewport" class="mode-viewport">
-            <ui:VisualElement name="mode-track" class="mode-track" />
-        </ui:VisualElement>
+        <!-- Two modes, two buttons. A carousel made the player drag to discover an option
+             that was always going to fit on screen. -->
+        <ui:VisualElement class="mode-list">
 
-        <ui:VisualElement name="mode-dots" class="mode-dots">
-            <ui:VisualElement name="dot-0" class="mode-dot mode-dot--active" />
-            <ui:VisualElement name="dot-1" class="mode-dot" />
+            <ui:Button name="btn-mode-classic" class="mode-option mode-option--selected">
+                <ui:VisualElement class="mode-icon" picking-mode="Ignore" />
+                <ui:VisualElement class="mode-option-text" picking-mode="Ignore">
+                    <ui:Label text="CLASSIC" class="mode-name" />
+                    <ui:Label text="Solve at your own pace. No timer, no pressure." class="mode-desc" />
+                    <ui:Label name="lbl-classic-progress" text="LEVEL 1" class="mode-stat" />
+                </ui:VisualElement>
+            </ui:Button>
+
+            <ui:Button name="btn-mode-timetrial" class="mode-option">
+                <ui:VisualElement class="mode-icon mode-icon--timed" picking-mode="Ignore" />
+                <ui:VisualElement class="mode-option-text" picking-mode="Ignore">
+                    <ui:Label text="TIME TRIAL" class="mode-name" />
+                    <ui:Label text="Same puzzles, against the clock." class="mode-desc" />
+                    <ui:Label name="lbl-timetrial-progress" text="LEVEL 1" class="mode-stat" />
+                </ui:VisualElement>
+            </ui:Button>
+
         </ui:VisualElement>
 
         <ui:Button name="btn-play-mode" text="PLAY" class="mode-play-button" />

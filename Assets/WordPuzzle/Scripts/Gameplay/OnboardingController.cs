@@ -4,6 +4,7 @@ using ServiceLocatorFramework;
 using DataBindingFramework;
 using WordPuzzle.Data;
 using WordPuzzle.Models;
+using WordPuzzle.Services;
 
 namespace WordPuzzle.Gameplay
 {
@@ -140,6 +141,7 @@ namespace WordPuzzle.Gameplay
 
             // Proven. The flow moves on to pointing at the collection, which now has words
             // in it and so is finally worth mentioning.
+            AnalyticsService.OnboardingStep("swipe_learned");
             OnboardingFlow.MarkSwipeLearned();
             enabled = false;
         }
