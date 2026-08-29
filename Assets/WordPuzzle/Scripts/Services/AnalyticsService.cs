@@ -6,11 +6,9 @@ namespace WordPuzzle.Services
     /// <summary>
     /// Game events, in one place, provider-agnostic.
     ///
-    /// CrazyGames deliberately has no custom-event API - it measures playtime and retention
-    /// itself from the gameplayStart/gameplayStop calls in CrazyGamesBridge, and its Analytics
-    /// module only reports purchases. So these events exist for the providers that do accept
-    /// them (Firebase on Android, or a portal that adds support later), and for reading in the
-    /// console while developing.
+    /// No provider is attached yet: events are raised, logged in the editor, and dropped in a
+    /// build. Firebase or any other backend subscribes to EventTracked without a single call
+    /// site changing.
     ///
     /// Instrumenting now rather than later matters because a publisher's first question is
     /// about D1 retention and level drop-off, and that data only exists if it was being

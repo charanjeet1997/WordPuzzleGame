@@ -22,7 +22,7 @@ namespace WordPuzzle.Services
     /// rearrange at the same moment, and three independent aspect checks would disagree for a
     /// frame and leave the wheel overlapping the grid. Polling rather than
     /// Screen.orientation because a resized desktop browser window changes shape without any
-    /// device rotation, and that is the common case on CrazyGames.
+    /// device rotation, and a resized browser window is the common case on the web.
     /// </summary>
     public class LayoutService : MonoBehaviour
     {

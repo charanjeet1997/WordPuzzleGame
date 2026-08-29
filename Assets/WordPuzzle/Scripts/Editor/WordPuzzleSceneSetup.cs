@@ -155,10 +155,6 @@ namespace WordPuzzle.Editor
 
             // Watches the window shape and tells the grid, wheel and UI to rearrange.
             GetOrAddComponent<LayoutService>(managersObj);
-
-            // Initialises the CrazyGames SDK and reports gameplay start/stop. Compiles to an
-            // empty component off WebGL, so it is harmless in the Android build.
-            GetOrAddComponent<CrazyGamesBridge>(managersObj);
             GameManager gameManager = GetOrAddComponent<GameManager>(managersObj);
             WordPuzzleInitializer initializer = GetOrAddComponent<WordPuzzleInitializer>(managersObj);
 

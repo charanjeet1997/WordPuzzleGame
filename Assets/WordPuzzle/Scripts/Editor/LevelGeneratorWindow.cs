@@ -153,6 +153,22 @@ namespace WordPuzzle.Editor
                 .ToList();
         }
 
+        /// <summary>
+        /// Runs a generation pass with the shipping defaults, without the window being open.
+        /// The window is created hidden purely to reuse its logic - the generation rules live
+        /// here, and duplicating them for a menu command would guarantee the two drift apart.
+        /// </summary>
+        public static void GenerateDefaultCampaign(TextAsset wordList)
+        {
+            var window = CreateInstance<LevelGeneratorWindow>();
+            window._wordListAsset = wordList;
+            window._appendInsteadOfReplace = false;
+            window.Generate();
+
+            Debug.Log("<color=green>[Aurora Words]</color> " + window._status);
+            DestroyImmediate(window);
+        }
+
         private void Generate()
         {
             List<string> words = LoadWords();
