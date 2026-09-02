@@ -50,9 +50,9 @@ MonoBehaviour:
   portraitArea:
     serializedVersion: 2
     x: 0.04
-    y: 0.52
+    y: 0.5
     width: 0.92
-    height: 0.42
+    height: 0.37
   landscapeArea:
     serializedVersion: 2
     x: 0.45
@@ -273,12 +273,13 @@ MonoBehaviour:
   nodeSpacingRatio: 1.55
   selectionRadius: 0.28
   nodeSize: 0.44
-  wheelWidthFraction: 0.86
+  wheelWidthFraction: 0.64
   landscapeWidthFraction: 0.4
-  portraitAnchor: {x: 0.5, y: 0.22}
+  portraitAnchor: {x: 0.5, y: 0.3}
   landscapeAnchor: {x: 0.22, y: 0.45}
   minNodeSize: 0.2
-  maxNodeSize: 0.85
+  maxNodeSize: 0.52
+  landscapeMaxNodeSize: 1.3
   letterFontSize: 2.1
   letterFont: {fileID: 0}
   showBackdrop: 0

@@ -21,7 +21,7 @@ namespace WordPuzzle.Gameplay
 
         [Tooltip("Viewport rect the grid may occupy in portrait: the band between the HUD bar " +
                  "and the letter wheel. x/y are the bottom-left corner, in 0-1 viewport coords.")]
-        public Rect portraitArea = new Rect(0.04f, 0.52f, 0.92f, 0.42f);
+        public Rect portraitArea = new Rect(0.04f, 0.50f, 0.92f, 0.37f);
 
         [Tooltip("Viewport rect in landscape. The wheel takes the left, so the grid sits on " +
                  "the right and gains most of the height back.")]

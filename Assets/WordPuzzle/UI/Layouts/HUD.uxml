@@ -27,8 +27,10 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- Lower stack sits beneath the world-space grid and letter wheel -->
-        <ui:VisualElement class="hud-lower">
+        <!-- Positioned against the root, not the lower stack: these sit at a fraction of the
+             screen height so they line up with the world-space grid and wheel. Inside the
+             lower stack a percentage measured against that container's own small height,
+             which put the preview behind the action buttons. -->
             <ui:VisualElement name="word-toast" class="word-toast" picking-mode="Ignore">
                 <ui:Label name="lbl-toast-word" text="" class="word-toast-word" />
                 <ui:Label name="lbl-toast-note" text="BONUS WORD" class="word-toast-note" />
@@ -38,6 +40,8 @@
                 <ui:Label name="lbl-word-preview" text="" class="word-preview-text" />
             </ui:VisualElement>
 
+        <!-- Lower stack sits beneath the world-space grid and letter wheel -->
+        <ui:VisualElement class="hud-lower">
             <ui:VisualElement class="hud-bottom-actions">
                 <ui:VisualElement class="action-column">
                     <ui:Button name="btn-shuffle" text="" class="action-btn">

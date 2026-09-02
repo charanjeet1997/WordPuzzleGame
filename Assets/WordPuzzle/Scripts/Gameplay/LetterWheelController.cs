@@ -34,7 +34,7 @@ namespace WordPuzzle.Gameplay
         [Tooltip("Fraction of the screen width the wheel may span in portrait, where it has " +
                  "the full width to itself.")]
         [Range(0.3f, 1f)]
-        public float wheelWidthFraction = 0.86f;
+        public float wheelWidthFraction = 0.64f;
 
         [Tooltip("Fraction of the screen width the wheel may span in landscape, where it shares " +
                  "the screen with the grid.")]
@@ -42,8 +42,9 @@ namespace WordPuzzle.Gameplay
         public float landscapeWidthFraction = 0.4f;
 
         [Header("Placement")]
-        [Tooltip("Viewport point the ring centres on in portrait: bottom centre, under the grid.")]
-        public Vector2 portraitAnchor = new Vector2(0.5f, 0.22f);
+        [Tooltip("Viewport point the ring centres on in portrait: above the action buttons, " +
+                 "below the grid. Not lower - at 0.22 the bottom letter sat on top of SHUFFLE.")]
+        public Vector2 portraitAnchor = new Vector2(0.5f, 0.30f);
 
         [Tooltip("Viewport point in landscape: left of centre, with the grid on the right.")]
         public Vector2 landscapeAnchor = new Vector2(0.22f, 0.45f);
@@ -51,8 +52,17 @@ namespace WordPuzzle.Gameplay
         [Tooltip("Never shrink nodes below this, even if the ring then overflows.")]
         public float minNodeSize = 0.2f;
 
-        [Tooltip("Largest a letter may grow to when there is room to spare.")]
-        public float maxNodeSize = 0.85f;
+        [Tooltip("Largest a letter may grow to in portrait, where the ring shares the column " +
+                 "with the grid above and the action buttons below. This is usually the " +
+                 "binding constraint in portrait, not the width fraction, so it is the knob " +
+                 "to turn to resize the ring there.")]
+        public float maxNodeSize = 0.52f;
+
+        [Tooltip("Largest a letter may grow to in landscape. Deliberately generous: landscape " +
+                 "has width to spare, so Landscape Width Fraction should be what decides the " +
+                 "size. At 0.62 this cap bound first and left the ring at a tenth of the " +
+                 "screen inside a budget of four times that.")]
+        public float landscapeMaxNodeSize = 1.3f;
 
         [Tooltip("Letter size in node-local units. Lower values leave more margin inside the circle.")]
         public float letterFontSize = 2.1f;
@@ -252,7 +262,8 @@ namespace WordPuzzle.Gameplay
                 _mainCamera.ViewportToWorldPoint(new Vector3(1f, 0.5f, depth)).x -
                 _mainCamera.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, depth)).x);
 
-            float fraction = LayoutService.IsLandscape ? landscapeWidthFraction : wheelWidthFraction;
+            bool landscape = LayoutService.IsLandscape;
+            float fraction = landscape ? landscapeWidthFraction : wheelWidthFraction;
             float available = halfWidth * 2f * fraction;
 
             // Ring outer diameter at the authored size, including the backdrop ring.
@@ -264,7 +275,7 @@ namespace WordPuzzle.Gameplay
             // Scales both ways: a four-letter wheel on a wide screen was a tiny cluster in a
             // large empty column, which is what made landscape look unfinished.
             float scaled = nodeSize * (available / diameter);
-            return Mathf.Clamp(scaled, minNodeSize, maxNodeSize);
+            return Mathf.Clamp(scaled, minNodeSize, landscape ? landscapeMaxNodeSize : maxNodeSize);
         }
 
         /// <summary>

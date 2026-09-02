@@ -98,7 +98,11 @@ namespace WordPuzzle.Editor
             {
                 bgObj = new GameObject("SceneBackground");
             }
-            Sprite bgSpr = Resources.Load<Sprite>("Sprites/game_background");
+            // Loaded by asset path, not Resources: the background is referenced directly by
+            // the scene, so there is no reason for a second copy under Resources/ that would
+            // ship in every build whether the scene used it or not.
+            Sprite bgSpr = AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/WordPuzzle/Sprites/scene_background_night_peaks.png");
             if (bgSpr == null)
             {
                 bgSpr = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/WordPuzzle/Sprites/game_background.png");
@@ -110,9 +114,9 @@ namespace WordPuzzle.Editor
                 bgSR.sortingOrder = -10;
                 bgObj.transform.position = new Vector3(0f, 0f, 10f);
 
-                // Scale is computed at runtime to cover whatever shape the screen is: the
-                // artwork is portrait, and a fixed scale leaves bars down the sides in
-                // landscape.
+                // Scale is computed at runtime to cover whatever shape the screen is. The
+                // artwork is a wide panorama, so on a portrait phone the cover crops hard to
+                // the sides and only the middle band of the image is on screen.
                 GetOrAddComponent<BackgroundFitter>(bgObj);
             }
 

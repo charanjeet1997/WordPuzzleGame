@@ -175,7 +175,13 @@
 }
 
 .word-toast {
-    /* Height grows with the text: the pill now carries a wrapped definition, not just a
+    /* Same scheme as the preview: a percentage of the screen, just above it. */
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    translate: -50% 0;
+
+    /* Height grows with the text: the pill carries a wrapped definition, not just a
        one-line caption, so a fixed height would clip it. */
     width: 820px;
     min-height: 132px;
@@ -185,11 +191,10 @@
     border-width: 0;
     align-items: center;
     justify-content: center;
-    margin-bottom: 30px;
     border-width: 0;
     opacity: 0;
     scale: 0.9 0.9;
-    translate: 0 18px;
+    translate: -50% 18px;
     transition-property: opacity, scale, translate;
     transition-duration: 0.2s, 0.2s, 0.2s;
 }
@@ -197,7 +202,7 @@
 .word-toast--visible {
     opacity: 1;
     scale: 1 1;
-    translate: 0 0;
+    translate: -50% 0;
 }
 
 .word-toast-word {
@@ -219,7 +224,16 @@
     -unity-text-align: middle-center;
 }
 
+/* Positioned as a fraction of the screen, not with a pixel margin.
+   The wheel and grid are placed in viewport coordinates by the gameplay code (wheel centred
+   at y 0.30, grid above y 0.50), so anything in the UI that has to sit between them must be
+   expressed the same way. A fixed margin was a number tuned for one phone: it put the
+   preview inside the grid on this one. */
 .word-preview-box {
+    position: absolute;
+    bottom: 41%;
+    left: 50%;
+    translate: -50% 0;
     background-image: url("../../Sprites/slices/bar_word_preview.png");
     -unity-slice-left: 58;
     -unity-slice-right: 58;
@@ -232,10 +246,6 @@
     min-height: 126px;
     min-width: 240px;
     padding: 0 60px;
-    /* Reserves the vertical band the world-space letter wheel occupies (220 design px
-       tall + 20 gap, x3). The wheel is rendered by the camera, not by this panel, so the
-       space has to be held open here or the preview would sit on top of it. */
-    margin-bottom: 720px;
 }
 
 .word-preview-text {
@@ -345,9 +355,13 @@
    empty screen. The word preview and the action buttons move to the right of the wheel. */
 
 .layout--landscape .word-preview-box {
-    /* Portrait holds 720px open for the world-space wheel below. In landscape the wheel is
-       beside the UI, not under it, so that reservation is pure wasted height. */
-    margin-bottom: 24px;
+    /* The wheel is beside the UI in landscape, not under it, so the preview drops to just
+       above the action row. */
+    bottom: 20%;
+}
+
+.layout--landscape .word-toast {
+    bottom: 34%;
 }
 
 .layout--landscape .hud-lower {

@@ -6,10 +6,13 @@ namespace WordPuzzle.Gameplay
     /// <summary>
     /// Scales the background sprite to cover the camera view, whatever shape the screen is.
     ///
-    /// The artwork is authored portrait, so on a landscape window a fixed scale leaves the
-    /// sides empty - the dark bars either side of the menu. Covering means scaling by the
-    /// larger of the two ratios and letting the excess run off the other axis, which is what
-    /// a background is for: it should never be the thing that runs out.
+    /// A fixed scale leaves the artwork short on one axis whenever the screen is a shape the
+    /// art was not authored for - dark bars either side of the menu. Covering means scaling
+    /// by the larger of the two ratios and letting the excess run off the other axis, which
+    /// is what a background is for: it should never be the thing that runs out.
+    ///
+    /// The current artwork is a wide panorama, so the axis that overflows is now the width:
+    /// on a portrait phone only the middle band of the image is on screen.
     /// </summary>
     // ExecuteAlways so the cover is visible while editing and when the Game view aspect is
     // changed, rather than only after entering play mode.
