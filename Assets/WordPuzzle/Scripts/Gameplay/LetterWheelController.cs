@@ -47,7 +47,7 @@ namespace WordPuzzle.Gameplay
         public Vector2 portraitAnchor = new Vector2(0.5f, 0.30f);
 
         [Tooltip("Viewport point in landscape: left of centre, with the grid on the right.")]
-        public Vector2 landscapeAnchor = new Vector2(0.22f, 0.45f);
+        public Vector2 landscapeAnchor = new Vector2(0.22f, 0.52f);
 
         [Tooltip("Never shrink nodes below this, even if the ring then overflows.")]
         public float minNodeSize = 0.2f;
@@ -78,8 +78,8 @@ namespace WordPuzzle.Gameplay
 
         [Header("LineRenderer Settings")]
         public LineRenderer lineRenderer;
-        public Color lineColor = new Color(0.965f, 0.867f, 0.604f, 0.85f);
-        public float lineWidth = 0.058f;
+        public Color lineColor = new Color(1.0f, 0.72f, 0.15f, 0.92f);
+        public float lineWidth = 0.038f;
 
         public event Action<string> OnWordSubmitted;
 
@@ -520,7 +520,7 @@ namespace WordPuzzle.Gameplay
             lineRenderer.endColor = lineColor;
 
             lineRenderer.useWorldSpace = true;
-            lineRenderer.sortingOrder = 10;
+            lineRenderer.sortingOrder = 4;
             lineRenderer.positionCount = 0;
 
             // A drag path doubles back sharply between nodes. With no corner/cap geometry the

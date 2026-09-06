@@ -20,16 +20,17 @@
 
 /* Larger than the design's 40px (=120px) circles - they read too small on device. */
 .icon-btn-round {
-    background-image: url("../../Sprites/slices/btn_icon_round.png");
-    background-color: rgba(0, 0, 0, 0);
-    border-width: 0;
+    background-color: rgba(12, 32, 60, 0.65);
+    border-radius: 84px;
+    border-width: 3px;
+    border-color: rgba(255, 255, 255, 0.85);
     width: 168px;
     height: 168px;
     align-items: center;
     justify-content: center;
     padding: 0;
-    transition-property: scale, opacity;
-    transition-duration: 0.12s, 0.12s;
+    transition-property: scale, opacity, background-color, border-color;
+    transition-duration: 0.12s, 0.12s, 0.12s, 0.12s;
 }
 
 /* Icons are sprites, not font glyphs: a glyph only renders if the active font happens
@@ -51,7 +52,11 @@
     background-image: url("../../Sprites/slices/icon_settings_gear.png");
 }
 
-.icon-btn-round:hover { scale: 1.05 1.05; }
+.icon-btn-round:hover {
+    scale: 1.05 1.05;
+    background-color: rgba(12, 32, 60, 0.85);
+    border-color: #ffd24d;
+}
 .icon-btn-round:active { scale: 0.93 0.93; opacity: 0.85; }
 
 /* Children keep their natural height (flex-shrink 0): compressing them made "WORDS" sit on
@@ -84,9 +89,11 @@
     flex-shrink: 0;
     font-size: 126px;
     -unity-font-style: bold;
-    color: #f6dd9a;
-    letter-spacing: 3px;
-    text-shadow: 0 9px 0 rgba(0, 0, 0, 0.35);
+    color: #ffffff;
+    letter-spacing: 4px;
+    -unity-text-outline-width: 4px;
+    -unity-text-outline-color: #0c2b53;
+    text-shadow: 0 10px 18px rgba(8, 28, 60, 0.7);
 }
 
 /* Negative top margin pulls the wordmark up under the title, as in the design. */
@@ -96,9 +103,12 @@
     flex-shrink: 0;
     font-size: 72px;
     -unity-font-style: bold;
-    color: #cfe8ea;
+    color: #ffd447;
     letter-spacing: 18px;
     margin-top: -6px;
+    -unity-text-outline-width: 2.5px;
+    -unity-text-outline-color: #0c2b53;
+    text-shadow: 0 6px 12px rgba(8, 28, 60, 0.6);
 }
 
 /* ------------------------------------------------------------------ chapter card */
@@ -111,10 +121,20 @@
     -unity-slice-bottom: 42;
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
-    width: 100%;
-    max-width: 810px;
+    width: 810px;
     padding: 48px 54px;
-    margin-bottom: 102px;
+    margin-right: 30px;
+}
+
+/* Locked chapters fade rather than vanish - the point of showing them is that they exist. */
+.chapter-card--locked {
+    opacity: 0.45;
+}
+
+.chapter-card--current {
+    border-width: 3px;
+    border-color: rgba(246, 221, 154, 0.5);
+    border-radius: 34px;
 }
 
 .chapter-card-row {
@@ -180,11 +200,11 @@
     background-image: url("../../Sprites/slices/btn_primary.png");
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
-    border-width: 0;
-    color: #4a2c05;
+    color: #3b1c00;
     font-size: 63px;
     -unity-font-style: bold;
     letter-spacing: 6px;
+    text-shadow: 0 2px 0 rgba(255, 255, 255, 0.75);
     transition-property: scale, opacity;
     transition-duration: 0.13s, 0.13s;
 }
@@ -197,40 +217,44 @@
     padding: 24px;
     margin-top: 30px;
     border-radius: 42px;
-    background-color: rgba(255, 255, 255, 0.07);
+    background-color: rgba(12, 32, 60, 0.78);
     border-width: 3px;
-    border-color: rgba(246, 221, 154, 0.35);
+    border-color: rgba(255, 215, 0, 0.8);
     align-items: center;
-    transition-property: scale, background-color;
-    transition-duration: 0.13s, 0.13s;
+    transition-property: scale, background-color, border-color;
+    transition-duration: 0.13s, 0.13s, 0.13s;
 }
 
 /* Pulses only while onboarding is pointing at it. USS has no keyframes, so the view
-   drives nothing here - the transition-free gold state is enough to draw the eye without
-   an animation loop to manage. */
+   drives nothing here - the transition-free gold state is enough to drive attention. */
 .btn-collection--prompt {
-    background-color: rgba(246, 221, 154, 0.22);
-    border-color: rgba(246, 221, 154, 0.9);
+    background-color: rgba(12, 32, 60, 0.95);
+    border-color: #ffd447;
     scale: 1.03 1.03;
 }
 
 .btn-collection--prompt .btn-collection-count {
-    color: #f6dd9a;
+    color: #ffd447;
 }
 
-.btn-collection:hover { background-color: rgba(255, 255, 255, 0.11); }
+.btn-collection:hover {
+    background-color: rgba(12, 32, 60, 0.92);
+    border-color: #ffd447;
+}
 .btn-collection:active { scale: 0.97 0.97; }
 
 .btn-collection-title {
     font-size: 33px;
     -unity-font-style: bold;
-    color: #f6dd9a;
+    color: #ffd447;
     letter-spacing: 3px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
 }
 
 .btn-collection-count {
     font-size: 27px;
-    color: rgba(255, 255, 255, 0.6);
+    color: #ffffff;
+    -unity-font-style: bold;
     margin-top: 4px;
 }
 
@@ -281,4 +305,39 @@
     width: 480px;
     padding: 15px;
     margin-top: 18px;
+}
+
+/* ============================================================ chapter carousel
+   The chapter card, one per chapter, scrolled sideways. */
+.chapter-carousel {
+    width: 100%;
+    flex-shrink: 0;
+    margin-bottom: 102px;
+}
+
+/* Padding on the strip's content, not on the ScrollView: on the ScrollView it would clip the
+   cards as they scroll under it, whereas here the first and last card simply start and end
+   inset from the screen edges. */
+.chapter-carousel-items {
+    flex-direction: row;
+    align-items: stretch;
+    padding-left: 72px;
+    padding-right: 72px;
+}
+
+/* No scrollbar: the strip is dragged, and a horizontal bar under the cards read as a stray
+   UI element rather than a control. The half-visible next card is the affordance instead.
+   Belt and braces with the ScrollView's own scroller-visibility attribute: the element is
+   matched here by name as well as class, since the class differs between Unity versions. */
+.chapter-carousel #unity-horizontal-scroller,
+.chapter-carousel #unity-vertical-scroller,
+.chapter-carousel .unity-scroller--horizontal,
+.chapter-carousel .unity-scroller--vertical {
+    display: none;
+}
+
+/* With the scrollers gone the viewport should take the whole strip, otherwise it keeps the
+   band of space the bar used to occupy. */
+.chapter-carousel .unity-scroll-view__content-viewport {
+    width: 100%;
 }

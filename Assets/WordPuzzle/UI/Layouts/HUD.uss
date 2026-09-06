@@ -27,17 +27,18 @@
 /* Sized to match the pills beside it, so the bar reads as one row rather than a button
    next to some badges. */
 .icon-btn-round {
-    background-image: url("../../Sprites/slices/btn_icon_round.png");
-    background-color: rgba(0, 0, 0, 0);
-    border-width: 0;
+    background-color: rgba(12, 32, 60, 0.68);
+    border-radius: 54px;
+    border-width: 2.5px;
+    border-color: rgba(255, 255, 255, 0.85);
     width: 108px;
     height: 108px;
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
     padding: 0;
-    transition-property: scale, opacity;
-    transition-duration: 0.12s, 0.12s;
+    transition-property: scale, opacity, background-color;
+    transition-duration: 0.12s, 0.12s, 0.12s;
 }
 
 /* Sprite icons rather than font glyphs, which only render if the active font has them. */
@@ -93,7 +94,7 @@
    player is looking for. */
 .hud-chapter-text {
     font-size: 21px;
-    color: rgba(255, 255, 255, 0.42);
+    color: #ffd447;
     -unity-font-style: bold;
     letter-spacing: 2px;
     margin-top: 2px;
@@ -181,22 +182,52 @@
     left: 50%;
     translate: -50% 0;
 
-    /* Height grows with the text: the pill carries a wrapped definition, not just a
-       one-line caption, so a fixed height would clip it. */
-    width: 820px;
-    min-height: 132px;
-    padding: 21px 36px;
-    background-image: url("../../Sprites/slices/pill_toast.png");
-    background-color: rgba(0, 0, 0, 0);
-    border-width: 0;
+    /* Height grows with the text: the card carries a wrapped definition */
+    width: 1150px;
+    max-width: 92%;
+    min-height: 160px;
+    padding: 24px 50px;
+    background-image: none;
+    background-color: rgba(11, 48, 96, 0.96);
+    border-radius: 28px;
+    border-width: 2.5px;
+    border-color: rgba(255, 255, 255, 0.65);
     align-items: center;
     justify-content: center;
-    border-width: 0;
     opacity: 0;
     scale: 0.9 0.9;
     translate: -50% 18px;
     transition-property: opacity, scale, translate;
     transition-duration: 0.2s, 0.2s, 0.2s;
+}
+
+.word-toast-close {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    width: 52px;
+    height: 52px;
+    border-radius: 26px;
+    background-color: rgba(255, 255, 255, 0.22);
+    border-width: 1.5px;
+    border-color: rgba(255, 255, 255, 0.6);
+    color: #ffffff;
+    font-size: 26px;
+    -unity-font-style: bold;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+}
+
+.word-toast-close:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+    scale: 1.08 1.08;
+}
+
+.word-toast-close:active {
+    scale: 0.92 0.92;
+    opacity: 0.8;
 }
 
 .word-toast--visible {
@@ -206,17 +237,36 @@
 }
 
 .word-toast-word {
-    font-size: 39px;
+    font-size: 50px;
     -unity-font-style: bold;
-    color: #4a2c05;
-    letter-spacing: 1px;
+    color: #ffffff;
+    letter-spacing: 2px;
+}
+
+/* The status caption: small, spaced and dimmed */
+.word-toast-status {
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: #ffd859;
+    letter-spacing: 2px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    -unity-text-align: middle-center;
+}
+
+.layout--portrait .word-toast-status {
+    font-size: 28px;
+}
+
+.layout--landscape .word-toast-status {
+    font-size: 24px;
 }
 
 .word-toast-note {
-    font-size: 27px;
+    font-size: 32px;
     -unity-font-style: bold;
-    color: rgba(74, 44, 5, 0.7);
-    margin-top: 3px;
+    color: rgba(255, 255, 255, 0.92);
+    margin-top: 6px;
     /* Definitions are sentences, not captions: they must wrap and stay inside the toast
        instead of stretching it off both edges of the screen. */
     white-space: normal;
@@ -234,65 +284,67 @@
     bottom: 41%;
     left: 50%;
     translate: -50% 0;
-    background-image: url("../../Sprites/slices/bar_word_preview.png");
-    -unity-slice-left: 58;
-    -unity-slice-right: 58;
-    -unity-slice-top: 58;
-    -unity-slice-bottom: 58;
-    background-color: rgba(0, 0, 0, 0);
-    border-width: 0;
+    background-image: none;
+    background-color: rgba(11, 48, 96, 0.92);
+    border-radius: 26px;
+    border-width: 2.5px;
+    border-color: rgba(255, 255, 255, 0.65);
     align-items: center;
     justify-content: center;
-    min-height: 126px;
-    min-width: 240px;
-    padding: 0 60px;
+    min-height: 88px;
+    min-width: 200px;
+    padding: 10px 36px;
 }
 
 .word-preview-text {
-    font-size: 69px;
+    font-size: 56px;
     -unity-font-style: bold;
     color: #ffffff;
-    letter-spacing: 9px;
+    letter-spacing: 6px;
 }
 
 /* ------------------------------------------------------------------ action buttons
-   The design puts the caption under the button rather than inside it. */
+   Unified deep ocean blue dock parent box housing all 3 action buttons. */
 .hud-bottom-actions {
     flex-direction: row;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
+    background-color: rgba(11, 48, 96, 0.92);
+    border-radius: 40px;
+    border-width: 2.5px;
+    border-color: rgba(255, 255, 255, 0.65);
+    padding: 14px 20px 16px 20px;
 }
 
 .action-column {
     align-items: center;
-    width: 222px;
-    margin: 0 24px;
+    justify-content: center;
+    width: 144px;
+    margin: 0 10px;
+    background-color: transparent;
+    border-width: 0;
+    padding: 0;
 }
 
 .action-btn {
-    background-image: url("../../Sprites/slices/btn_icon_square_glass.png");
-    -unity-slice-left: 44;
-    -unity-slice-right: 44;
-    -unity-slice-top: 44;
-    -unity-slice-bottom: 44;
-    background-color: rgba(0, 0, 0, 0);
+    background-image: none;
+    background-color: transparent;
     border-width: 0;
-    width: 168px;
-    height: 168px;
+    width: 96px;
+    height: 96px;
     align-items: center;
     justify-content: center;
     padding: 0;
-    margin-bottom: 15px;
+    margin-bottom: 4px;
     transition-property: scale, opacity;
     transition-duration: 0.12s, 0.12s;
 }
 
-.hint-color {
-    background-image: url("../../Sprites/slices/btn_icon_square_gold.png");
-    background-color: rgba(0, 0, 0, 0);
+.hint-color,
+.words-color {
+    background-image: none;
+    background-color: transparent;
     border-width: 0;
-    border-width: 0;
-    color: #4a2c05;
 }
 
 /* Kept clickable on purpose - tapping it plays the rejection cue, which tells the player
@@ -302,10 +354,17 @@
 }
 
 .action-label {
-    font-size: 30px;
+    width: 100%;
+    white-space: nowrap;
+    -unity-text-align: middle-center;
+    font-size: 21px;
     -unity-font-style: bold;
-    letter-spacing: 3px;
-    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 1px;
+    color: #ffd859;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.95);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgba(4, 10, 22, 1.0);
+    margin-top: 4px;
 }
 
 /* ------------------------------------------------------------------ press feedback */
@@ -350,27 +409,50 @@
 
 
 /* ============================================================ landscape
-   The wheel moves to the left half and the grid takes the right, so the lower stack no
-   longer reserves a tall band beneath itself - that space is now the wheel's column, not
-   empty screen. The word preview and the action buttons move to the right of the wheel. */
+   The wheel moves to the left half (x: 22%, y: 45%) and the grid takes the right (x: 45% - 97%).
+   The word preview and toast sit directly above the letter wheel (left: 22%, bottom: 74%),
+   and the action buttons stay neatly on the left beneath the wheel column (left: 0, width: 44%).
+*/
 
 .layout--landscape .word-preview-box {
-    /* The wheel is beside the UI in landscape, not under it, so the preview drops to just
-       above the action row. */
-    bottom: 20%;
+    left: 22%;
+    bottom: 78%;
+    translate: -50% 0;
+    min-height: 80px;
+    min-width: 180px;
+    padding: 8px 32px;
+    border-radius: 24px;
 }
 
 .layout--landscape .word-toast {
-    bottom: 34%;
+    left: 50%;
+    bottom: 48%;
+    translate: -50% 0;
+    width: 58%;
+    margin-bottom: 0;
 }
 
 .layout--landscape .hud-lower {
-    padding-bottom: 36px;
+    position: absolute;
+    bottom: 35px;
+    left: 50%;
+    translate: -50% 0;
+    width: auto;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 0;
 }
 
-.layout--landscape .word-toast {
-    width: 640px;
-    margin-bottom: 18px;
+.layout--landscape .hud-bottom-actions {
+    width: auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(11, 48, 96, 0.92);
+    border-radius: 36px;
+    border-width: 2.5px;
+    border-color: rgba(255, 255, 255, 0.65);
+    padding: 12px 18px 14px 18px;
 }
 
 /* Compact top bar: landscape is short, and the bar is competing with the grid for height. */
@@ -391,8 +473,11 @@
 }
 
 .layout--landscape .action-btn {
-    width: 132px;
-    height: 132px;
+    width: 90px;
+    height: 90px;
+    background-image: none;
+    background-color: transparent;
+    border-width: 0;
 }
 
 .layout--landscape .action-icon {
@@ -401,6 +486,181 @@
 }
 
 .layout--landscape .action-column {
-    width: 168px;
-    margin: 0 15px;
+    width: 140px;
+    margin: 0 10px;
+    background-color: transparent;
+    border-width: 0;
+    padding: 0;
+}
+
+.layout--landscape .action-label {
+    white-space: nowrap;
+    font-size: 20px;
+    margin-top: 4px;
+}
+
+/* ============================================================ word list */
+.words-color {
+    background-image: none;
+    background-color: transparent;
+    border-width: 0;
+}
+
+.icon-words {
+    background-image: url("../../Sprites/slices/icon_words.png");
+    -unity-background-image-tint-color: #ffffff;
+}
+
+/* Absolute inset rather than 100%: same reason as the victory scrim - the HUD root does not
+   stretch, so a percentage size would collapse and the scrim would not cover the screen. */
+.words-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(4, 10, 16, 0.72);
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+.words-panel--open {
+    display: flex;
+}
+
+.words-panel-card {
+    background-image: url("../../Sprites/slices/panel_modal.png");
+    -unity-slice-left: 57;
+    -unity-slice-right: 57;
+    -unity-slice-top: 57;
+    -unity-slice-bottom: 57;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    width: 82%;
+    max-height: 76%;
+    padding: 48px 54px;
+}
+
+.words-panel-head {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.words-panel-title {
+    font-size: 40px;
+    -unity-font-style: bold;
+    color: #f6dd9a;
+    letter-spacing: 3px;
+}
+
+.words-panel-close {
+    background-image: url("../../Sprites/slices/btn_icon_round.png");
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    width: 84px;
+    height: 84px;
+    font-size: 38px;
+    -unity-font-style: bold;
+    color: rgba(255, 255, 255, 0.75);
+    padding: 0;
+}
+
+.words-panel-scroll {
+    width: 100%;
+    flex-grow: 1;
+}
+
+.words-panel-list {
+    width: 100%;
+}
+
+/* A row per word, stacked: the meaning is a sentence, so the words cannot sit side by side
+   as chips - each needs the full width to read. */
+.word-row {
+    width: 100%;
+    padding: 18px 24px;
+    margin-bottom: 12px;
+    border-radius: 24px;
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Unsolved rows recede: they carry no meaning, so they should not compete with the ones
+   that do. */
+.word-row--hidden {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.word-row-word {
+    font-size: 34px;
+    -unity-font-style: bold;
+    color: #f6dd9a;
+    letter-spacing: 4px;
+}
+
+.word-row-word--bonus {
+    color: #9fd4a8;
+}
+
+.word-row-pos {
+    font-size: 25px;
+    -unity-font-style: italic;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 4px;
+}
+
+.word-row-text {
+    font-size: 27px;
+    color: rgba(255, 255, 255, 0.8);
+    white-space: normal;
+}
+
+.words-panel-subhead {
+    width: 100%;
+    font-size: 27px;
+    -unity-font-style: bold;
+    color: rgba(246, 221, 154, 0.7);
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+}
+
+/* ============================================================ portrait toast
+   A phone is narrow, so the same pill holds far fewer words per line and a definition that
+   was two lines in landscape becomes four. Widened to nearly the full screen and set in a
+   larger type size, since on a phone the toast is read at arm's length. */
+.layout--portrait .word-toast {
+    width: 96%;
+    min-height: 240px;
+    padding: 36px 42px;
+}
+
+.layout--portrait .word-toast-word {
+    font-size: 60px;
+}
+
+.layout--portrait .word-toast-note {
+    font-size: 40px;
+}
+
+/* ============================================================ landscape toast
+   Sized as a share of the screen rather than in reference pixels. The panel matches a
+   1080-wide reference, so a fixed 1150px pill that fills a phone shrinks to a quarter of a
+   wide landscape window - which is how the definition ended up unreadable there. */
+.layout--landscape .word-toast {
+    width: 58%;
+    min-height: 160px;
+    padding: 24px 36px;
+    left: 50%;
+    bottom: 48%;
+    translate: -50% 0;
+}
+
+.layout--landscape .word-toast-word {
+    font-size: 56px;
+}
+
+.layout--landscape .word-toast-note {
+    font-size: 38px;
 }

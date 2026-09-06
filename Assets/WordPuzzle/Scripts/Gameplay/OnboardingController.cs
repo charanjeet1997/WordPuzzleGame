@@ -9,13 +9,18 @@ using WordPuzzle.Services;
 namespace WordPuzzle.Gameplay
 {
     /// <summary>
-    /// Teaches the swipe, and nothing else. Everything else in this game is self-evident from
-    /// looking at it; dragging through letters is the one mechanic a first-time player can fail
-    /// to discover, and a player who never finds a word never sees anything else we built.
+    /// Traces a word on the wheel with a finger marker, in two situations.
     ///
-    /// Deliberately not a multi-step tutorial: each additional forced step measurably costs
-    /// first-session completion, and hints, shuffle and coins all explain themselves once the
-    /// player is solving words.
+    /// First session: teaches the swipe, and nothing else. Dragging through letters is the one
+    /// mechanic a first-time player can fail to discover, and a player who never finds a word
+    /// never sees anything else we built. Deliberately not a multi-step tutorial - each extra
+    /// forced step measurably costs first-session completion, and hints, shuffle and coins all
+    /// explain themselves once the player is solving words.
+    ///
+    /// Afterwards: the same marker becomes a stuck assist, on far longer thresholds - a long
+    /// idle, or several rejected words in a row. Both triggers are needed because they catch
+    /// opposite behaviours: a player staring at the screen never fails a word, and a player
+    /// guessing constantly never idles.
     /// </summary>
     public class OnboardingController : MonoBehaviour
     {
@@ -28,6 +33,16 @@ namespace WordPuzzle.Gameplay
         [Tooltip("Shorter on the very first word: a new player is looking at an unexplained screen.")]
         [SerializeField] private float idleBeforeFirstHint = 1.5f;
 
+        [Header("Stuck assist (after onboarding)")]
+        [Tooltip("Seconds of no input before the hint offers a word to an experienced player. " +
+                 "Much longer than the onboarding delay: this is for being stuck, not for " +
+                 "thinking, and a hint that interrupts thinking is an annoyance.")]
+        [SerializeField] private float assistIdleSeconds = 20f;
+
+        [Tooltip("Rejected words in a row before the hint steps in. Repeated wrong guesses are " +
+                 "a clearer signal of being stuck than idling is.")]
+        [SerializeField] private int assistWrongAttempts = 3;
+
         [SerializeField] private OnboardingHint hint;
 
         private GameplayHandler _handler;
@@ -36,6 +51,8 @@ namespace WordPuzzle.Gameplay
 
         private IObserver<char> _swipeObserver;
         private IObserver<string> _matchedObserver;
+        private IObserver<string> _wrongObserver;
+        private int _wrongInARow;
 
         private readonly List<Vector3> _path = new List<Vector3>();
         private float _idleTime;
@@ -63,12 +80,6 @@ namespace WordPuzzle.Gameplay
 
         private void OnEnable()
         {
-            if (!Pending)
-            {
-                enabled = false;
-                return;
-            }
-
             if (!ServiceLocator.Current.Has<IObserverManager>()) return;
 
             var observers = ServiceLocator.Current.Get<IObserverManager>();
@@ -80,10 +91,17 @@ namespace WordPuzzle.Gameplay
             _matchedObserver = observers.GetOrCreateObserver<string>(WondersOfWordGameModel.OBS_WORD_MATCHED);
             _matchedObserver.Bind(this, OnWordMatched);
 
+            _wrongObserver = observers.GetOrCreateObserver<string>(WondersOfWordGameModel.OBS_WRONG_WORD);
+            _wrongObserver.Bind(this, OnWrongWord);
+
             HookWheel();
 
             _active = true;
-            _idleTime = idleBeforeFirstHint;   // show almost immediately on a cold start
+            _wrongInARow = 0;
+
+            // Onboarding shows almost immediately on a cold start; assist waits out its full
+            // idle window, so an experienced player is not hinted at for pausing to think.
+            _idleTime = Pending ? idleBeforeFirstHint : 0f;
         }
 
         private void OnDisable()
@@ -98,6 +116,12 @@ namespace WordPuzzle.Gameplay
             {
                 _matchedObserver.Unbind(OnWordMatched);
                 _matchedObserver = null;
+            }
+
+            if (_wrongObserver != null)
+            {
+                _wrongObserver.Unbind(OnWrongWord);
+                _wrongObserver = null;
             }
 
             if (_wheel != null) _wheel.WheelRebuilt -= OnWheelRebuilt;
@@ -134,16 +158,40 @@ namespace WordPuzzle.Gameplay
         private void OnWordMatched(string word)
         {
             _idleTime = 0f;
+            _wrongInARow = 0;
             hint?.Stop();
+
+            if (!Pending) return;
 
             _wordsSolvedSinceStart++;
             if (_wordsSolvedSinceStart < wordsUntilLearned) return;
 
             // Proven. The flow moves on to pointing at the collection, which now has words
             // in it and so is finally worth mentioning.
+            //
+            // The component stays enabled: onboarding is over, but it goes on serving as the
+            // stuck assist below, on much longer thresholds.
             AnalyticsService.OnboardingStep("swipe_learned");
             OnboardingFlow.MarkSwipeLearned();
-            enabled = false;
+        }
+
+        /// <summary>
+        /// A rejected word. Several in a row says the player is out of ideas rather than
+        /// mid-thought, which is a better trigger than the clock: someone guessing every few
+        /// seconds never idles long enough to be offered help.
+        /// </summary>
+        private void OnWrongWord(string word)
+        {
+            _idleTime = 0f;
+
+            // Onboarding has its own, much more eager trigger; this would only pre-empt it.
+            if (Pending) return;
+
+            _wrongInARow++;
+            if (_wrongInARow < assistWrongAttempts) return;
+
+            _wrongInARow = 0;
+            ShowHintForEasiestWord();
         }
 
         private void Update()
@@ -163,7 +211,7 @@ namespace WordPuzzle.Gameplay
             if (hint.IsPlaying) return;
 
             _idleTime += Time.unscaledDeltaTime;
-            if (_idleTime < idleBeforeHint) return;
+            if (_idleTime < (Pending ? idleBeforeHint : assistIdleSeconds)) return;
 
             ShowHintForEasiestWord();
         }

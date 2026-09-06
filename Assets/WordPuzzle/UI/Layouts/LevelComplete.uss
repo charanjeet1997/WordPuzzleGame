@@ -38,12 +38,26 @@
     opacity: 1;
 }
 
+/* Full width and centred, so in portrait the two columns stack and the card looks exactly
+   as it did when these elements were direct children of it. */
+.victory-col {
+    width: 100%;
+    align-items: center;
+}
+
+/* Moved between the columns by LevelCompleteView, so it must look right under either. */
+.victory-actions {
+    width: 100%;
+    align-items: center;
+}
+
 .victory-title {
     font-size: 84px;
     -unity-font-style: bold;
-    color: #f6dd9a;
+    color: #ffd447;
     letter-spacing: 3px;
     margin-bottom: 45px;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 /* ------------------------------------------------------------------ stars
@@ -256,4 +270,115 @@
     -unity-font-style: bold;
     color: rgba(255, 255, 255, 0.55);
     letter-spacing: 1.5px;
+}
+
+/* ============================================================ landscape
+   Landscape is short and wide, and the portrait card is the opposite: a tall column that
+   ran from the top of the screen to the bottom. The two columns go side by side and the
+   vertical rhythm is compressed, so the card spends the width it has instead of the height
+   it does not. */
+.layout--landscape .victory-card {
+    flex-direction: row;
+
+    /* nowrap: the card has exactly two children now, and the buttons live inside the left
+       one. Nothing can wrap onto a third row, so the card's height is just the taller of the
+       two columns. */
+    flex-wrap: nowrap;
+    align-items: flex-start;
+
+    justify-content: flex-start;
+
+    /* A share of the screen rather than a fixed pixel width: landscape runs from a phone to
+       a desktop window, and a width that suits one leaves the card lost in the other. */
+    width: 76%;
+    max-width: 100%;
+    padding: 3.5% 3.5%;
+
+    /* Height left to the contents. A fixed 88% did decouple the card from the word list, but
+       it also stopped the card growing for its own buttons, so the action row ran past the
+       bottom edge and "Main Menu" sat outside the panel. */
+}
+
+.layout--landscape .victory-col {
+    width: 50%;
+}
+
+.layout--landscape .victory-col--summary {
+    /* flex-start, not center: centring floated this column in the middle of the taller
+       word-list column and left a dead band between SCORE and the buttons. */
+    justify-content: flex-start;
+    padding-right: 5%;
+}
+
+/* The actions ride under the stars here, so they need the gap the score line used to give. */
+.layout--landscape .victory-actions {
+    margin-top: 4%;
+}
+
+/* Fills the left column it now lives in. */
+.layout--landscape .victory-col--summary > .victory-actions {
+    width: 100%;
+    padding-right: 0;
+}
+
+/* The list is the only thing in the right column now, so it takes the column's height
+   rather than a fixed cap - the card's height is set by the left column beside it.
+   align-self overrides the card's flex-start, which otherwise sizes this column to its
+   content and leaves the bottom half of it empty. */
+.layout--landscape .victory-col--detail {
+    align-items: flex-start;
+}
+
+.layout--landscape .victory-title {
+    font-size: 84px;
+    margin-bottom: 27px;
+}
+
+.layout--landscape .star {
+    width: 104px;
+    height: 104px;
+}
+
+.layout--landscape .stars-row {
+    margin-bottom: 27px;
+}
+
+/* No cap in landscape: the list is alone in its column, so it should grow to fill whatever
+   height the left column sets. The 300px cap was cutting a word row in half and leaving the
+   bottom of the column blank. */
+/* px, not a percentage: this column's height is auto, so a percentage max-height has no
+   parent height to resolve against and Yoga discards it - the list then grows to its full
+   content height, pushes the buttons past the card and clips "Main Menu". */
+.layout--landscape .meanings-scroll {
+    max-height: 700px;
+    margin-bottom: 0;
+}
+
+/* The word rows were sized for the narrow portrait card; in the wide landscape column the
+   same sizes read as fine print. */
+.layout--landscape .meanings-heading {
+    font-size: 34px;
+}
+
+.layout--landscape .meaning-word {
+    font-size: 42px;
+}
+
+.layout--landscape .meaning-pos {
+    font-size: 30px;
+}
+
+.layout--landscape .meaning-text {
+    font-size: 34px;
+}
+
+.layout--landscape .btn-victory-primary {
+    width: 100%;
+    height: 132px;
+    font-size: 44px;
+}
+
+.layout--landscape .victory-subtitle {
+    padding: 12px 36px;
+    font-size: 38px;
 }

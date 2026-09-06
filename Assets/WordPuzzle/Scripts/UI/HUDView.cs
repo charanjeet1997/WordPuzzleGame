@@ -2,6 +2,7 @@ using UnityEngine.UIElements;
 using ServiceLocatorFramework;
 using DataBindingFramework;
 using WordPuzzle.Models;
+using WordPuzzle.Data;
 using WordPuzzle.Managers;
 using WordPuzzle.Gameplay;
 using WordPuzzle.Audio;
@@ -22,9 +23,16 @@ namespace WordPuzzle.UI
         private Button _hintButton;
         private Button _shuffleButton;
         private Button _pauseButton;
+        private Button _wordsButton;
+        private Button _wordsCloseButton;
+        private Label _wordsCountLabel;
+        private VisualElement _wordsPanel;
+        private VisualElement _wordsPanelList;
 
         private VisualElement _wordToast;
+        private Button _toastCloseButton;
         private Label _toastWordLabel;
+        private Label _toastStatusLabel;
         private Label _toastNoteLabel;
         private IObserver<string> _matchedWordObserver;
         private IObserver<string> _bonusWordObserver;
@@ -37,12 +45,13 @@ namespace WordPuzzle.UI
         private const string ToastNeutralClass = "word-toast--neutral";
         private const string PreviewErrorClass = "word-preview-box--error";
         private const string PreviewTextErrorClass = "word-preview-text--error";
+        private const string WordsPanelOpenClass = "words-panel--open";
         private const long ErrorFlashMs = 600;
         private const long ToastVisibleMs = 1400;
 
         // A definition needs longer on screen than "BONUS WORD" does - roughly the time it
         // takes to read a short sentence, without stalling the next swipe.
-        private const long ToastWithMeaningMs = 3200;
+        private const long ToastWithMeaningMs = 6000;
 
         private WordDefinitionService _definitions;
         private bool _warnedNoDefinitionService;
@@ -87,8 +96,20 @@ namespace WordPuzzle.UI
             _shuffleButton = rootElement.Q<Button>("btn-shuffle") ?? rootElement.Q<Button>("ShuffleButton") ?? rootElement.Q<Button>(className: "action-btn-pill");
             _pauseButton = rootElement.Q<Button>("btn-pause") ?? rootElement.Q<Button>("PauseButton") ?? rootElement.Q<Button>(className: "icon-btn-round");
 
+            _wordsButton = rootElement.Q<Button>("btn-words");
+            _wordsCloseButton = rootElement.Q<Button>("btn-words-close");
+            _wordsCountLabel = rootElement.Q<Label>("lbl-words-count");
+            _wordsPanel = rootElement.Q<VisualElement>("words-panel");
+            _wordsPanelList = rootElement.Q<VisualElement>("words-panel-list");
+
+            // Closed on every show: the panel is part of the shared document, so without this
+            // it would still be open from the previous level.
+            _wordsPanel?.RemoveFromClassList(WordsPanelOpenClass);
+
             _wordToast = rootElement.Q<VisualElement>("word-toast");
+            _toastCloseButton = rootElement.Q<Button>("btn-toast-close");
             _toastWordLabel = rootElement.Q<Label>("lbl-toast-word");
+            _toastStatusLabel = rootElement.Q<Label>("lbl-toast-status");
             _toastNoteLabel = rootElement.Q<Label>("lbl-toast-note");
             if (_wordToast != null) _wordToast.RemoveFromClassList(ToastVisibleClass);
 
@@ -97,6 +118,11 @@ namespace WordPuzzle.UI
             if (_hintButton != null) _hintButton.clicked += OnHintClicked;
             if (_shuffleButton != null) _shuffleButton.clicked += OnShuffleClicked;
             if (_pauseButton != null) _pauseButton.clicked += OnPauseClicked;
+            if (_wordsButton != null) _wordsButton.clicked += OnWordsClicked;
+            if (_wordsCloseButton != null) _wordsCloseButton.clicked += OnWordsCloseClicked;
+            if (_toastCloseButton != null) _toastCloseButton.clicked += OnToastCloseClicked;
+
+            RefreshWordsCount();
 
             if (_gameModel != null)
             {
@@ -111,6 +137,11 @@ namespace WordPuzzle.UI
                 }
 
                 RefreshHintAffordability(_gameModel.Coins.Value);
+
+                // Bound rather than set once, so the caption counts up as words are solved
+                // instead of showing the count the level started with.
+                _gameModel.SolvedWordsCount.Bind(_bindingOwner, (_) => RefreshWordsCount());
+                _gameModel.TargetWordsTotal.Bind(_bindingOwner, (_) => RefreshWordsCount());
 
                 if (_levelLabel != null)
                 {
@@ -132,8 +163,20 @@ namespace WordPuzzle.UI
 
                 if (_wordPreviewLabel != null)
                 {
-                    _gameModel.CurrentWordPreview.Bind(_bindingOwner, (preview) => _wordPreviewLabel.text = preview);
-                    _wordPreviewLabel.text = _gameModel.CurrentWordPreview.Value;
+                    _gameModel.CurrentWordPreview.Bind(_bindingOwner, (preview) =>
+                    {
+                        _wordPreviewLabel.text = preview ?? string.Empty;
+                        if (_wordPreviewBox != null)
+                        {
+                            _wordPreviewBox.style.display = string.IsNullOrEmpty(preview) ? DisplayStyle.None : DisplayStyle.Flex;
+                        }
+                    });
+                    string currentPreview = _gameModel.CurrentWordPreview.Value;
+                    _wordPreviewLabel.text = currentPreview ?? string.Empty;
+                    if (_wordPreviewBox != null)
+                    {
+                        _wordPreviewBox.style.display = string.IsNullOrEmpty(currentPreview) ? DisplayStyle.None : DisplayStyle.Flex;
+                    }
                 }
             }
         }
@@ -143,6 +186,9 @@ namespace WordPuzzle.UI
             if (_hintButton != null) _hintButton.clicked -= OnHintClicked;
             if (_shuffleButton != null) _shuffleButton.clicked -= OnShuffleClicked;
             if (_pauseButton != null) _pauseButton.clicked -= OnPauseClicked;
+            if (_wordsButton != null) _wordsButton.clicked -= OnWordsClicked;
+            if (_wordsCloseButton != null) _wordsCloseButton.clicked -= OnWordsCloseClicked;
+            if (_toastCloseButton != null) _toastCloseButton.clicked -= OnToastCloseClicked;
 
             if (_matchedWordObserver != null)
             {
@@ -173,6 +219,14 @@ namespace WordPuzzle.UI
 
             _toastHideTask?.Pause();
             _toastHideTask = null;
+        }
+
+        private void OnToastCloseClicked()
+        {
+            _toastHideTask?.Pause();
+            _toastHideTask = null;
+            _wordToast?.RemoveFromClassList(ToastVisibleClass);
+            _audioManager?.PlayButtonClickSound();
         }
 
         private void BindBonusWordObserver()
@@ -244,10 +298,43 @@ namespace WordPuzzle.UI
                 return string.IsNullOrEmpty(prefix) ? "WORD FOUND" : prefix;
             }
 
-            // WordNet glosses can run long; the toast is one or two lines, not a paragraph.
-            if (meaning.Length > 110) meaning = meaning.Substring(0, 107).TrimEnd() + "...";
+            // WordNet glosses can run long, and a cut mid-sentence is worse than no definition
+            // at all - "who purchases securities in one market for immediate resale in..." tells
+            // the player nothing. The toast is sized for a couple of lines now, so the cap is
+            // generous enough that most glosses survive whole.
+            if (meaning.Length > 220) meaning = meaning.Substring(0, 217).TrimEnd() + "...";
 
             return string.IsNullOrEmpty(prefix) ? meaning : $"{prefix}\n{meaning}";
+        }
+
+        /// <summary>
+        /// Splits what <see cref="MeaningNote"/> produced back into its status caption and the
+        /// meaning, so each can carry its own type. The two arrive joined because the note is
+        /// also used where only one line is wanted.
+        /// </summary>
+        private static void SplitNote(string note, out string status, out string meaning)
+        {
+            status = null;
+            meaning = note;
+
+            if (string.IsNullOrEmpty(note)) return;
+
+            int newline = note.IndexOf('\n');
+            if (newline < 0)
+            {
+                // A bare caption with no definition behind it - "WORD FOUND", "ALREADY FOUND".
+                // Those are statuses, not meanings, so they belong on the status line.
+                bool isCaption = note.Length <= 24 && note.ToUpperInvariant() == note;
+                if (isCaption)
+                {
+                    status = note;
+                    meaning = null;
+                }
+                return;
+            }
+
+            status = note.Substring(0, newline);
+            meaning = note.Substring(newline + 1);
         }
 
         private void OnBonusWordFound(string word)
@@ -265,12 +352,134 @@ namespace WordPuzzle.UI
             ShowToast(word, MeaningNote(word, "ALREADY FOUND"), true);
         }
 
+        /// <summary>
+        /// Rebuilds and opens the word panel. Built on open rather than kept in sync, because
+        /// it is only ever read while it is on screen and a stale list would be worse than a
+        /// momentary rebuild.
+        /// </summary>
+        private void OnWordsClicked()
+        {
+            if (_wordsPanel == null) return;
+
+            BuildWordsPanel();
+            _wordsPanel.AddToClassList(WordsPanelOpenClass);
+            _audioManager?.PlayButtonClickSound();
+        }
+
+        private void OnWordsCloseClicked()
+        {
+            _wordsPanel?.RemoveFromClassList(WordsPanelOpenClass);
+            _audioManager?.PlayButtonClickSound();
+        }
+
+        /// <summary>
+        /// One chip per target word: solved ones spelled out, the rest as one dash per letter
+        /// so the panel says how many are left and how long they are without giving the answer
+        /// away - that is what the hint button is for. Bonus words already found follow, since
+        /// they are not part of the level's target set.
+        /// </summary>
+        private void BuildWordsPanel()
+        {
+            if (_wordsPanelList == null) return;
+
+            _wordsPanelList.Clear();
+
+            LevelData level = _gameManager?.GetCurrentLevelData();
+            if (level?.targetWords == null) return;
+
+            foreach (TargetWordEntry entry in level.targetWords)
+            {
+                if (entry == null || string.IsNullOrEmpty(entry.word)) continue;
+
+                string word = entry.word.ToUpperInvariant();
+                bool found = _gameModel != null && _gameModel.SolvedTargetWords.Contains(word);
+                _wordsPanelList.Add(BuildWordRow(word, found, false));
+            }
+
+            if (_gameModel == null || _gameModel.FoundBonusWords.Count == 0) return;
+
+            var subhead = new Label("BONUS WORDS");
+            subhead.AddToClassList("words-panel-subhead");
+            _wordsPanelList.Add(subhead);
+
+            foreach (string bonus in _gameModel.FoundBonusWords)
+            {
+                _wordsPanelList.Add(BuildWordRow(bonus.ToUpperInvariant(), true, true));
+            }
+        }
+
+        /// <summary>
+        /// One row per word: the word, its part of speech, and its meaning. An unsolved word
+        /// shows dashes and no meaning - the definition would name the word outright, which is
+        /// what the hint button is for.
+        /// </summary>
+        private VisualElement BuildWordRow(string word, bool found, bool bonus)
+        {
+            if (_definitions == null && ServiceLocator.Current.Has<WordDefinitionService>())
+                _definitions = ServiceLocator.Current.Get<WordDefinitionService>();
+
+            var row = new VisualElement();
+            row.AddToClassList("word-row");
+            if (!found) row.AddToClassList("word-row--hidden");
+
+            var wordLabel = new Label(found ? word : new string('-', word.Length));
+            wordLabel.AddToClassList("word-row-word");
+            if (bonus) wordLabel.AddToClassList("word-row-word--bonus");
+            row.Add(wordLabel);
+
+            if (!found || _definitions == null || !_definitions.IsReady) return row;
+
+            string pos = _definitions.GetPrimaryPartOfSpeech(word);
+            if (!string.IsNullOrEmpty(pos))
+            {
+                var posLabel = new Label(pos);
+                posLabel.AddToClassList("word-row-pos");
+                row.Add(posLabel);
+            }
+
+            string meaning = _definitions.GetPrimaryMeaning(word);
+            if (!string.IsNullOrEmpty(meaning))
+            {
+                var meaningLabel = new Label(meaning);
+                meaningLabel.AddToClassList("word-row-text");
+                row.Add(meaningLabel);
+            }
+
+            return row;
+        }
+
+        /// <summary>Caption under the WORDS button: how many of the level's words are solved.</summary>
+        private void RefreshWordsCount()
+        {
+            if (_wordsCountLabel == null || _gameModel == null) return;
+
+            _wordsCountLabel.text =
+                $"WORDS ({_gameModel.SolvedWordsCount.Value}/{_gameModel.TargetWordsTotal.Value})";
+        }
+
         private void ShowToast(string word, string note, bool neutral)
         {
             if (_wordToast == null || string.IsNullOrEmpty(word)) return;
 
+            SplitNote(note, out string status, out string meaning);
+
             if (_toastWordLabel != null) _toastWordLabel.text = word.ToUpperInvariant();
-            if (_toastNoteLabel != null) _toastNoteLabel.text = note;
+
+            // Hidden rather than blanked: an empty label still takes its margins, which left a
+            // gap under the word on every toast that carried no status.
+            if (_toastStatusLabel != null)
+            {
+                _toastStatusLabel.text = status ?? string.Empty;
+                _toastStatusLabel.style.display =
+                    string.IsNullOrEmpty(status) ? DisplayStyle.None : DisplayStyle.Flex;
+            }
+
+            if (_toastNoteLabel != null)
+            {
+                _toastNoteLabel.text = meaning ?? string.Empty;
+                _toastNoteLabel.style.display =
+                    string.IsNullOrEmpty(meaning) ? DisplayStyle.None : DisplayStyle.Flex;
+            }
 
             _wordToast.EnableInClassList(ToastNeutralClass, neutral);
             _wordToast.AddToClassList(ToastVisibleClass);
@@ -315,7 +524,7 @@ namespace WordPuzzle.UI
             Label costLabel = rootElement?.Q<Label>("lbl-hint-cost");
             if (costLabel != null)
             {
-                costLabel.text = remaining > 0 ? $"HINT · {remaining} LEFT" : "HINT · 0 LEFT";
+                costLabel.text = remaining > 0 ? $"HINT ({remaining})" : "HINT (0)";
             }
 
             if (_hintButton == null) return;

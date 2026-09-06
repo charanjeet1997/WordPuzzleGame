@@ -61,6 +61,7 @@ MonoBehaviour:
     height: 0.84
   minTileSize: 0.16
   maxTileSize: 0.95
+  startingRevealedTiles: 3
   letterFontSize: 2.4
   letterFont: {fileID: 0}
 --- !u!1 &4902043852229764415
@@ -276,18 +277,18 @@ MonoBehaviour:
   wheelWidthFraction: 0.64
   landscapeWidthFraction: 0.4
   portraitAnchor: {x: 0.5, y: 0.3}
-  landscapeAnchor: {x: 0.22, y: 0.45}
+  landscapeAnchor: {x: 0.22, y: 0.52}
   minNodeSize: 0.2
   maxNodeSize: 0.52
   landscapeMaxNodeSize: 1.3
   letterFontSize: 2.1
   letterFont: {fileID: 0}
   showBackdrop: 0
-  backdropRenderer: {fileID: 0}
+  backdropRenderer: {fileID: 6991431419992105488}
   backdropPadding: 0.1
   lineRenderer: {fileID: 1828035435931493067}
-  lineColor: {r: 0.965, g: 0.867, b: 0.604, a: 0.85}
-  lineWidth: 0.058
+  lineColor: {r: 1, g: 0.72, b: 0.15, a: 0.92}
+  lineWidth: 0.038
 --- !u!1 &6299647734375221975
 GameObject:
   m_ObjectHideFlags: 0
@@ -494,4 +495,6 @@ MonoBehaviour:
   wordsUntilLearned: 2
   idleBeforeHint: 5
   idleBeforeFirstHint: 1.5
+  assistIdleSeconds: 20
+  assistWrongAttempts: 3
   hint: {fileID: 0}

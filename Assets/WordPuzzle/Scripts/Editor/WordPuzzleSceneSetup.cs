@@ -102,10 +102,18 @@ namespace WordPuzzle.Editor
             // the scene, so there is no reason for a second copy under Resources/ that would
             // ship in every build whether the scene used it or not.
             Sprite bgSpr = AssetDatabase.LoadAssetAtPath<Sprite>(
-                "Assets/WordPuzzle/Sprites/scene_background_night_peaks.png");
+                "Assets/WordPuzzle/Sprites/ChatGPT Image Sep 6, 2026, 08_29_32 PM (1).png");
             if (bgSpr == null)
             {
-                bgSpr = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/WordPuzzle/Sprites/game_background.png");
+                var allAssets = AssetDatabase.LoadAllAssetsAtPath("Assets/WordPuzzle/Sprites/ChatGPT Image Sep 6, 2026, 08_29_32 PM (1).png");
+                foreach (var a in allAssets)
+                {
+                    if (a is Sprite s) { bgSpr = s; break; }
+                }
+            }
+            if (bgSpr == null)
+            {
+                bgSpr = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/WordPuzzle/Sprites/scene_background_sunny_peaks.png");
             }
             if (bgSpr != null)
             {
@@ -643,6 +651,9 @@ namespace WordPuzzle.Editor
                 float nativeSize = backdropSpr.bounds.size.x;
                 float backdropScale = nativeSize > 0f ? (backdropRadius * 2f) / nativeSize : 1f;
                 backdropObj.transform.localScale = new Vector3(backdropScale, backdropScale, 1f);
+
+                wheelController.showBackdrop = true;
+                wheelController.backdropRenderer = backdropSR;
             }
 
             GameplayHandler handlerComp = gameplayObj.AddComponent<GameplayHandler>();

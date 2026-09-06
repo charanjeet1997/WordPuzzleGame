@@ -18,11 +18,14 @@ namespace WordPuzzle.UI
         private Button _soundButton;
         private Label _titleLabel;
         private Label _coinsLabel;
-        private Label _chapterLabel;
-        private Label _chapterNameLabel;
-        private Label _levelLabel;
-        private Label _wordCountLabel;
-        private VisualElement _progressDots;
+        private VisualElement _chapterListItems;
+        private ScrollView _chapterCarousel;
+
+        // Drag-to-scroll state. UI Toolkit's ScrollView scrolls by wheel and by scrollbar, but
+        // has no mouse drag, so with the bar hidden the strip had no way to move at all.
+        private bool _draggingCarousel;
+        private float _dragStartX;
+        private float _dragStartOffset;
 
         /// <summary>Levels per chapter, matching how the generator stamps chapterTitle.</summary>
         private const int LevelsPerChapter = 20;
@@ -54,11 +57,9 @@ namespace WordPuzzle.UI
             _soundButton = rootElement.Q<Button>("btn-sound") ?? rootElement.Q<Button>("SoundButton");
             
             _titleLabel = rootElement.Q<Label>("TitleLabel") ?? rootElement.Q<Label>(className: "game-title");
-            _chapterLabel = rootElement.Q<Label>("lbl-chapter-info");
-            _chapterNameLabel = rootElement.Q<Label>("lbl-chapter-name");
-            _levelLabel = rootElement.Q<Label>("lbl-level-number");
-            _wordCountLabel = rootElement.Q<Label>("lbl-word-count");
-            _progressDots = rootElement.Q<VisualElement>("progress-dots");
+            _chapterListItems = rootElement.Q<VisualElement>("chapter-carousel-items");
+            _chapterCarousel = rootElement.Q<ScrollView>("chapter-carousel");
+            HookCarouselDrag();
             _coinsLabel = rootElement.Q<Label>("CoinsLabel") ?? rootElement.Q<Label>(className: "coins-text");
 
             if (_playButton != null)
@@ -115,6 +116,49 @@ namespace WordPuzzle.UI
             }
         }
 
+        /// <summary>
+        /// Makes the chapter strip draggable with the mouse or a finger. Registered on the
+        /// ScrollView itself so a drag started anywhere over the cards counts, which is how a
+        /// carousel is expected to behave - there is no visible bar to grab.
+        /// </summary>
+        private void HookCarouselDrag()
+        {
+            if (_chapterCarousel == null) return;
+
+            _chapterCarousel.RegisterCallback<PointerDownEvent>(OnCarouselPointerDown);
+            _chapterCarousel.RegisterCallback<PointerMoveEvent>(OnCarouselPointerMove);
+            _chapterCarousel.RegisterCallback<PointerUpEvent>(OnCarouselPointerUp);
+            _chapterCarousel.RegisterCallback<PointerCaptureOutEvent>(_ => _draggingCarousel = false);
+        }
+
+        private void OnCarouselPointerDown(PointerDownEvent evt)
+        {
+            _draggingCarousel = true;
+            _dragStartX = evt.position.x;
+            _dragStartOffset = _chapterCarousel.scrollOffset.x;
+
+            // Captured so the drag keeps tracking once the pointer leaves the strip; without
+            // it a fast flick stops the moment the cursor crosses the edge.
+            _chapterCarousel.CapturePointer(evt.pointerId);
+        }
+
+        private void OnCarouselPointerMove(PointerMoveEvent evt)
+        {
+            if (!_draggingCarousel) return;
+
+            // Dragging left moves the content left, so the offset moves opposite the pointer.
+            float offset = _dragStartOffset - (evt.position.x - _dragStartX);
+            _chapterCarousel.scrollOffset = new Vector2(offset, _chapterCarousel.scrollOffset.y);
+        }
+
+        private void OnCarouselPointerUp(PointerUpEvent evt)
+        {
+            if (!_draggingCarousel) return;
+
+            _draggingCarousel = false;
+            _chapterCarousel.ReleasePointer(evt.pointerId);
+        }
+
         private void OnPlayClicked()
         {
             if (_audioManager == null && ServiceLocator.Current.Has<AudioManager>())
@@ -131,8 +175,9 @@ namespace WordPuzzle.UI
         }
 
         /// <summary>
-        /// Fills the menu card from the level the player is actually on. Every field here was
-        /// hardcoded placeholder text before, so the card never moved off "CHAPTER 1 / LEVEL 1".
+        /// Works out which chapter the player is in and rebuilds the carousel around it. The
+        /// card is no longer a single fixed element in the UXML - there is one per chapter and
+        /// they are all built in <see cref="RefreshChapterList"/>.
         /// </summary>
         private void RefreshChapterCard()
         {
@@ -141,53 +186,143 @@ namespace WordPuzzle.UI
             if (_gameModel == null && ServiceLocator.Current.Has<WondersOfWordGameModel>())
                 _gameModel = ServiceLocator.Current.Get<WondersOfWordGameModel>();
 
+            LevelDatabase db = _gameManager != null ? _gameManager.levelDatabase : null;
+            int perChapter = db != null && db.LevelsPerChapter > 0 ? db.LevelsPerChapter : LevelsPerChapter;
+
             int level = _gameModel != null ? _gameModel.CurrentLevelIndex.Value : 1;
-            int chapter = ((level - 1) / LevelsPerChapter) + 1;
-            int levelInChapter = ((level - 1) % LevelsPerChapter) + 1;
-
-            if (_chapterLabel != null) _chapterLabel.text = $"CHAPTER {chapter}";
-            if (_levelLabel != null) _levelLabel.text = $"LEVEL {level}";
-
-            LevelData data = _gameManager != null ? _gameManager.GetCurrentLevelData() : null;
-
-            if (_wordCountLabel != null)
-            {
-                int words = data != null && data.targetWords != null ? data.targetWords.Count : 0;
-                _wordCountLabel.text = words > 0 ? $"{words} WORDS" : string.Empty;
-            }
-
-            // The generator stamps chapterTitle as plain "Chapter N" with no flavour name, so
-            // fall back to the wheel letters rather than printing the chapter number twice.
-            if (_chapterNameLabel != null)
-            {
-                string name = null;
-                if (data != null)
-                {
-                    int dash = data.chapterTitle != null ? data.chapterTitle.IndexOf(" - ") : -1;
-                    if (dash >= 0) name = data.chapterTitle.Substring(dash + 3);
-                    else if (!string.IsNullOrEmpty(data.wheelLetters)) name = data.wheelLetters;
-                }
-                _chapterNameLabel.text = string.IsNullOrEmpty(name) ? "Ready to play" : name;
-            }
-
-            RefreshProgressDots(levelInChapter);
+            RefreshChapterList(((level - 1) / perChapter) + 1);
         }
 
-        /// <summary>Fills dots in proportion to progress through the current chapter.</summary>
-        private void RefreshProgressDots(int levelInChapter)
+        /// <summary>
+        /// Lists every chapter in the level database, marking the ones the player has not
+        /// reached as locked. Built from the database rather than a fixed count, so adding
+        /// levels adds chapters here without a second edit.
+        /// </summary>
+        private void RefreshChapterList(int currentChapter)
         {
-            if (_progressDots == null) return;
+            if (_chapterListItems == null) return;
 
-            int total = _progressDots.childCount;
-            if (total == 0) return;
+            _chapterListItems.Clear();
 
-            int filled = Mathf.Clamp(
-                Mathf.CeilToInt(levelInChapter / (float)LevelsPerChapter * total), 1, total);
+            LevelDatabase db = _gameManager != null ? _gameManager.levelDatabase : null;
+            if (db == null || db.Count <= 0) return;
 
-            for (int i = 0; i < total; i++)
+            // The database owns the grouping; the constant here is only a fallback for a
+            // database that has not been set up yet.
+            int perChapter = db.LevelsPerChapter > 0 ? db.LevelsPerChapter : LevelsPerChapter;
+            int chapters = Mathf.CeilToInt(db.Count / (float)perChapter);
+
+            int level = _gameModel != null ? _gameModel.CurrentLevelIndex.Value : 1;
+
+            for (int chapter = 1; chapter <= chapters; chapter++)
             {
-                _progressDots[i].EnableInClassList("dot--on", i < filled);
+                bool locked = chapter > currentChapter;
+                bool current = chapter == currentChapter;
+
+                var card = new VisualElement();
+                card.AddToClassList("chapter-card");
+                if (locked) card.AddToClassList("chapter-card--locked");
+                else if (current) card.AddToClassList("chapter-card--current");
+
+                // The last chapter is usually a part chapter, so its level count is whatever
+                // the database has left rather than a full run.
+                int levelsInChapter = Mathf.Min(perChapter, db.Count - (chapter - 1) * perChapter);
+
+                var topRow = new VisualElement();
+                topRow.AddToClassList("chapter-card-row");
+
+                var title = new Label($"CHAPTER {chapter}");
+                title.AddToClassList("chapter-title");
+                topRow.Add(title);
+
+                var meta = new Label($"{levelsInChapter} LEVELS · {ChapterLetters(db, chapter, perChapter, levelsInChapter)}");
+                meta.AddToClassList("chapter-meta");
+                topRow.Add(meta);
+                card.Add(topRow);
+
+                var name = new Label(ChapterName(db, chapter, perChapter, locked));
+                name.AddToClassList("chapter-name");
+                card.Add(name);
+
+                var bottomRow = new VisualElement();
+                bottomRow.AddToClassList("chapter-card-row");
+
+                // Only the chapter in progress shows a level and dots: on a locked chapter
+                // there is no progress to report, and on a finished one it is always full.
+                var status = new Label(locked ? "LOCKED" : current ? $"LEVEL {level}" : "COMPLETE");
+                status.AddToClassList("level-subtitle");
+                bottomRow.Add(status);
+
+                if (current)
+                {
+                    bottomRow.Add(BuildProgressDots(((level - 1) % perChapter) + 1, perChapter));
+                }
+
+                card.Add(bottomRow);
+                _chapterListItems.Add(card);
             }
+        }
+
+        /// <summary>
+        /// Wheel size across a chapter, as "4 LETTERS" or "4-6 LETTERS". This is what actually
+        /// makes later chapters harder, so it belongs on the card next to the level count.
+        /// Scanned across the whole chapter rather than read off its first level, because a
+        /// chapter can step up in size partway through.
+        /// </summary>
+        private string ChapterLetters(LevelDatabase db, int chapter, int perChapter, int levelsInChapter)
+        {
+            int min = int.MaxValue;
+            int max = 0;
+
+            for (int i = 0; i < levelsInChapter; i++)
+            {
+                LevelData data = db.GetLevel((chapter - 1) * perChapter + 1 + i);
+                int letters = data != null && data.wheelLetters != null ? data.wheelLetters.Length : 0;
+                if (letters <= 0) continue;
+
+                if (letters < min) min = letters;
+                if (letters > max) max = letters;
+            }
+
+            if (max == 0) return "-";
+            return min == max ? $"{max} LETTERS" : $"{min}-{max} LETTERS";
+        }
+
+        /// <summary>Five dots filled in proportion to progress through the chapter.</summary>
+        private VisualElement BuildProgressDots(int levelInChapter, int perChapter)
+        {
+            const int DotCount = 5;
+
+            var dots = new VisualElement();
+            dots.AddToClassList("progress-dots");
+
+            int on = Mathf.Clamp(
+                Mathf.CeilToInt(levelInChapter / (float)perChapter * DotCount), 1, DotCount);
+
+            for (int i = 0; i < DotCount; i++)
+            {
+                var dot = new VisualElement();
+                dot.AddToClassList("dot");
+                if (i < on) dot.AddToClassList("dot--on");
+                dots.Add(dot);
+            }
+
+            return dots;
+        }
+
+        /// <summary>
+        /// Display name for a chapter, taken from the first level in it. Falls back to the
+        /// chapter number, since the generator stamps some titles as a bare "Chapter N".
+        /// </summary>
+        private string ChapterName(LevelDatabase db, int chapter, int perChapter, bool locked)
+        {
+            LevelData first = db.GetLevel((chapter - 1) * perChapter + 1);
+            string title = first != null ? first.chapterTitle : null;
+
+            int dash = title != null ? title.IndexOf(" - ") : -1;
+            if (dash >= 0) return title.Substring(dash + 3);
+
+            return locked ? "Locked" : $"Chapter {chapter}";
         }
 
         /// <summary>The count is the hook - the button says how far along the collection is.</summary>

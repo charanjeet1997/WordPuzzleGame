@@ -34,6 +34,11 @@ namespace WordPuzzle.Gameplay
                  "on a wide screen a three-word grid was leaving most of its area empty.")]
         public float maxTileSize = 0.95f;
 
+        [Tooltip("Letters shown already filled in when the level opens, so it reads as a partly " +
+                 "solved crossword instead of blank squares. Set to 0 for no free letters.")]
+        [Range(0, 6)]
+        public int startingRevealedTiles = 3;
+
         [Tooltip("Letter size in tile-local units. Lower values leave more margin inside the tile.")]
         public float letterFontSize = 2.4f;
 
@@ -117,6 +122,67 @@ namespace WordPuzzle.Gameplay
                     }
                 }
             }
+
+            RevealStartingTiles();
+        }
+
+        /// <summary>
+        /// Reveals a few letters up front, so the level opens as a partly filled crossword
+        /// rather than a wall of blank squares. A blank grid gives a young player nothing to
+        /// reason from; two or three letters turn it into a guessable puzzle.
+        ///
+        /// Every word keeps at least one hidden tile, so a pre-reveal can never hand over a
+        /// short word outright - a three-letter word is exactly the one most likely to be
+        /// picked clean by chance.
+        /// </summary>
+        private void RevealStartingTiles()
+        {
+            if (startingRevealedTiles <= 0 || _gridTiles.Count == 0) return;
+
+            for (int given = 0; given < startingRevealedTiles; given++)
+            {
+                _scratchTiles.Clear();
+                foreach (GridTile tile in _gridTiles.Values)
+                {
+                    if (!tile.IsRevealed && !IsLastHiddenTileOfAnyWord(tile)) _scratchTiles.Add(tile);
+                }
+
+                if (_scratchTiles.Count == 0) break;
+                _scratchTiles[Random.Range(0, _scratchTiles.Count)].Reveal(false);
+            }
+
+            _scratchTiles.Clear();
+        }
+
+        /// <summary>
+        /// True if revealing this tile would complete a word that is not solved yet - the tile
+        /// is the only one still hidden in it.
+        /// </summary>
+        private bool IsLastHiddenTileOfAnyWord(GridTile candidate)
+        {
+            foreach (TargetWordEntry entry in _targetWords)
+            {
+                if (entry == null || string.IsNullOrEmpty(entry.word)) continue;
+
+                bool containsCandidate = false;
+                int hidden = 0;
+
+                for (int i = 0; i < entry.word.Length; i++)
+                {
+                    int r = entry.startRow + (entry.orientation == WordOrientation.Vertical ? i : 0);
+                    int c = entry.startCol + (entry.orientation == WordOrientation.Horizontal ? i : 0);
+
+                    if (!_gridTiles.TryGetValue(new Vector2Int(r, c), out GridTile tile)) continue;
+                    if (tile.IsRevealed) continue;
+
+                    hidden++;
+                    if (tile == candidate) containsCandidate = true;
+                }
+
+                if (containsCandidate && hidden <= 1) return true;
+            }
+
+            return false;
         }
 
         /// <summary>

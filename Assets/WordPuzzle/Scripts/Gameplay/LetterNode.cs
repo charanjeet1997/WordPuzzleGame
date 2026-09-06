@@ -40,20 +40,36 @@ namespace WordPuzzle.Gameplay
             IsSelected = selected;
             if (bgSprite != null)
             {
-                bgSprite.color = Color.white;
                 if (selected && selectedSprite != null)
                 {
                     bgSprite.sprite = selectedSprite;
+                    bgSprite.color = Color.white;
                 }
                 else if (normalSprite != null)
                 {
                     bgSprite.sprite = normalSprite;
+                    bgSprite.color = Color.white;
+                }
+            }
+
+            if (letterTextMesh != null)
+            {
+                if (selected)
+                {
+                    letterTextMesh.color = Color.white;
+                    letterTextMesh.outlineWidth = 0.2f;
+                    letterTextMesh.outlineColor = new Color32(110, 55, 10, 255);
+                }
+                else
+                {
+                    letterTextMesh.color = new Color(0.10f, 0.16f, 0.28f, 1f);
+                    letterTextMesh.outlineWidth = 0f;
                 }
             }
 
             if (transform != null)
             {
-                transform.localScale = selected ? _baseScale * 1.2f : _baseScale;
+                transform.localScale = selected ? _baseScale * 1.15f : _baseScale;
             }
         }
 

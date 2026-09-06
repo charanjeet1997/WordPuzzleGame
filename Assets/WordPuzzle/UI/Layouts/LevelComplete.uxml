@@ -1,34 +1,45 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" path="Assets/WordPuzzle/UI/Layouts/LevelComplete.uxml">
     <ui:Style src="LevelComplete.uss" />
     <ui:VisualElement name="level-complete-root" class="victory-backdrop">
+        <!-- Split into two columns purely so landscape can put them side by side. In portrait
+             both are full width and stack, which is the original single-column card. -->
         <ui:VisualElement class="victory-card">
-            <ui:Label text="LEVEL CLEAR!" class="victory-title" />
+            <ui:VisualElement class="victory-col victory-col--summary">
+                <ui:Label text="LEVEL CLEAR!" class="victory-title" />
 
-            <ui:VisualElement name="stars-row" class="stars-row">
-                <ui:VisualElement name="star-0" class="star star--empty" />
-                <ui:VisualElement name="star-1" class="star star--empty" />
-                <ui:VisualElement name="star-2" class="star star--empty" />
+                <ui:VisualElement name="stars-row" class="stars-row">
+                    <ui:VisualElement name="star-0" class="star star--empty" />
+                    <ui:VisualElement name="star-1" class="star star--empty" />
+                    <ui:VisualElement name="star-2" class="star star--empty" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="reward-box">
+                    <ui:VisualElement class="reward-coin" />
+                    <ui:Label name="lbl-reward" text="+50" class="reward-text" />
+                </ui:VisualElement>
+
+                <ui:Label name="lbl-score" text="" class="reward-subtext" />
+
+                <ui:Label name="lbl-time" text="" class="reward-subtext" />
+
+                <!-- Inside the summary column, so in landscape the buttons sit under the score
+                     in the left column instead of on a row below both columns. A row below is
+                     always pushed down by the word list, which is what kept the card oversized. -->
+                <ui:VisualElement name="victory-actions" class="victory-actions">
+                    <!-- First clear only: points the player at the collection now that it has words. -->
+                    <ui:Label name="lbl-onboarding-tip" text="" class="onboarding-tip" />
+
+                    <ui:Button name="btn-next-level" text="NEXT LEVEL" class="btn-victory-primary" />
+                    <ui:Label name="lbl-subtitle" text="Main Menu" class="victory-subtitle" />
+                </ui:VisualElement>
             </ui:VisualElement>
 
-            <ui:VisualElement class="reward-box">
-                <ui:VisualElement class="reward-coin" />
-                <ui:Label name="lbl-reward" text="+50" class="reward-text" />
+            <ui:VisualElement class="victory-col victory-col--detail">
+                <ui:Label text="WORDS YOU FOUND" class="meanings-heading" />
+                <ui:ScrollView name="meanings-scroll" class="meanings-scroll">
+                    <ui:VisualElement name="meanings-list" class="meanings-list" />
+                </ui:ScrollView>
             </ui:VisualElement>
-
-            <ui:Label name="lbl-score" text="" class="reward-subtext" />
-
-            <ui:Label name="lbl-time" text="" class="reward-subtext" />
-
-            <ui:Label text="WORDS YOU FOUND" class="meanings-heading" />
-            <ui:ScrollView name="meanings-scroll" class="meanings-scroll">
-                <ui:VisualElement name="meanings-list" class="meanings-list" />
-            </ui:ScrollView>
-
-            <!-- First clear only: points the player at the collection now that it has words. -->
-            <ui:Label name="lbl-onboarding-tip" text="" class="onboarding-tip" />
-
-            <ui:Button name="btn-next-level" text="NEXT LEVEL" class="btn-victory-primary" />
-            <ui:Label name="lbl-subtitle" text="Main Menu" class="victory-subtitle" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

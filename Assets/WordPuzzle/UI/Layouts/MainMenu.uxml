@@ -17,23 +17,14 @@
                 <ui:Label text="W O R D S" class="game-subtitle" />
             </ui:VisualElement>
 
-            <ui:VisualElement class="chapter-card">
-                <ui:VisualElement class="chapter-card-row">
-                    <ui:Label name="lbl-chapter-info" text="CHAPTER 1" class="chapter-title" />
-                    <ui:Label name="lbl-word-count" text="3 WORDS" class="chapter-meta" />
-                </ui:VisualElement>
-                <ui:Label name="lbl-chapter-name" text="First Light" class="chapter-name" />
-                <ui:VisualElement class="chapter-card-row">
-                    <ui:Label name="lbl-level-number" text="LEVEL 1" class="level-subtitle" />
-                    <ui:VisualElement name="progress-dots" class="progress-dots">
-                        <ui:VisualElement class="dot dot--on" />
-                        <ui:VisualElement class="dot dot--on" />
-                        <ui:VisualElement class="dot dot--on" />
-                        <ui:VisualElement class="dot" />
-                        <ui:VisualElement class="dot" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-            </ui:VisualElement>
+            <!-- The chapter card is now one page of a horizontal strip: same card, one per
+                 chapter, scrolled sideways. Cards are built in code because the chapter count
+                 comes from the level database. -->
+            <ui:ScrollView name="chapter-carousel" class="chapter-carousel" mode="Horizontal"
+                           horizontal-scroller-visibility="Hidden"
+                           vertical-scroller-visibility="Hidden">
+                <ui:VisualElement name="chapter-carousel-items" class="chapter-carousel-items" />
+            </ui:ScrollView>
 
             <ui:Button name="btn-play" text="PLAY" class="btn-primary" />
 

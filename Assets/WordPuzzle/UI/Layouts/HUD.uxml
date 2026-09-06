@@ -31,10 +31,12 @@
              screen height so they line up with the world-space grid and wheel. Inside the
              lower stack a percentage measured against that container's own small height,
              which put the preview behind the action buttons. -->
-            <ui:VisualElement name="word-toast" class="word-toast" picking-mode="Ignore">
-                <ui:Label name="lbl-toast-word" text="" class="word-toast-word" />
-                <ui:Label name="lbl-toast-note" text="BONUS WORD" class="word-toast-note" />
-            </ui:VisualElement>
+        <ui:VisualElement name="word-toast" class="word-toast">
+            <ui:Button name="btn-toast-close" text="✕" class="word-toast-close" />
+            <ui:Label name="lbl-toast-word" text="" class="word-toast-word" />
+            <ui:Label name="lbl-toast-status" text="" class="word-toast-status" />
+            <ui:Label name="lbl-toast-note" text="" class="word-toast-note" />
+        </ui:VisualElement>
 
             <ui:VisualElement class="word-preview-box">
                 <ui:Label name="lbl-word-preview" text="" class="word-preview-text" />
@@ -55,6 +57,27 @@
                     </ui:Button>
                     <ui:Label name="lbl-hint-cost" text="HINT · 5 LEFT" class="action-label" />
                 </ui:VisualElement>
+                <ui:VisualElement class="action-column">
+                    <ui:Button name="btn-words" text="" class="action-btn words-color">
+                        <ui:VisualElement class="action-icon icon-words" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Label name="lbl-words-count" text="WORDS · 0/0" class="action-label" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Word list overlay, opened by the WORDS button. Hidden by default; the panel is
+             built fresh each time it opens so it always reflects the current level. -->
+        <ui:VisualElement name="words-panel" class="words-panel">
+            <ui:VisualElement class="words-panel-card">
+                <ui:VisualElement class="words-panel-head">
+                    <ui:Label name="lbl-words-title" text="WORDS IN THIS LEVEL" class="words-panel-title" />
+                    <ui:Button name="btn-words-close" text="✕" class="words-panel-close" />
+                </ui:VisualElement>
+
+                <ui:ScrollView name="words-panel-scroll" class="words-panel-scroll">
+                    <ui:VisualElement name="words-panel-list" class="words-panel-list" />
+                </ui:ScrollView>
             </ui:VisualElement>
         </ui:VisualElement>
 

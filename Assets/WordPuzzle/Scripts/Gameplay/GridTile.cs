@@ -46,14 +46,15 @@ namespace WordPuzzle.Gameplay
 
             if (tileSprite != null)
             {
-                tileSprite.color = Color.white;
                 if (revealed && revealedTileSprite != null)
                 {
                     tileSprite.sprite = revealedTileSprite;
+                    tileSprite.color = Color.white;
                 }
                 else if (hiddenTileSprite != null)
                 {
                     tileSprite.sprite = hiddenTileSprite;
+                    tileSprite.color = Color.white;
                 }
             }
 

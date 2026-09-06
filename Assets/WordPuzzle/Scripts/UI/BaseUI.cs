@@ -32,7 +32,16 @@ namespace WordPuzzle.UI
 
             rootElement.EnableInClassList("layout--portrait", layout == ScreenLayout.Portrait);
             rootElement.EnableInClassList("layout--landscape", layout == ScreenLayout.Landscape);
+
+            OnLayoutApplied(layout);
         }
+
+        /// <summary>
+        /// Runs after the orientation class is set, for the rare difference USS cannot express.
+        /// Styling belongs in the stylesheet; this is for structural changes such as moving an
+        /// element to a different parent, which no class can do.
+        /// </summary>
+        protected virtual void OnLayoutApplied(ScreenLayout layout) { }
 
         public virtual void Show()
         {
