@@ -5,15 +5,6 @@ TextureImporter:
   - first:
       213: 2851302447902630744
     second: icon_words_0
-  - first:
-      213: -6529253905140958766
-    second: icon_words_1
-  - first:
-      213: 2260832021736590022
-    second: icon_words_2
-  - first:
-      213: -3093753437684415179
-    second: icon_words_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -55,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -138,12 +129,12 @@ TextureImporter:
       name: icon_words_0
       rect:
         serializedVersion: 2
-        x: 13
-        y: 66
-        width: 49
-        height: 49
+        x: 0
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -156,77 +147,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: icon_words_1
-      rect:
-        serializedVersion: 2
-        x: 67
-        y: 66
-        width: 49
-        height: 49
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2d9bdbfaa2e6365a0800000000000000
-      internalID: -6529253905140958766
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: icon_words_2
-      rect:
-        serializedVersion: 2
-        x: 13
-        y: 12
-        width: 49
-        height: 49
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6ca0070deb6106f10800000000000000
-      internalID: 2260832021736590022
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: icon_words_3
-      rect:
-        serializedVersion: 2
-        x: 67
-        y: 12
-        width: 49
-        height: 49
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5354d2cc3a7c015d0800000000000000
-      internalID: -3093753437684415179
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -237,9 +162,6 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       icon_words_0: 2851302447902630744
-      icon_words_1: -6529253905140958766
-      icon_words_2: 2260832021736590022
-      icon_words_3: -3093753437684415179
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
